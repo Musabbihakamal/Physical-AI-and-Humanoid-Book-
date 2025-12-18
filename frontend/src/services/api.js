@@ -1,0 +1,205 @@
+// frontend/src/services/api.js
+import cache from '../utils/cache';
+import { getEnvVar } from '../utils/env';
+
+const API_BASE_URL = getEnvVar('REACT_APP_BACKEND_URL', 'http://localhost:8000');
+
+class ApiService {
+  constructor() {
+    this.baseUrl = API_BASE_URL;
+    this.refreshingToken = null; // To prevent multiple refresh requests
+  }
+
+  // Helper method to get auth headers
+  getAuthHeaders() {
+    const accessToken = localStorage.getItem('accessToken');
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    if (accessToken) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+
+    return headers;
+  }
+
+  // Helper method to refresh token
+  async refreshToken() {
+    if (this.refreshingToken) {
+      // If already refreshing, wait for the existing refresh to complete
+      return this.refreshingToken;
+    }
+
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    this.refreshingToken = fetch(`${this.baseUrl}/api/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.access_token && data.refresh_token) {
+          localStorage.setItem('accessToken', data.access_token);
+          localStorage.setItem('refreshToken', data.refresh_token);
+          this.refreshingToken = null;
+          return data;
+        } else {
+          throw new Error('Token refresh failed');
+        }
+      })
+      .catch(error => {
+        // Clear tokens if refresh fails
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        this.refreshingToken = null;
+        throw error;
+      });
+
+    return this.refreshingToken;
+  }
+
+  // Helper method to make API requests with auth
+  async request(endpoint, options = {}) {
+    let config = {
+      headers: {
+        ...this.getAuthHeaders(),
+        ...options.headers,
+      },
+      ...options,
+    };
+
+    let url = `${this.baseUrl}${endpoint}`;
+    let response;
+    let data;
+
+    try {
+      response = await fetch(url, config);
+
+      // If we get a 401, try to refresh the token and retry the request
+      if (response.status === 401) {
+        try {
+          await this.refreshToken();
+          // Retry the request with the new token
+          config.headers = {
+            ...this.getAuthHeaders(),
+            ...options.headers,
+          };
+          response = await fetch(url, config);
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          // If refresh fails, clear tokens and let the app handle the 401
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+        }
+      }
+
+      // Try to parse response as JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        // For non-JSON responses, get text and try to parse if possible
+        const text = await response.text();
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { message: text };
+        }
+      }
+
+      if (!response.ok) {
+        throw new Error(data.detail?.message || data.message || 'API request failed');
+      }
+
+      return data;
+    } catch (error) {
+      console.error(`API request failed: ${endpoint}`, error);
+      throw error;
+    }
+  }
+
+  // Glossary Maker API
+  async createGlossary(content, parameters = {}) {
+    return this.request('/api/agents/glossary-maker', {
+      method: 'POST',
+      body: JSON.stringify({
+        content,
+        parameters,
+      }),
+    });
+  }
+
+  // Code Explainer API
+  async explainCode(code, language = null, parameters = {}) {
+    return this.request('/api/agents/code-explainer', {
+      method: 'POST',
+      body: JSON.stringify({
+        code,
+        language,
+        parameters,
+      }),
+    });
+  }
+
+  // Quiz Creator API
+  async createQuiz(content, difficulty = null, parameters = {}) {
+    return this.request('/api/agents/quiz-creator', {
+      method: 'POST',
+      body: JSON.stringify({
+        content,
+        difficulty,
+        parameters,
+      }),
+    });
+  }
+
+  // Chapter Generator API
+  async generateChapter(moduleFocus, outline = null, parameters = {}) {
+    return this.request('/api/agents/chapter-generator', {
+      method: 'POST',
+      body: JSON.stringify({
+        module_focus: moduleFocus,
+        outline,
+        parameters,
+      }),
+    });
+  }
+
+  // Get request status
+  async getRequestStatus(requestId) {
+    // Don't cache status requests as they change frequently
+    return this.request(`/api/agents/status/${requestId}`);
+  }
+
+  // Get user profile
+  async getUserProfile() {
+    return this.request('/api/auth/me');
+  }
+
+  // Get user session info
+  async getSessionInfo() {
+    return this.request('/api/agents/session-info');
+  }
+
+  // Get cached results for completed requests
+  async getCachedResult(requestId, type) {
+    const cacheKey = `result:${type}:${requestId}`;
+    return cache.get(cacheKey);
+  }
+
+  // Cache results for completed requests
+  async cacheResult(requestId, type, result) {
+    const cacheKey = `result:${type}:${requestId}`;
+    // Cache for 10 minutes (600000 ms)
+    cache.set(cacheKey, result, 600000);
+  }
+}
+
+export default new ApiService();

@@ -31,7 +31,12 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- Content Standards: Ensure all technical content is accurate and grounded in official documentation
+- Formatting: Verify Docusaurus-compatible Markdown format is used
+- AI Behavior: Confirm agents follow strict compliance and avoid hallucination
+- Safety: Validate all content is safe for minors and emphasizes safe practice
+- RAG Requirements: Verify chatbot supports proper retrieval levels and answering rules
+- Deployment: Confirm content is deterministic, reproducible, and version-controlled
 
 ## Project Structure
 

@@ -1,0 +1,47 @@
+{
+  "name": "book-rag-agent-system",
+  "version": "1.0.0",
+  "description": "A comprehensive AI system that includes specialized subagents for book generation, a RAG-based chatbot trained on book content and external knowledge, and a complete book generation system using AI subagents. The system supports writing, managing, and interacting with a complete technical book using AI capabilities.",
+  "main": "index.js",
+  "scripts": {
+    "init": "bash scripts/initialize.sh",
+    "init:windows": "scripts\\initialize.bat",
+    "setup": "npm install && cd frontend && npm install && cd ..",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && python -m src.main",
+    "frontend": "cd frontend && npm start",
+    "test": "cd backend && python -m pytest tests/",
+    "docs": "cd frontend && npm run build",
+    "validate": "cd backend && python src/scripts/validate_subagents.py",
+    "build": "npm run docs",
+    "deploy": "docker-compose up -d",
+    "deploy:prod": "docker-compose -f docker-compose.prod.yml up -d",
+    "logs": "docker-compose logs -f",
+    "stop": "docker-compose down",
+    "restart": "docker-compose down && docker-compose up -d"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book-.git"
+  },
+  "keywords": [
+    "ai",
+    "rag",
+    "book-generation",
+    "subagents",
+    "education",
+    "docusaurus"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book-/issues"
+  },
+  "homepage": "https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book-#readme",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "gh-pages": "^6.3.0",
+    "typescript": "^5.9.3"
+  }
+}

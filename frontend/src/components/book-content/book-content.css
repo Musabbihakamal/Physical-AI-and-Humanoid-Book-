@@ -1,0 +1,45 @@
+.book-content {
+  position: relative;
+  padding: 20px;
+}
+
+.text-selection-tools {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.text-selection-tools .tool-btn {
+  margin: 0 4px;
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+.text-selection-tools .tool-btn:hover {
+  background: #e0e0e0;
+}
+
+.widget-container {
+  margin: 20px 0;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.standalone-widgets {
+  margin-top: 30px;
+}
+
+.standalone-widgets > * {
+  margin-bottom: 20px;
+}

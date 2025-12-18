@@ -80,25 +80,31 @@
 <!--
   ACTION REQUIRED: The content in this section represents placeholders.
   Fill them out with the right functional requirements.
+  Ensure all content meets constitution requirements:
+  - Technically accurate and grounded in official documentation
+  - Reproducible by students
+  - Safe for minors
+  - Follows Docusaurus-compatible Markdown format
+  - Uses appropriate complexity for target audience
 -->
 
 ### Functional Requirements
 
-- **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
-- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]  
-- **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
-- **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
-- **FR-005**: System MUST [behavior, e.g., "log all security events"]
+- **FR-001**: Content MUST be technically accurate and grounded in official documentation
+- **FR-002**: Content MUST be reproducible by students following provided instructions
+- **FR-003**: Content MUST be safe for minors and emphasize safe practice in robotics labs
+- **FR-004**: System MUST follow Docusaurus-compatible Markdown formatting standards
+- **FR-005**: Content MUST adapt complexity based on user background and experience level
 
 *Example of marking unclear requirements:*
 
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+- **FR-006**: Content MUST be compatible with [NEEDS CLARIFICATION: target platform requirements - Linux, Jetson, Cloud?]
+- **FR-007**: Code examples MUST follow [NEEDS CLARIFICATION: specific ROS 2 version requirements]
 
 ### Key Entities *(include if feature involves data)*
 
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
+- **[Entity 1]**: [What it represents, key attributes without implementation, ensuring safety and accuracy]
+- **[Entity 2]**: [What it represents, relationships to other entities, following constitution guidelines]
 
 ## Success Criteria *(mandatory)*
 

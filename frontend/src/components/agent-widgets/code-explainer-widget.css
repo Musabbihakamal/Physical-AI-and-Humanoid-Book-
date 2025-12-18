@@ -1,0 +1,65 @@
+.code-explainer-widget {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  background-color: #f9f9f9;
+}
+
+.code-explainer-widget h3 {
+  margin-top: 0;
+  color: #2c3e50;
+}
+
+.explain-btn {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.explain-btn:hover {
+  background-color: #219653;
+}
+
+.explain-btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #e74c3c;
+  margin: 8px 0;
+}
+
+.explanation-results {
+  margin-top: 16px;
+}
+
+.explanation-results h4 {
+  color: #2c3e50;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 8px;
+}
+
+.explanation-section {
+  margin: 12px 0;
+}
+
+.explanation-section h5 {
+  color: #34495e;
+  margin-bottom: 6px;
+}
+
+.explanation-section ul {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+
+.explanation-section li {
+  margin: 4px 0;
+  color: #555;
+}
