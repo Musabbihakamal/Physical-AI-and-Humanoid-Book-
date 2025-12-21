@@ -1,28 +1,28 @@
 .quiz-widget {
-  border: 1px solid #ddd;
+  border: 1px solid #2d2b2b;
   border-radius: 8px;
   padding: 16px;
   margin: 16px 0;
-  background-color: #f9f9f9;
+  background-color: #3b3939;
 }
 
 .quiz-widget h3 {
   margin-top: 0;
-  color: #2c3e50;
+  color: #33e5b0ce;
 }
 
 .generate-btn {
-  background-color: #9b59b6;
-  color: white;
+  background-color: #eff1f0;
+  color: rgb(11, 9, 9);
   border: none;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 20px;
 }
 
 .generate-btn:hover {
-  background-color: #8e44ad;
+  background-color: #615d63;
 }
 
 .generate-btn:disabled {
@@ -60,7 +60,7 @@
 }
 
 .question-container h5 {
-  color: #2c3e50;
+  color: #6391bf;
   margin-bottom: 12px;
 }
 
@@ -78,7 +78,7 @@
 
 .option label {
   cursor: pointer;
-  color: #555;
+  color: #676161;
 }
 
 .short-answer {
@@ -97,7 +97,7 @@
 }
 
 .nav-btn {
-  background-color: #3498db;
+  background-color: #b8bcbf;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -120,7 +120,7 @@
 }
 
 .next-btn:hover {
-  background-color: #2980b9;
+  background-color: #c4cbcf;
 }
 
 .submit-btn {

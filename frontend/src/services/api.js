@@ -1,8 +1,10 @@
 // frontend/src/services/api.js
 import cache from '../utils/cache';
-import { getEnvVar } from '../utils/env';
+import { getEnvVar, isProduction } from '../utils/env';
 
-const API_BASE_URL = getEnvVar('REACT_APP_BACKEND_URL', 'http://localhost:8000');
+// Use a mock API URL for static deployments or fallback to backend
+const API_BASE_URL = getEnvVar('REACT_APP_BACKEND_URL',
+  isProduction() ? '' : 'http://localhost:8000'); // Empty string for static deployment
 
 class ApiService {
   constructor() {
@@ -12,7 +14,10 @@ class ApiService {
 
   // Helper method to get auth headers
   getAuthHeaders() {
-    const accessToken = localStorage.getItem('accessToken');
+    let accessToken = null;
+    if (typeof window !== 'undefined') {
+      accessToken = localStorage.getItem('accessToken');
+    }
     const headers = {
       'Content-Type': 'application/json',
     };
@@ -31,7 +36,10 @@ class ApiService {
       return this.refreshingToken;
     }
 
-    const refreshToken = localStorage.getItem('refreshToken');
+    let refreshToken = null;
+    if (typeof window !== 'undefined') {
+      refreshToken = localStorage.getItem('refreshToken');
+    }
     if (!refreshToken) {
       throw new Error('No refresh token available');
     }
@@ -46,8 +54,10 @@ class ApiService {
       .then(response => response.json())
       .then(data => {
         if (data.access_token && data.refresh_token) {
-          localStorage.setItem('accessToken', data.access_token);
-          localStorage.setItem('refreshToken', data.refresh_token);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('accessToken', data.access_token);
+            localStorage.setItem('refreshToken', data.refresh_token);
+          }
           this.refreshingToken = null;
           return data;
         } else {
@@ -56,8 +66,10 @@ class ApiService {
       })
       .catch(error => {
         // Clear tokens if refresh fails
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+        }
         this.refreshingToken = null;
         throw error;
       });
@@ -67,6 +79,11 @@ class ApiService {
 
   // Helper method to make API requests with auth
   async request(endpoint, options = {}) {
+    // If no base URL is configured (static deployment), return mock responses
+    if (!this.baseUrl || this.baseUrl === '') {
+      return this.getMockResponse(endpoint, options);
+    }
+
     let config = {
       headers: {
         ...this.getAuthHeaders(),
@@ -95,8 +112,10 @@ class ApiService {
         } catch (refreshError) {
           console.error('Token refresh failed:', refreshError);
           // If refresh fails, clear tokens and let the app handle the 401
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+          }
         }
       }
 
@@ -123,6 +142,67 @@ class ApiService {
       console.error(`API request failed: ${endpoint}`, error);
       throw error;
     }
+  }
+
+  // Mock responses for static deployment
+  getMockResponse(endpoint, options = {}) {
+    console.warn(`Mock API call for static deployment: ${endpoint}`);
+
+    // Mock responses for different endpoints
+    if (endpoint.includes('/api/auth/')) {
+      // Mock auth responses
+      if (endpoint.includes('/login') || endpoint.includes('/register')) {
+        return Promise.resolve({
+          access_token: 'mock_token',
+          refresh_token: 'mock_refresh_token',
+          user: { id: 1, email: 'user@example.com', name: 'Demo User' }
+        });
+      } else if (endpoint.includes('/me')) {
+        return Promise.resolve({ id: 1, email: 'user@example.com', name: 'Demo User' });
+      }
+    } else if (endpoint.includes('/api/agents/glossary-maker')) {
+      return Promise.resolve({
+        request_id: 'mock-request-id',
+        status: 'COMPLETED',
+        result: {
+          terms: [
+            { term: 'Example Term', definition: 'This is an example definition for static deployment.' }
+          ]
+        }
+      });
+    } else if (endpoint.includes('/api/agents/code-explainer')) {
+      return Promise.resolve({
+        request_id: 'mock-request-id',
+        status: 'COMPLETED',
+        result: {
+          overview: 'This is a mock code explanation for static deployment.',
+          key_components: [{ type: 'function', name: 'example', declaration: 'def example():' }],
+          ros2_specifics: ['rclpy'],
+          isaac_sim_specifics: ['omni.isaac'],
+          technical_concepts: ['Mock concept'],
+          usage_context: 'Mock usage',
+          learning_points: ['Mock learning point']
+        }
+      });
+    } else if (endpoint.includes('/api/agents/quiz-creator')) {
+      return Promise.resolve({
+        request_id: 'mock-request-id',
+        status: 'COMPLETED',
+        result: {
+          questions: [
+            { question: 'Example question?', options: ['A', 'B', 'C', 'D'], correct_answer_index: 0 }
+          ]
+        }
+      });
+    } else if (endpoint.includes('/api/agents/status/')) {
+      return Promise.resolve({
+        status: 'COMPLETED',
+        progress: 100
+      });
+    }
+
+    // Default mock response
+    return Promise.resolve({ message: 'Mock response for static deployment' });
   }
 
   // Glossary Maker API
@@ -160,17 +240,6 @@ class ApiService {
     });
   }
 
-  // Chapter Generator API
-  async generateChapter(moduleFocus, outline = null, parameters = {}) {
-    return this.request('/api/agents/chapter-generator', {
-      method: 'POST',
-      body: JSON.stringify({
-        module_focus: moduleFocus,
-        outline,
-        parameters,
-      }),
-    });
-  }
 
   // Get request status
   async getRequestStatus(requestId) {

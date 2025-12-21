@@ -4,23 +4,26 @@ const { themes } = require('prism-react-renderer');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Physical AI and humanoid book',
+  title: 'Physical AI and Humanoid Book',
   tagline: 'Comprehensive Educational System for Physical AI & Humanoid Robotics',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://your-github-username.github.io',  // Replace with your GitHub username
+  url: 'https://Musabbihakamal.github.io',  // Updated to actual GitHub username
   // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<orgName>/<repoName>/'
-  baseUrl: '/Physical-AI-and-Humanoid-Book',  // Updated to remove trailing dash
+  // For local development, use root path; for GitHub pages, use repo name
+  baseUrl: process.env.NODE_ENV === 'development' ? '/' : '/Physical-AI-and-Humanoid-Book',  // Dynamic base URL
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'your-github-username', // Replace with your GitHub username
+  organizationName: 'Musabbihakamal', // Updated to actual GitHub username
   projectName: 'Physical-AI-and-Humanoid-Book', // Usually your repo name.
 
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  markdown: {
+    mermaid: true,
+    format: 'detect',
+  },
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
@@ -40,7 +43,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/your-github-username/Physical-AI-and-Humanoid-Book/edit/main/frontend/docs/',
+            'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book/edit/main/frontend/docs/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -55,7 +58,7 @@ const config = {
       // Replace with your project's social card
       image: 'img/docusaurus-social-card.jpg',
       navbar: {
-        title: 'Physical AI and humanoid book',
+        title: 'Physical AI and Humanoid Book',
         items: [
           {
             type: 'docSidebar',
@@ -64,7 +67,7 @@ const config = {
             label: 'Docs',
           },
           {
-            href: '/auth/login',
+            href: '/auth/signin',
             label: 'Sign In',
             position: 'right',
           },
@@ -74,7 +77,7 @@ const config = {
             position: 'right',
           },
           {
-            href: 'https://github.com/your-github-username/Physical-AI-and-Humanoid-Book',
+            href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book',
             label: 'GitHub',
             position: 'right',
           },
@@ -84,15 +87,28 @@ const config = {
         style: 'dark',
         links: [
           {
+            title: 'Documentation',
+            items: [
+              {
+                label: 'Tutorials',
+                to: '/docs/category/tutorials',
+              },
+              {
+                label: 'API Reference',
+                href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book#api-documentation', // Link to README section
+              },
+            ],
+          },
+          {
             title: 'Community',
             items: [
               {
-                label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+                label: 'GitHub',
+                href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book',
               },
               {
-                label: 'Discord',
-                href: 'https://discordapp.com/invite/docusaurus',
+                label: 'Issues',
+                href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book/issues',
               },
             ],
           },
@@ -101,12 +117,12 @@ const config = {
             items: [
               {
                 label: 'GitHub',
-                href: 'https://github.com/facebook/docusaurus',
+                href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book',
               },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Physical AI and Humanoid Book Project. Built with Docusaurus.`,
       },
       prism: {
         theme: themes.github,

@@ -1,40 +1,6 @@
 version: '3.8'
 
 services:
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    ports:
-      - "8000:8000"
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - QDRANT_URL=${QDRANT_URL}
-      - QDRANT_API_KEY=${QDRANT_API_KEY}
-      - DATABASE_URL=${DATABASE_URL}
-      - SECRET_KEY=${SECRET_KEY}
-      - DEBUG=${DEBUG:-False}
-    depends_on:
-      - postgres
-      - qdrant
-    volumes:
-      - ./backend:/app/backend
-      - ./shared:/app/shared
-
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    ports:
-      - "3000:80"
-    environment:
-      - REACT_APP_BACKEND_URL=http://localhost:8000
-    depends_on:
-      - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-
   postgres:
     image: postgres:15
     environment:
@@ -70,6 +36,42 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - QDRANT_URL=${QDRANT_URL}
+      - QDRANT_API_KEY=${QDRANT_API_KEY}
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/book_agent_db
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG:-False}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    volumes:
+      - ./backend:/app/backend
+      - ./shared:/app/shared
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:8000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
 volumes:
   postgres_data:

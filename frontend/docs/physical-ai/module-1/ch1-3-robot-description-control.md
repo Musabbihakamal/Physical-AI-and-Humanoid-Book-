@@ -5,9 +5,6 @@ title: "Chapter 1.3: Robot Description and Control"
 
 # Chapter 1.3: Robot Description and Control
 
-## Summary
-This chapter covers the comprehensive process of describing robots in ROS 2 using URDF (Unified Robot Description Format) and controlling them effectively. We'll explore how to create detailed robot descriptions, implement various control strategies, and integrate robot description with control systems for both simulation and real hardware. The chapter emphasizes practical approaches to robot modeling and control that are essential for physical AI and humanoid robotics.
-
 ## Learning Objectives
 By the end of this chapter, you will be able to:
 - Create comprehensive URDF files for complex robots including humanoids

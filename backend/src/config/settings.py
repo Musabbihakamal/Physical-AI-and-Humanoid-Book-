@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     QDRANT_URL: Optional[str] = None
     QDRANT_API_KEY: Optional[str] = None
     CLAUDE_API_KEY: Optional[str] = None
+    ANTHROPIC_API_KEY: Optional[str] = None
 
     # Agent settings
     DEFAULT_AGENT_TIMEOUT: int = 30  # seconds

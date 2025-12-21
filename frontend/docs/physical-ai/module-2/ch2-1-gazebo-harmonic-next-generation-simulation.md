@@ -5,10 +5,6 @@ title: "Chapter 2.1: Gazebo Harmonic - Next Generation Simulation"
 
 # Chapter 2.1: Gazebo Harmonic - Next Generation Simulation
 
-## Summary
-
-Gazebo Harmonic represents the next generation of robotics simulation with significant improvements in performance, physics accuracy, and integration capabilities. This chapter explores the latest features, enhanced physics engines, and advanced simulation capabilities that make Gazebo Harmonic the premier choice for high-fidelity humanoid robotics simulation.
-
 ## Learning Objectives
 
 By the end of this chapter, you will be able to:

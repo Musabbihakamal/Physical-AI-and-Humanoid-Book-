@@ -1,57 +1,112 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import GlossaryWidget from '../agent-widgets/glossary-widget';
 import CodeExplainerWidget from '../agent-widgets/code-explainer-widget';
 import QuizWidget from '../agent-widgets/quiz-widget';
-import ChapterGeneratorWidget from '../agent-widgets/chapter-generator-widget';
 
 const BookContent = ({ content }) => {
   const [selectedText, setSelectedText] = useState('');
   const [showGlossaryWidget, setShowGlossaryWidget] = useState(false);
   const [showCodeExplainer, setShowCodeExplainer] = useState(false);
+  const [persistedGlossaryContent, setPersistedGlossaryContent] = useState('');
+  const [persistedCodeContent, setPersistedCodeContent] = useState('');
+  const [isClient, setIsClient] = useState(false);
+
+  // Check if running on client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleTextSelection = () => {
-    const selection = window.getSelection();
-    if (selection.toString().trim()) {
-      setSelectedText(selection.toString());
+    if (typeof window !== 'undefined' && window.getSelection) {
+      const selection = window.getSelection();
+      if (selection.toString().trim()) {
+        setSelectedText(selection.toString());
+      }
+    }
+  };
+
+  const handleGlossaryWidget = () => {
+    // Always save the current selected text and show the widget
+    if (selectedText) {
+      setPersistedGlossaryContent(selectedText);
+      setShowGlossaryWidget(true);
+    }
+  };
+
+  const handleCodeExplainerWidget = () => {
+    // Always save the current selected text and show the widget
+    if (selectedText) {
+      setPersistedCodeContent(selectedText);
+      setShowCodeExplainer(true);
+    }
+  };
+
+  // Function to update widget content without hiding the widget
+  const updateGlossaryContent = () => {
+    if (selectedText) {
+      setPersistedGlossaryContent(selectedText);
+    }
+  };
+
+  const updateCodeContent = () => {
+    if (selectedText) {
+      setPersistedCodeContent(selectedText);
     }
   };
 
   return (
-    <div className="book-content" onMouseUp={handleTextSelection}>
+    <div className="book-content" onMouseUp={isClient ? handleTextSelection : undefined}>
       <div className="content-display" dangerouslySetInnerHTML={{ __html: content }} />
 
-      {selectedText && (
+      {isClient && selectedText && (
         <div className="text-selection-tools">
           <button
-            onClick={() => setShowGlossaryWidget(!showGlossaryWidget)}
+            onClick={handleGlossaryWidget}
             className="tool-btn glossary-btn"
           >
-            Create Glossary
+            Create/Update Glossary
           </button>
           <button
-            onClick={() => setShowCodeExplainer(!showCodeExplainer)}
+            onClick={handleCodeExplainerWidget}
             className="tool-btn code-btn"
           >
-            Explain Code
+            Explain/Update Code
           </button>
         </div>
       )}
 
-      {showGlossaryWidget && (
+      {isClient && showGlossaryWidget && (
         <div className="widget-container">
-          <GlossaryWidget content={selectedText} />
+          <div className="widget-header">
+            <h3>Glossary Widget</h3>
+            <button
+              onClick={() => setShowGlossaryWidget(false)}
+              className="close-widget-btn"
+            >
+              ×
+            </button>
+          </div>
+          <GlossaryWidget content={persistedGlossaryContent} />
         </div>
       )}
 
-      {showCodeExplainer && (
+      {isClient && showCodeExplainer && (
         <div className="widget-container">
-          <CodeExplainerWidget code={selectedText} />
+          <div className="widget-header">
+            <h3>Code Explainer Widget</h3>
+            <button
+              onClick={() => setShowCodeExplainer(false)}
+              className="close-widget-btn"
+            >
+              ×
+            </button>
+          </div>
+          <CodeExplainerWidget code={persistedCodeContent} />
         </div>
       )}
 
       <div className="standalone-widgets">
         <QuizWidget />
-        <ChapterGeneratorWidget />
       </div>
     </div>
   );

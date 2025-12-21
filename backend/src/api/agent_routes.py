@@ -12,7 +12,6 @@ from ..services.user_service import UserService
 from ..services.glossary_service import GlossaryService
 from ..services.code_explainer_service import CodeExplainerService
 from ..services.quiz_service import QuizService
-from ..services.chapter_service import ChapterService
 from ..utils.errors import ValidationError
 from ..utils.security import validate_and_secure_request
 from ..utils.rate_limiting import check_rate_limit, record_agent_request, get_user_agent_usage
@@ -50,10 +49,6 @@ class QuizCreatorRequest(BaseModel):
     parameters: Optional[Dict[str, Any]] = None
 
 
-class ChapterGeneratorRequest(BaseModel):
-    module_focus: str
-    outline: Optional[list] = None
-    parameters: Optional[Dict[str, Any]] = None
 
 
 @router.post("/glossary-maker")
@@ -373,112 +368,6 @@ async def create_quiz(
         )
 
 
-@router.post("/chapter-generator")
-async def generate_chapter(
-    request: ChapterGeneratorRequest,
-    current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Generate a chapter using the Chapter Generator agent.
-    """
-    try:
-        # Update session activity
-        UserSessionManager.update_session_activity(str(current_user.id))
-
-        # Check rate limit for this user and agent type
-        if not check_rate_limit(db, str(current_user.id), "CHAPTER_GENERATOR"):
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail={
-                    "message": "Rate limit exceeded for Chapter Generator",
-                    "usage": get_user_agent_usage(db, str(current_user.id), "CHAPTER_GENERATOR")
-                }
-            )
-
-        # Validate and secure the request
-        security_result = validate_and_secure_request(
-            agent_type="CHAPTER_GENERATOR",
-            content=request.module_focus,
-            parameters={
-                "outline": request.outline,
-                **(request.parameters or {})
-            },
-            user_id=current_user.id,
-            endpoint="/api/agents/chapter-generator"
-        )
-
-        if not security_result["is_valid"]:
-            logger.warning(f"Security validation failed for chapter generator: {security_result['errors']}")
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail={
-                    "message": "Request validation failed",
-                    "errors": security_result["errors"]
-                }
-            )
-
-        # Get sanitized content
-        sanitized_module_focus = security_result.get("sanitized_content", request.module_focus)
-
-        # Get user profile if user exists (using the UserProfile model which is linked to User)
-        user_profile = UserService.get_user_profile(db, current_user.id)
-
-        # Create agent request
-        agent_request = AgentRequest(
-            agent_type="CHAPTER_GENERATOR",
-            parameters={
-                "outline": request.outline,
-                **(request.parameters or {})
-            },
-            context={
-                "module_focus": sanitized_module_focus,
-                "user_profile_id": str(user_profile.user_id) if user_profile else None
-            },
-            user_id=current_user.id
-        )
-        db.add(agent_request)
-        db.commit()
-        db.refresh(agent_request)
-
-        # Execute the Chapter Generator agent processing
-        result = await ChapterService.generate_chapter(
-            db=db,
-            module_focus=sanitized_module_focus,
-            outline=request.outline,
-            request_id=str(agent_request.id),
-            user_profile=user_profile
-        )
-
-        # Update the agent request status to COMPLETED
-        agent_request.status = "COMPLETED"
-        db.commit()
-
-        # Record the successful request for rate limiting
-        record_agent_request(db, str(current_user.id), "CHAPTER_GENERATOR")
-
-        # Add to user session history
-        UserSessionManager.add_to_history(str(current_user.id), str(agent_request.id), "CHAPTER_GENERATOR", result)
-
-        result["id"] = str(agent_request.id)
-        result["request_id"] = str(agent_request.id)
-        result["status"] = "COMPLETED"
-
-        logger.info(f"Chapter generator request created: {agent_request.id}")
-        return result
-
-    except ValidationError as e:
-        logger.warning(f"Validation error in chapter generator: {e.message}")
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"message": e.message, "field": e.field}
-        )
-    except Exception as e:
-        logger.error(f"Error in chapter generator: {str(e)}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred during chapter generation"
-        )
 
 
 @router.get("/status/{request_id}")

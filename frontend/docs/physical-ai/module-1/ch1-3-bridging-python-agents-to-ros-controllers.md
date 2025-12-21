@@ -5,9 +5,6 @@ title: "Chapter 1.3: Bridging Python Agents to ROS Controllers using rclpy"
 
 # Chapter 1.3: Bridging Python Agents to ROS Controllers using rclpy
 
-## Summary
-This chapter explores the integration of Python-based AI agents with ROS 2 controllers using the rclpy client library. It covers patterns, best practices, and safety considerations for connecting intelligent decision-making systems to robotic control infrastructure.
-
 ## Learning Objectives
 By the end of this chapter, you will be able to:
 - Integrate Python AI agents with ROS 2 control systems using rclpy

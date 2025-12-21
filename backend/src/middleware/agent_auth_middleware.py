@@ -95,8 +95,6 @@ class AgentAuthMiddleware:
             return "CODE_EXPLAINER"
         elif "/quiz-creator" in path:
             return "QUIZ_CREATOR"
-        elif "/chapter-generator" in path:
-            return "CHAPTER_GENERATOR"
         return "UNKNOWN"
 
 

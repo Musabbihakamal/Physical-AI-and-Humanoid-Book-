@@ -5,8 +5,6 @@ title: "Chapter 5: Capstone Project - Humanoid AI Companion"
 
 # Chapter 5: Capstone Project - Humanoid AI Companion
 
-## Summary
-This capstone chapter integrates all concepts learned in the course to build a complete humanoid AI companion system that can engage in natural conversation, perform tasks, and interact socially with humans in physical environments.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:
@@ -1673,3 +1671,13 @@ graph TB
 - [Human-Robot Interaction Guidelines](https://ieeexplore.ieee.org/document/8957456)
 - [Social Robotics Principles](https://link.springer.com/book/10.1007/978-3-030-46150-8)
 - [Ethical AI in Robotics](https://arxiv.org/abs/2103.04974)
+
+## Summary
+
+This capstone chapter integrated all previous modules into a complete humanoid AI companion system that demonstrates the practical application of Vision-Language-Action (VLA) systems, voice-to-action processing, cognitive planning with LLMs, and multi-modal interaction. The complete system architecture encompasses perception (multimodal sensing with vision, audio, and touch), cognition (language understanding, reasoning, and planning), action (motor control, manipulation, and navigation), social (emotional intelligence, social norms, and personality), and safety (ethical guidelines, safety protocols, and fail-safes) systems.
+
+The chapter addressed key system integration challenges including real-time performance across all subsystems, modularity for independent component updates, scalability to support increasing complexity, robustness for handling failures gracefully, and safety for operation in human environments. Social AI principles were implemented based on theory of mind (understanding others' mental states), emotional intelligence (recognizing and responding to emotions), social norms (following cultural conventions), personalization (adapting to user preferences), and ethical AI (ensuring responsible behavior).
+
+The practical implementation demonstrated a complete humanoid AI companion system with all subsystems integrated: vision system for face and gesture recognition, audio system for speech processing, NLP engine for language understanding, motion controller for physical actions, VLA planner for vision-language-action coordination, LLM cognitive planner for high-level reasoning, multi-modal fusion for combining inputs, safety system for ensuring secure operation, and social engine for managing interactions. The system includes comprehensive safety and ethics implementations with collision avoidance, speed limits, force constraints, privacy controls, and ethical guidelines.
+
+The chapter emphasized conversational AI for physical agents with contextual understanding across modalities, grounded language connected to the physical environment, embodied cognition using physical experience for understanding, pragmatic reasoning for implied meanings, and dialog management for turn-taking. Human-robot interaction design focused on natural interaction, trust building, transparency, adaptability, and error recovery. The complete system demonstrates how all components work together to create an intelligent, safe, and socially-aware humanoid AI companion that can understand natural language commands, perceive its environment, plan appropriate actions, and execute them safely while maintaining appropriate social behaviors and respecting user preferences and privacy.

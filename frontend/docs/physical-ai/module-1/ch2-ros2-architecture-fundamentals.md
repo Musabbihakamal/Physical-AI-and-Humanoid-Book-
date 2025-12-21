@@ -5,8 +5,6 @@ title: "Chapter 2: ROS 2 Architecture Fundamentals"
 
 # Chapter 2: ROS 2 Architecture Fundamentals
 
-## Summary
-This chapter covers the fundamental architecture of ROS 2, including nodes, topics, services, and other communication patterns that form the backbone of robotic applications.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:
@@ -142,3 +140,11 @@ graph LR
 - [ROS 2 Architecture](https://design.ros2.org/articles/Infrastructure.html)
 - [DDS Specification](https://www.omg.org/spec/DDS/)
 - [ROS 2 Tutorials](https://docs.ros.org/en/humble/Tutorials.html)
+
+## Summary
+
+This chapter covered the fundamental concepts of ROS 2 architecture, which is built on DDS (Data Distribution Service) and provides a middleware for communication between different processes and machines. We explored the core components of ROS 2 including nodes (individual processes that perform computation), topics (unidirectional communication channels for data streaming), services (bidirectional communication for request/response patterns), and actions (extended services for long-running tasks with feedback).
+
+We discussed the different communication patterns in ROS 2: publish/subscribe for streaming data, request/response for RPC-style communication, and actions for long-running tasks with progress feedback. The chapter also covered how ROS 2 serves as middleware for robot control with abstraction layers including hardware abstraction, communication, resource management, and security.
+
+Additionally, we examined the control architecture options (centralized, distributed, hierarchical, and behavior-based), real-time capabilities, and practical examples of creating publisher and subscriber nodes. The exercises provided hands-on experience with implementing different types of communication patterns and the quiz helped reinforce key concepts.

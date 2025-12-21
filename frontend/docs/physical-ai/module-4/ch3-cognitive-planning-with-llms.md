@@ -5,8 +5,6 @@ title: "Chapter 3: Cognitive Planning with LLMs"
 
 # Chapter 3: Cognitive Planning with LLMs
 
-## Summary
-This chapter covers using Large Language Models (LLMs) for cognitive planning in robotics, enabling robots to understand natural language commands and translate them into executable action sequences.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:
@@ -736,3 +734,13 @@ graph TB
 - [Large Language Models for Robotics](https://arxiv.org/abs/2309.17108)
 - [Cognitive Architectures for Robotics](https://ieeexplore.ieee.org/document/9158056)
 - [Language Grounding in Robotics](https://arxiv.org/abs/2205.11498)
+
+## Summary
+
+This chapter explored the integration of Large Language Models (LLMs) with robotic systems for cognitive planning, focusing on how LLMs can enhance robot capabilities by processing natural language commands and generating executable action sequences. The chapter addressed key challenges in LLM integration including grounding (connecting language concepts to physical reality), precision (translating abstract commands to specific actions), safety (ensuring generated plans are safe for execution), real-time constraints (meeting timing requirements for control), and uncertainty handling (managing ambiguous or incomplete information).
+
+The chapter detailed cognitive planning fundamentals that encompass natural language understanding for interpreting human commands, task decomposition for breaking complex tasks into subtasks, spatial reasoning for understanding locations and relationships, temporal reasoning for planning sequences of actions over time, and context awareness for using environmental and situational information. Planning hierarchies were discussed with high-level planning for task-level decomposition and sequencing, mid-level planning for action selection and parameterization, and low-level planning for trajectory generation and control.
+
+Practical implementations included LLM-based task planners that decompose high-level natural language commands into executable action sequences, considering robot capabilities and environmental context. A context-aware planning system was demonstrated that validates plans against contextual constraints and modifies actions for safety. The chapter also covered natural language command processors that extract relevant information from user commands, classify command types, and resolve ambiguities using environmental context.
+
+The implementation emphasized contextual reasoning capabilities that consider spatial context (understanding locations and relationships), temporal context (understanding timing and sequences), social context (understanding human intentions and preferences), and physical context (understanding object properties and affordances). Safety validation mechanisms were integrated to ensure that planned actions are safe for execution in the current environment. The chapter demonstrated how LLMs can serve as cognitive planners that bridge high-level human intentions with low-level robot actions, enabling more intuitive human-robot interaction.

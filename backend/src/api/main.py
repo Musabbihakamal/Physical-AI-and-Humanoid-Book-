@@ -50,17 +50,6 @@ app.add_middleware(
 # This ensures that all models are registered with Base.metadata before table creation
 from ..models import agent_request, generated_content, book_chapter, content_link, rag_session, user_profile, user, token
 
-# Create database tables using lifespan
-from contextlib import asynccontextmanager
-from fastapi import FastAPI
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    logger.info("Creating database tables...")
-    Base.metadata.create_all(bind=engine)
-    logger.info("Database tables created successfully")
-    yield
-    logger.info("Application shutdown")
 
 # For testing purposes, create tables immediately if in test mode
 # This needs to happen after models are imported but before the app is used

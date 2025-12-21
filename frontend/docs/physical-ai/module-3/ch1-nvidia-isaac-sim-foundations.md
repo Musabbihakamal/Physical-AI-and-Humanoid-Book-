@@ -5,9 +5,6 @@ title: "Chapter 1: NVIDIA Isaac Sim Foundations"
 
 # Chapter 1: NVIDIA Isaac Sim Foundations
 
-## Summary
-This chapter introduces NVIDIA Isaac Sim, a comprehensive robotics simulation environment for developing and testing AI-powered robots, with a focus on humanoid robotics applications.
-
 ## Learning Objectives
 By the end of this chapter, you will be able to:
 - Install and configure NVIDIA Isaac Sim for robotics development

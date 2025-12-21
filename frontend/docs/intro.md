@@ -23,10 +23,7 @@ By completing this book, you will be able to:
 
 This educational system combines theoretical knowledge with practical implementation, featuring:
 
-- **Complete Technical Book**: 9 comprehensive chapters following the Physical AI Book Constitution
 - **Interactive Documentation**: Built with Docusaurus for optimal learning experience
-- **AI-Powered Features**: Glossary Maker, Code Explainer, Quiz Creator, and Chapter Generator
-- **Real-World Examples**: Implementation with ROS 2, NVIDIA Isaac Sim, Gazebo, Unity, and Isaac ROS
 - **Advanced Systems**: Vision-Language-Action systems and conversational robotics
 - **Constitution-Governed Content**: All content follows our established standards for accuracy, safety, and consistency
 

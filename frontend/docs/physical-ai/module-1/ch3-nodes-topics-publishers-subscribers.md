@@ -5,8 +5,6 @@ title: "Chapter 3: Nodes, Topics, Publishers & Subscribers"
 
 # Chapter 3: Nodes, Topics, Publishers & Subscribers
 
-## Summary
-This chapter delves deep into the publish-subscribe communication pattern in ROS 2, covering the creation and management of nodes, topics, publishers, and subscribers.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:
@@ -156,3 +154,11 @@ graph LR
 - [ROS 2 QoS Examples](https://docs.ros.org/en/humble/Tutorials/Beginner-Client-Libraries/Quality-Of-Service.html)
 - [ROS 2 Node Lifecycle](https://design.ros2.org/articles/node_lifecycle.html)
 - [DDS QoS Policy Reference](https://community.rti.com/static/documentation/connext-dds/5.2.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual.pdf#%2F%2FArtech%2Fbookkeeper%2Ftemp%2FBookKeeperStorage%2F2147483710%2F1683491049%2Fsection.1.4.html)
+
+## Summary
+
+This chapter explored the core ROS 2 concepts of nodes, topics, publishers, and subscribers, which form the foundation of the publish/subscribe communication pattern. We learned about the node lifecycle with its states: unconfigured, inactive, active, and finalized, and how nodes can be written in different languages while communicating through ROS 2 topics.
+
+We covered Quality of Service (QoS) settings which define how messages are delivered, including reliability (reliable vs. best effort), durability (volatile vs. transient local), history (keep last vs. keep all), and depth (message queue size). The chapter also examined how topics decouple publishers and subscribers in time and space, allowing for flexible communication patterns with multiple publishers and subscribers for the same topic.
+
+The practical examples demonstrated creating advanced publishers with custom QoS profiles and subscribers with custom callback groups. We also explored how Python agents can be bridged to ROS controllers, which is essential for integrating high-level AI decision-making with low-level robot control systems. The chapter emphasized the importance of safe communication patterns and proper node management in robotic systems.

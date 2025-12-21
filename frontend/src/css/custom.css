@@ -9,6 +9,9 @@
  * You can override the default Docusaurus styling here.
  */
 
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Montserrat:wght@400;500;600;700&display=swap');
+
 :root {
   --ifm-color-primary: #25c2a0;
   --ifm-color-primary-dark: #21af90;
@@ -54,26 +57,30 @@
   background: url('/img/background.jpg') no-repeat center top;
   background-size: cover;
   background-attachment: fixed;
-  color: white;
+  color: rgb(196, 45, 45);
   min-height: 70vh; /* Increased from default to give more space for title area */
 }
 
 /* Ensure text is readable on the animated background */
 .hero__title {
-  color: white !important;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  color: rgb(40, 115, 243) !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.594);
+  font-family: 'Arial, Helvetica, sans-serif'; /* Custom font for title */
 }
 
 .hero__subtitle {
-  color: #e0e0e0 !important;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  color: #f4e7e7 !important;
+  text-shadow: 1px 1px 3px rgba(57, 53, 53, 0.826);
+  font-family: 'Roboto', 'Arial', sans-serif; /* Custom font for subtitle */
 }
 
 /* Enhance buttons to contrast with background */
 .button--secondary {
-  background-color: rgba(255, 255, 255, 0.2) !important;
-  border: 2px solid rgba(255, 255, 255, 0.5) !important;
-  color: white !important;
+  background-color: rgba(40, 40, 40, 0.2) !important;
+  border: 2px solid rgb(177, 172, 172) !important;
+  color: rgb(77, 204, 255) !important;
+  font-family: 'Cambria, Cochin, Georgia, Times, Times New Roman', serif; /* Custom font for button */
+  font-size: 26px;
 }
 
 .button--secondary:hover {
@@ -83,8 +90,9 @@
 
 .button--primary {
   background-color: rgba(255, 255, 255, 0.2) !important;
-  border: 2px solid rgba(255, 255, 255, 0.5) !important;
+  border: 2px solid rgba(172, 165, 165, 0.5) !important;
   color: white !important;
+  font-family: 'Montserrat', 'Helvetica', sans-serif; /* Custom font for button */
 }
 
 .button--primary:hover {
@@ -94,7 +102,7 @@
 
 /* Additional styling for features section */
 .features {
-  background-color: #f8f9fa;
+  background-color: #377bbe;
 }
 
 .features h2,
@@ -106,7 +114,7 @@
 .navbar {
   background: transparent !important;
   backdrop-filter: blur(10px);
-  color: white;
+  color: rgb(17, 6, 6);
 }
 
 .navbar__brand,

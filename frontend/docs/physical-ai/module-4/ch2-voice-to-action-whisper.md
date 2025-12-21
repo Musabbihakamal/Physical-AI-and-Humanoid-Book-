@@ -5,8 +5,6 @@ title: "Chapter 2: Voice-to-Action with OpenAI Whisper"
 
 # Chapter 2: Voice-to-Action with OpenAI Whisper
 
-## Summary
-This chapter covers implementing voice-to-action systems using OpenAI Whisper for speech recognition and converting voice commands to ROS 2 actions for humanoid robots.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:
@@ -651,3 +649,13 @@ graph TB
 - [OpenAI Whisper Documentation](https://github.com/openai/whisper)
 - [ROS 2 Audio Processing](https://docs.ros.org/en/humble/Tutorials.html#audio-processing)
 - [Speech Recognition in Robotics](https://ieeexplore.ieee.org/document/9158056)
+
+## Summary
+
+This chapter focused on implementing voice-to-action systems using OpenAI Whisper for speech recognition in robotics applications. Whisper is a general-purpose speech recognition model that offers multilingual support, robust recognition across different accents and noise conditions, timestamp information for speech segments, speaker diarization, and punctuation restoration.
+
+The chapter detailed the voice command processing pipeline, which includes audio capture from microphones, preprocessing for noise reduction and normalization, transcription using Whisper, command parsing to extract actionable elements from text, action mapping to convert commands to robot actions, and execution through the robot control system. Key design principles for voice commands were emphasized, including clear intent, consistent format, error recovery, context awareness, and safety-first approaches.
+
+Real-time voice processing techniques were covered, including streaming recognition for immediate response, wake word detection to trigger recognition, buffer management for efficient processing, latency optimization to minimize delays, and resource management to balance accuracy with computational requirements. The chapter provided practical implementations of Whisper integration with ROS 2, including audio recording loops, transcription processing, voice command validation, and natural language to ROS command conversion.
+
+Safety considerations were highlighted through voice command validation systems that check for dangerous keywords, validate command length, and ensure appropriate actions. The chapter also covered voice command safety filters that use service-based validation to approve or reject commands before execution. A dialog manager implementation was provided to handle conversational context, maintain conversation history, and update interaction context based on user inputs. The integration of voice commands with robot control systems was demonstrated through practical examples showing how to convert natural language commands into executable robot actions while maintaining safety and reliability.

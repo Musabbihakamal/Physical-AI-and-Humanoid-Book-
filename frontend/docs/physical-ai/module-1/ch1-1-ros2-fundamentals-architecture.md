@@ -412,6 +412,10 @@ The practical examples demonstrated advanced node implementations with lifecycle
 
 These foundational concepts are critical for building robust, scalable robotic applications that can operate effectively in complex, distributed environments. Understanding these principles enables the development of systems that can handle the challenges of real-world robotic applications, from single robots to multi-robot systems and cloud robotics.
 
+import TranslateButton from '@site/src/components/TranslateButton';
+
+<TranslateButton />
+
 ## References
 - [ROS 2 Architecture](https://design.ros2.org/articles/ROS2_Architecture.html)
 - [DDS Specification](https://www.omg.org/spec/DDS/)

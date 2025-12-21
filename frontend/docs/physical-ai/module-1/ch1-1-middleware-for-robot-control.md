@@ -5,9 +5,6 @@ title: "Chapter 1.1: Middleware for Robot Control"
 
 # Chapter 1.1: Middleware for Robot Control
 
-## Summary
-This chapter explores the role of middleware in robot control systems, focusing on how ROS 2 serves as a sophisticated middleware that abstracts the complexity of robot control through its DDS-based architecture.
-
 ## Learning Objectives
 By the end of this chapter, you will be able to:
 - Understand the role of middleware in robot control systems
@@ -193,3 +190,7 @@ graph TB
 - [ROS 2 Middleware Layer](https://design.ros2.org/articles/Infrastructure.html)
 - [DDS for Robotics](https://www.omg.org/spec/DDS/)
 - [ROS 2 Quality of Service](https://docs.ros.org/en/humble/Concepts/About-Quality-of-Service-Settings.html)
+
+import TranslateButton from '@site/src/components/TranslateButton';
+
+<TranslateButton />

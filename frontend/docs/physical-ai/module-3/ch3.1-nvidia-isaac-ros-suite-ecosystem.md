@@ -5,8 +5,6 @@ title: "Chapter 3.1: NVIDIA Isaac ROS Suite and Ecosystem"
 
 # Chapter 3.1: NVIDIA Isaac ROS Suite and Ecosystem
 
-## Summary
-This chapter provides a comprehensive exploration of the NVIDIA Isaac ROS ecosystem, detailing the various packages, tools, and integration patterns that enable high-performance robotic perception and control. You'll learn how to leverage GPU acceleration for real-time robotics applications and understand the architecture of the Isaac ROS framework.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

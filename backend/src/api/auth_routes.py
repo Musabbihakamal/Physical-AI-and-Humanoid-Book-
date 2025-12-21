@@ -1,7 +1,7 @@
 """
 Authentication API routes for the multi-agent book generation system.
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 from typing import Optional
@@ -12,6 +12,9 @@ from ..models.user_profile import UserProfile
 from ..utils.errors import ValidationError
 from .dependencies import get_current_user, get_token_from_header
 import logging
+import secrets
+import hashlib
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +61,14 @@ class LoginRequest(BaseModel):
         }
 
 
+class OAuthLoginRequest(BaseModel):
+    provider: str  # "google" or "github"
+    access_token: str
+    email: str
+    full_name: str
+    avatar_url: Optional[str] = None
+
+
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
@@ -75,6 +86,375 @@ class RefreshTokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str
+
+
+class OAuthLoginResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+    user_id: str
+    email: str
+    full_name: str
+    is_new_user: bool  # Whether this was a new user registration
+
+
+@router.post("/oauth-login", response_model=OAuthLoginResponse)
+async def oauth_login(
+    request: OAuthLoginRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    OAuth login/registration endpoint for Google and GitHub.
+    """
+    try:
+        # Check if user already exists with this email
+        existing_user = db.query(User).filter(User.email == request.email).first()
+
+        if existing_user:
+            # User exists, generate tokens
+            access_token, refresh_token = AuthService.generate_tokens(existing_user)
+
+            logger.info(f"OAuth login successful for existing user: {request.email}")
+
+            return OAuthLoginResponse(
+                access_token=access_token,
+                refresh_token=refresh_token,
+                token_type="bearer",
+                user_id=str(existing_user.id),
+                email=existing_user.email,
+                full_name=existing_user.full_name,
+                is_new_user=False
+            )
+        else:
+            # User doesn't exist, create new user
+            # Generate a random password for OAuth users (not used for login)
+            random_password = secrets.token_urlsafe(32)
+
+            user, access_token, refresh_token = AuthService.register_user(
+                db=db,
+                email=request.email,
+                password=random_password,  # Random password for OAuth users
+                full_name=request.full_name,
+                experience_level="BEGINNER",  # Default for new OAuth users
+                technical_background=f"Registered via {request.provider}",
+                preferred_difficulty="MEDIUM",
+                learning_goals=[],
+                hardware_access=[],
+                language_preference="en"
+            )
+
+            logger.info(f"OAuth registration successful for new user: {user.email}")
+
+            return OAuthLoginResponse(
+                access_token=access_token,
+                refresh_token=refresh_token,
+                token_type="bearer",
+                user_id=str(user.id),
+                email=user.email,
+                full_name=user.full_name,
+                is_new_user=True
+            )
+
+    except ValidationError as e:
+        logger.warning(f"Validation error during OAuth login: {e.message}")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"message": e.message, "field": e.field}
+        )
+    except Exception as e:
+        logger.error(f"Error during OAuth login: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred during OAuth login"
+        )
+
+
+# OAuth Configuration - Add these routes for Google and GitHub OAuth
+@router.get("/google")
+async def google_login(request: Request):
+    """
+    Initiate Google OAuth flow.
+    This endpoint redirects the user to Google's OAuth consent screen.
+    """
+    # Get Google OAuth configuration from environment variables
+    from urllib.parse import urlencode
+    import os
+
+    google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+    google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+    redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", f"{str(request.url.origin)}/api/auth/google/callback")
+
+    if not google_client_id:
+        # Return configuration error instead of raising exception to ensure route exists
+        return {
+            "error": "Google OAuth is not configured",
+            "detail": "Google OAuth is not configured. Please contact the administrator to set up Google OAuth integration.",
+            "configured": False
+        }
+
+    # Generate a state parameter for security
+    state = secrets.token_urlsafe(32)
+
+    # Save state in session or database for validation (simplified here)
+    # In a real app, you'd use a proper session store
+
+    # Build the authorization URL
+    params = {
+        "client_id": google_client_id,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "state": state,
+    }
+
+    auth_url = f"https://accounts.google.com/o/oauth2/auth?{urlencode(params)}"
+    return {"auth_url": auth_url, "configured": True}
+
+
+@router.get("/github")
+async def github_login(request: Request):
+    """
+    Initiate GitHub OAuth flow.
+    This endpoint redirects the user to GitHub's OAuth consent screen.
+    """
+    # Get GitHub OAuth configuration from environment variables
+    from urllib.parse import urlencode
+    import os
+
+    github_client_id = os.getenv("GITHUB_CLIENT_ID")
+    github_client_secret = os.getenv("GITHUB_CLIENT_SECRET")
+    redirect_uri = os.getenv("GITHUB_REDIRECT_URI", f"{str(request.url.origin)}/api/auth/github/callback")
+
+    if not github_client_id:
+        # Return configuration error instead of raising exception to ensure route exists
+        return {
+            "error": "GitHub OAuth is not configured",
+            "detail": "GitHub OAuth is not configured. Please contact the administrator to set up GitHub OAuth integration.",
+            "configured": False
+        }
+
+    # Generate a state parameter for security
+    state = secrets.token_urlsafe(32)
+
+    # Build the authorization URL
+    params = {
+        "client_id": github_client_id,
+        "redirect_uri": redirect_uri,
+        "scope": "user:email",
+        "state": state,
+    }
+
+    auth_url = f"https://github.com/login/oauth/authorize?{urlencode(params)}"
+    return {"auth_url": auth_url, "configured": True}
+
+
+# OAuth Callback endpoints - These handle the response from OAuth providers
+@router.get("/google/callback")
+async def google_callback(
+    code: str,
+    state: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Handle Google OAuth callback.
+    Exchange the authorization code for an access token and get user info.
+    """
+    import os
+    import requests
+    from urllib.parse import urlencode
+
+    google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+    google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+    redirect_uri = os.getenv("GOOGLE_REDIRECT_URI")
+
+    if not google_client_id or not google_client_secret:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Google OAuth is not properly configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables."
+        )
+
+    # Exchange authorization code for access token
+    token_url = "https://oauth2.googleapis.com/token"
+    token_data = {
+        "code": code,
+        "client_id": google_client_id,
+        "client_secret": google_client_secret,
+        "redirect_uri": redirect_uri,
+        "grant_type": "authorization_code",
+    }
+
+    token_response = requests.post(token_url, data=token_data)
+    token_json = token_response.json()
+
+    if "access_token" not in token_json:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to get access token from Google."
+        )
+
+    # Get user info from Google
+    access_token = token_json["access_token"]
+    user_info_response = requests.get(
+        "https://www.googleapis.com/oauth2/v2/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+    user_info = user_info_response.json()
+
+    if "email" not in user_info:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to get user info from Google."
+        )
+
+    # Create or update user in database using the OAuth login endpoint
+    oauth_request = OAuthLoginRequest(
+        provider="google",
+        access_token=access_token,
+        email=user_info["email"],
+        full_name=user_info.get("name", user_info.get("email", "Unknown")),
+        avatar_url=user_info.get("picture")
+    )
+
+    # Process OAuth login and get tokens
+    existing_user = db.query(User).filter(User.email == user_info["email"]).first()
+
+    if existing_user:
+        # User exists, generate tokens
+        access_token, refresh_token = AuthService.generate_tokens(existing_user)
+        is_new_user = False
+    else:
+        # User doesn't exist, create new user
+        random_password = secrets.token_urlsafe(32)
+        user, access_token, refresh_token = AuthService.register_user(
+            db=db,
+            email=user_info["email"],
+            password=random_password,
+            full_name=user_info.get("name", user_info.get("email", "Unknown")),
+            experience_level="BEGINNER",
+            technical_background="Registered via Google OAuth",
+            preferred_difficulty="MEDIUM",
+            learning_goals=[],
+            hardware_access=[],
+            language_preference="en"
+        )
+        is_new_user = True
+
+    # Return tokens (in a real app, you might redirect to frontend with tokens)
+    return OAuthLoginResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        user_id=str(existing_user.id if existing_user else user.id),
+        email=user_info["email"],
+        full_name=user_info.get("name", user_info.get("email", "Unknown")),
+        is_new_user=is_new_user
+    )
+
+
+@router.get("/github/callback")
+async def github_callback(
+    code: str,
+    state: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Handle GitHub OAuth callback.
+    Exchange the authorization code for an access token and get user info.
+    """
+    import os
+    import requests
+    from urllib.parse import urlencode
+
+    github_client_id = os.getenv("GITHUB_CLIENT_ID")
+    github_client_secret = os.getenv("GITHUB_CLIENT_SECRET")
+    redirect_uri = os.getenv("GITHUB_REDIRECT_URI")
+
+    if not github_client_id or not github_client_secret:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="GitHub OAuth is not properly configured. Please set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET environment variables."
+        )
+
+    # Exchange authorization code for access token
+    token_url = "https://github.com/login/oauth/access_token"
+    token_data = {
+        "code": code,
+        "client_id": github_client_id,
+        "client_secret": github_client_secret,
+        "redirect_uri": redirect_uri,
+    }
+
+    headers = {"Accept": "application/json"}
+    token_response = requests.post(token_url, data=token_data, headers=headers)
+    token_json = token_response.json()
+
+    if "access_token" not in token_json:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to get access token from GitHub."
+        )
+
+    # Get user info from GitHub
+    access_token = token_json["access_token"]
+    user_headers = {
+        "Authorization": f"token {access_token}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+    user_info_response = requests.get("https://api.github.com/user", headers=user_headers)
+    user_info = user_info_response.json()
+
+    # Get user's primary email from GitHub
+    email_response = requests.get("https://api.github.com/user/emails", headers=user_headers)
+    emails = email_response.json()
+    primary_email = next((email["email"] for email in emails if email["primary"] and email["verified"]), None)
+
+    if not primary_email:
+        # If no primary email found, get the first verified email
+        primary_email = next((email["email"] for email in emails if email["verified"]), user_info.get("login", "") + "@github.com")
+
+    # Create or update user in database
+    oauth_request = OAuthLoginRequest(
+        provider="github",
+        access_token=access_token,
+        email=primary_email,
+        full_name=user_info.get("name", user_info.get("login", "Unknown")),
+        avatar_url=user_info.get("avatar_url")
+    )
+
+    # Process OAuth login and get tokens
+    existing_user = db.query(User).filter(User.email == primary_email).first()
+
+    if existing_user:
+        # User exists, generate tokens
+        access_token, refresh_token = AuthService.generate_tokens(existing_user)
+        is_new_user = False
+    else:
+        # User doesn't exist, create new user
+        random_password = secrets.token_urlsafe(32)
+        user, access_token, refresh_token = AuthService.register_user(
+            db=db,
+            email=primary_email,
+            password=random_password,
+            full_name=user_info.get("name", user_info.get("login", "Unknown")),
+            experience_level="BEGINNER",
+            technical_background="Registered via GitHub OAuth",
+            preferred_difficulty="MEDIUM",
+            learning_goals=[],
+            hardware_access=[],
+            language_preference="en"
+        )
+        is_new_user = True
+
+    # Return tokens (in a real app, you might redirect to frontend with tokens)
+    return OAuthLoginResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        user_id=str(existing_user.id if existing_user else user.id),
+        email=primary_email,
+        full_name=user_info.get("name", user_info.get("login", "Unknown")),
+        is_new_user=is_new_user
+    )
 
 
 @router.post("/register", response_model=TokenResponse)

@@ -77,32 +77,35 @@ const AuthProvider = ({ children }) => {
 
   // Check for existing tokens on app start
   useEffect(() => {
-    const accessToken = localStorage.getItem('accessToken');
-    const refreshToken = localStorage.getItem('refreshToken');
+    // Check if we're in the browser environment
+    if (typeof window !== 'undefined') {
+      const accessToken = localStorage.getItem('accessToken');
+      const refreshToken = localStorage.getItem('refreshToken');
 
-    if (accessToken && refreshToken) {
-      // Verify token validity by getting user profile
-      const verifyToken = async () => {
-        try {
-          const response = await apiService.getUserProfile();
+      if (accessToken && refreshToken) {
+        // Verify token validity by getting user profile
+        const verifyToken = async () => {
+          try {
+            const response = await apiService.getUserProfile();
 
-          dispatch({
-            type: 'LOGIN_SUCCESS',
-            payload: {
-              user: response,
-              accessToken,
-              refreshToken
-            }
-          });
-        } catch (error) {
-          // Token verification failed, clear stored tokens
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          dispatch({ type: 'LOGOUT' });
-        }
-      };
+            dispatch({
+              type: 'LOGIN_SUCCESS',
+              payload: {
+                user: response,
+                accessToken,
+                refreshToken
+              }
+            });
+          } catch (error) {
+            // Token verification failed, clear stored tokens
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            dispatch({ type: 'LOGOUT' });
+          }
+        };
 
-      verifyToken();
+        verifyToken();
+      }
     }
   }, []);
 
@@ -116,9 +119,11 @@ const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
-      // Store tokens in localStorage
-      localStorage.setItem('accessToken', response.access_token);
-      localStorage.setItem('refreshToken', response.refresh_token);
+      // Store tokens in localStorage (only in browser)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('accessToken', response.access_token);
+        localStorage.setItem('refreshToken', response.refresh_token);
+      }
 
       dispatch({
         type: 'LOGIN_SUCCESS',
@@ -160,9 +165,11 @@ const AuthProvider = ({ children }) => {
         })
       });
 
-      // Store tokens in localStorage
-      localStorage.setItem('accessToken', response.access_token);
-      localStorage.setItem('refreshToken', response.refresh_token);
+      // Store tokens in localStorage (only in browser)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('accessToken', response.access_token);
+        localStorage.setItem('refreshToken', response.refresh_token);
+      }
 
       dispatch({
         type: 'REGISTER_SUCCESS',
@@ -185,9 +192,11 @@ const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    // Clear tokens from localStorage
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    // Clear tokens from localStorage (only in browser)
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+    }
 
     dispatch({ type: 'LOGOUT' });
   };

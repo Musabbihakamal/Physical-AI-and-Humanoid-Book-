@@ -3,7 +3,7 @@
 Subagent Validation Script
 
 This script validates that all subagents work as expected according to the quickstart guide.
-It tests the Glossary Maker, Code Explainer, Quiz Creator, and Chapter Generator subagents.
+It tests the Glossary Maker, Code Explainer, Quiz Creator, and Book Content Writer subagents.
 """
 import asyncio
 import sys
@@ -25,7 +25,6 @@ sys.path.insert(0, shared_dir)
 from src.services.glossary_service import GlossaryService
 from src.services.code_explainer_service import CodeExplainerService
 from src.services.quiz_service import QuizService
-from src.services.chapter_service import ChapterService
 from src.services.book_content_service import BookContentService
 from src.services.content_service import ContentService
 from src.database.database import get_db
@@ -60,8 +59,6 @@ class SubagentValidator:
         # Test Quiz Creator functionality
         await self._test_quiz_creator()
 
-        # Test Chapter Generator functionality
-        await self._test_chapter_generator()
 
         # Test Book Content Writer functionality
         await self._test_book_content_writer()
@@ -170,32 +167,6 @@ class SubagentValidator:
             self._add_test_result("quiz_error", False, f"Error in Quiz Creator: {str(e)}")
             print(f"  [FAIL] Quiz Creator: Error - {str(e)}")
 
-    async def _test_chapter_generator(self):
-        """Test the Chapter Generator subagent"""
-        print("\nTesting Chapter Generator...")
-
-        try:
-            # Test chapter structure generation
-            outline = await ChapterService.generate_chapter_structure("ROS 2 Fundamentals", depth="medium")
-            self._add_test_result("chapter_structure", len(outline) > 0, "Chapter structure generation")
-
-            # Test code block generation
-            code_blocks = await ChapterService.generate_code_blocks("ROS 2 Publisher")
-            self._add_test_result("chapter_code_blocks", len(code_blocks) > 0, "Code block generation")
-
-            # Test exercise generation
-            exercises = await ChapterService.generate_exercises("ROS 2 Nodes")
-            self._add_test_result("chapter_exercises", len(exercises) > 0, "Exercise generation")
-
-            # Test diagram generation
-            diagrams = await ChapterService.generate_diagrams("ROS 2 Communication")
-            self._add_test_result("chapter_diagrams", len(diagrams) > 0, "Diagram generation")
-
-            print(f"  [PASS] Chapter Generator: {self.results['test_results'].get('chapter_structure', {}).get('status', 'Unknown')}")
-
-        except Exception as e:
-            self._add_test_result("chapter_error", False, f"Error in Chapter Generator: {str(e)}")
-            print(f"  [FAIL] Chapter Generator: Error - {str(e)}")
 
     async def _test_book_content_writer(self):
         """Test the Book Content Writer subagent"""

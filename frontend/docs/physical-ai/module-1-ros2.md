@@ -5,9 +5,6 @@ title: "Module 1: The Robotic Nervous System (ROS 2)"
 
 # Module 1: The Robotic Nervous System (ROS 2)
 
-## Summary
-This module covers the fundamentals of ROS 2 (Robot Operating System 2), which serves as the nervous system for robotic applications. You'll learn about middleware for robot control, ROS 2 nodes, topics, services, Python agents with rclpy, and URDF for humanoid robots.
-
 ## Learning Objectives
 By the end of this module, you will be able to:
 - Understand ROS 2 architecture and its role in robotics

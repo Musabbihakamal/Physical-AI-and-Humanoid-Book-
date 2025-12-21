@@ -5,9 +5,6 @@ title: "Chapter 1.2: ROS 2 Nodes, Topics, and Services"
 
 # Chapter 1.2: ROS 2 Nodes, Topics, and Services
 
-## Summary
-This chapter provides an in-depth exploration of the fundamental ROS 2 communication primitives: nodes, topics, and services. These components form the backbone of the ROS 2 communication architecture and are essential for building distributed robotic applications.
-
 ## Learning Objectives
 By the end of this chapter, you will be able to:
 - Create and manage ROS 2 nodes with proper lifecycle

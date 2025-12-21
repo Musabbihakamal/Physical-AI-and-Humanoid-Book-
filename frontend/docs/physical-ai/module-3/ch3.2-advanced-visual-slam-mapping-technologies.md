@@ -5,8 +5,6 @@ title: "Chapter 3.2: Advanced Visual SLAM and Mapping Technologies"
 
 # Chapter 3.2: Advanced Visual SLAM and Mapping Technologies
 
-## Summary
-This chapter explores advanced Visual SLAM (Simultaneous Localization and Mapping) technologies with a focus on NVIDIA Isaac's GPU-accelerated implementations. You'll learn about cutting-edge mapping algorithms, optimization techniques, and real-world deployment strategies for humanoid robots operating in dynamic environments.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

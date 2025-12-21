@@ -5,8 +5,6 @@ title: "Chapter 5: Integrating ROS 2 Nodes with Gazebo and Unity"
 
 # Chapter 5: Integrating ROS 2 Nodes with Gazebo and Unity
 
-## Summary
-This chapter covers the integration of ROS 2 nodes with both Gazebo simulation and Unity visualization, creating a complete digital twin pipeline for humanoid robotics.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:
@@ -345,3 +343,13 @@ graph TB
 - [ROS Bridge Suite](http://wiki.ros.org/rosbridge_suite)
 - [Unity Robotics Integration](https://github.com/Unity-Technologies/Unity-Robotics-Hub)
 - [Gazebo-ROS Integration](https://github.com/ros-simulation/gazebo_ros_pkgs)
+
+## Summary
+
+This chapter focused on integrating ROS 2 nodes with both Gazebo and Unity to create a unified simulation and visualization pipeline. We explored the concept of digital twin architecture for robotics, which involves a physical system (real robot or simulation), a virtual system (Unity visualization), a data connection (ROS 2 topics/services), and synchronization mechanisms to keep all systems in real-time alignment.
+
+We covered multi-platform integration involving ROS 2 as the communication and coordination layer, Gazebo for physics-based simulation, and Unity for high-fidelity visualization. The chapter detailed various communication patterns including ROS 2 topics for streaming data, services for request/response interactions, actions for long-running tasks with feedback, and custom messages for specialized data structures.
+
+The practical examples included a comprehensive ROS 2 bridge package that synchronizes robot states between Gazebo simulation and Unity visualization, with Python code for the bridge node and C# code for Unity integration. We also examined timing and synchronization challenges, including clock management, rate control, latency compensation, and state prediction during high-latency periods.
+
+The chapter provided a complete launch file configuration that brings together all components: Gazebo simulation, robot state publisher, the Gazebo-Unity bridge, ROS Bridge Server for Unity, and controllers. This creates a complete digital twin system for humanoid robots that enables bidirectional data flow and real-time synchronization between simulation and visualization platforms, allowing for enhanced robot development, testing, and monitoring capabilities.

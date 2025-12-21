@@ -5,8 +5,6 @@ title: "Chapter 1: Introduction to Physical AI & Embodied Intelligence"
 
 # Chapter 1: Introduction to Physical AI & Embodied Intelligence
 
-## Summary
-This chapter introduces the fundamental concepts of Physical AI and Embodied Intelligence, establishing the foundation for understanding how AI systems interact with the physical world through robotic platforms.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

@@ -5,9 +5,6 @@ title: "Module 2: High-Fidelity Simulation Environments"
 
 # Module 2: High-Fidelity Simulation Environments
 
-## Summary
-This module covers advanced simulation environments for humanoid robotics, including next-generation Gazebo Harmonic, Unity Robotics Simulation Framework, advanced sensor fusion techniques, and simulation-to-reality transfer methodologies. You'll learn about physics simulation, environment building, sensor integration, and how to bridge the gap between simulation and real-world deployment.
-
 ## Learning Objectives
 By the end of this module, you will be able to:
 - Install and configure Gazebo Harmonic for next-generation robotics simulation

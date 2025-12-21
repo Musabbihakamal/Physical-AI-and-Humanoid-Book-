@@ -6,7 +6,7 @@ from .glossary_service import GlossaryService
 from .content_link_service import ContentLinkService
 from .code_explainer_service import CodeExplainerService
 from .quiz_service import QuizService
-from .chapter_service import ChapterService
+from .book_content_service import BookContentService
 
 __all__ = [
     "UserService",
@@ -14,5 +14,5 @@ __all__ = [
     "ContentLinkService",
     "CodeExplainerService",
     "QuizService",
-    "ChapterService"
+    "BookContentService",
 ]

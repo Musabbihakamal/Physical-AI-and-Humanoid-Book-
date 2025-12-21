@@ -7,8 +7,6 @@ title: "Chapter 1.2: Python and C++ Integration for AI Agents"
 
 # Chapter 1.2: Python and C++ Integration for AI Agents
 
-## Summary
-This chapter explores the integration of Python and C++ in ROS 2 for AI agent development. We'll examine how to leverage the strengths of both languages to create efficient, high-performance AI agents that can control robotic systems. The chapter covers inter-language communication, performance optimization, and best practices for combining Python's AI capabilities with C++'s performance characteristics.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

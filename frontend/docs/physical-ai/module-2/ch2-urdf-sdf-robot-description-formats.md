@@ -5,9 +5,6 @@ title: "Chapter 2: URDF and SDF Robot Description Formats"
 
 # Chapter 2: URDF and SDF Robot Description Formats
 
-## Summary
-This chapter explores the differences and relationships between URDF (Unified Robot Description Format) and SDF (Simulation Description Format), and how they work together in simulation environments.
-
 ## Learning Objectives
 By the end of this chapter, you will be able to:
 - Understand the differences between URDF and SDF formats
@@ -294,6 +291,19 @@ graph TB
 1. What is the main difference between URDF and SDF?
 2. Can you use URDF models in SDF-based simulators?
 3. What are the advantages of using SDF over URDF for simulation?
+
+## Summary
+
+This chapter provided a comprehensive comparison of URDF (Unified Robot Description Format) and SDF (Simulation Description Format), exploring their distinct purposes, capabilities, and appropriate use cases in robotics development. We examined how these formats work together to enable effective robot modeling for both control and simulation environments.
+
+Key concepts covered include:
+- The fundamental differences between URDF for ROS control and SDF for simulation
+- Techniques for converting between formats and maintaining compatibility
+- Best practices for creating robot descriptions that work across both domains
+- Integration approaches for using both formats in comprehensive robotic systems
+- Validation methods to ensure model correctness across different platforms
+
+Understanding both formats is essential for developing robots that can seamlessly transition between simulation and real-world operation. The proper use of URDF and SDF ensures that robot models function correctly in both control systems and simulation environments.
 
 ## References
 - [URDF Documentation](http://wiki.ros.org/urdf)

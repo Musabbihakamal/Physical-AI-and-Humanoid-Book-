@@ -5,8 +5,6 @@ title: "Chapter 3: VSLAM and Navigation"
 
 # Chapter 3: VSLAM and Navigation
 
-## Summary
-This chapter covers Visual Simultaneous Localization and Mapping (VSLAM) techniques using Isaac Sim and Isaac ROS, including path planning for humanoid robots and integration with navigation systems.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:
@@ -570,3 +568,13 @@ graph TB
 - [Nav2 Documentation](https://navigation.ros.org/)
 - [Isaac ROS Visual SLAM](https://nvidia-isaac-ros.github.io/repositories_and_packages/isaac_ros_visual_slam/index.html)
 - [ROS 2 Navigation Tutorials](https://docs.ros.org/en/humble/Tutorials/Navigation.html)
+
+## Summary
+
+This chapter focused on Visual SLAM (Simultaneous Localization and Mapping) and navigation for humanoid robots. We explored the fundamentals of VSLAM, which combines localization (estimating the robot's position), mapping (building a representation of the environment), and visual processing (using camera images for perception).
+
+We examined different VSLAM approaches including feature-based methods that detect and track distinctive features in images, direct methods that use pixel intensities directly for tracking, semi-direct methods that combine feature and direct approaches, and deep learning methods that use neural networks for feature extraction and matching. The chapter addressed specific challenges for humanoid robots including dynamic motion from bipedal gait, height variations affecting viewpoint, balance constraints during navigation, limited computing power, and sensor mounting considerations.
+
+We covered the essential components of navigation systems including global planners for path planning from start to goal, local planners for obstacle avoidance and path following, costmaps for representing environment obstacles and costs, controllers for sending commands to robot actuators, and recovery behaviors for handling navigation failures. Special attention was given to bipedal navigation considerations such as step planning for stable walking, center of mass management for balance, terrain adaptation for different surfaces, and social navigation around humans.
+
+Practical examples demonstrated implementing Isaac ROS Visual SLAM with image processing, feature tracking, and pose estimation. We also explored Nav2 configuration for humanoid robots with specific parameters for bipedal navigation, including controller settings, costmap configurations, and behavior trees tailored for humanoid movement patterns. The chapter emphasized the importance of evaluating VSLAM and navigation performance in different environments and understanding how humanoid navigation requirements differ from wheeled robots.

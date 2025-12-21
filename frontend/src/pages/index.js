@@ -17,14 +17,7 @@ function HomepageHeader() {
           <Link
             className="button button--secondary button--lg"
             to="/docs/physical-ai-book">
-            Read the Physical AI & Humanoid Robotics Book 📚
-          </Link>
-        </div>
-        <div className={styles.buttons}>
-          <Link
-            className="button button--primary button--lg"
-            to="/docs/physical-ai/intro">
-            Start Learning Now →
+            Start Reading
           </Link>
         </div>
       </div>
@@ -42,24 +35,10 @@ export default function Home() {
       <main>
         <section className={styles.features}>
           <div className="container">
-            <div className="row">
-              <div className="col col--4">
-                <h2>Complete Technical Book</h2>
-                <p>9 comprehensive chapters covering Physical AI, ROS 2, simulation environments, and humanoid robotics following ROS 2 Rolling/Humble conventions and Python PEP8 style.</p>
-              </div>
-              <div className="col col--4">
-                <h2>AI-Powered Learning</h2>
-                <p>Glossary Maker, Code Explainer, Quiz Creator, and Chapter Generator with integrated RAG chatbot for enhanced learning. All content is technically accurate, reproducible, and safe for minors.</p>
-              </div>
-              <div className="col col--4">
-                <h2>Real-World Applications</h2>
-                <p>Implementation examples with ROS 2, NVIDIA Isaac Sim, Gazebo, Unity, Isaac ROS, and advanced robotics frameworks. All code follows platform-agnostic instructions for Linux, Jetson, and Cloud.</p>
-              </div>
-            </div>
 
             <div className="row" style={{marginTop: '2rem'}}>
               <div className="col col--12">
-                <h2 style={{textAlign: 'center'}}>Learning Modules</h2>
+                <h2 style={{textAlign: 'center', fontFamily: "'Montserrat', 'Helvetica', sans-serif"}}>Learning Modules</h2>
                 <div className="row" style={{gap: '1rem', justifyContent: 'center'}}>
                   <div className="col col--3" style={{margin: 0, padding: '1rem'}}>
                     <div className={`${styles.moduleCard} ${styles.moduleCard1}`}>
@@ -140,20 +119,6 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="row" style={{marginTop: '2rem', backgroundColor: '#f0f8ff', padding: '2rem', borderRadius: '8px'}}>
-              <div className="col col--12">
-                <h2 style={{textAlign: 'center'}}>Constitution-Governed Content</h2>
-                <p style={{textAlign: 'center', fontSize: '1.1em', lineHeight: '1.6'}}>
-                  All content follows our <strong>Physical AI Book Constitution</strong> ensuring technical accuracy,
-                  safety for minors, reproducibility, and consistency across all chapters.
-                  Code examples follow ROS 2 conventions and Python PEP8 style with platform-agnostic instructions.
-                </p>
-                <div style={{display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1rem'}}>
-                  <Link className="button button--primary" to="/docs/physical-ai/intro">Begin Learning</Link>
-                  <Link className="button button--secondary" to="/docs/physical-ai-book">View Complete Book</Link>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
       </main>

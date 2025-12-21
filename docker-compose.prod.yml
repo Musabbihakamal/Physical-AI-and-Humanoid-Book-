@@ -1,43 +1,6 @@
 version: '3.8'
 
 services:
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    ports:
-      - "8000:8000"
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - QDRANT_URL=${QDRANT_URL}
-      - QDRANT_API_KEY=${QDRANT_API_KEY}
-      - DATABASE_URL=${DATABASE_URL}
-      - SECRET_KEY=${SECRET_KEY}
-      - DEBUG=${DEBUG:-False}
-      - WORKERS=4
-    depends_on:
-      - postgres
-      - qdrant
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    ports:
-      - "80:80"
-    environment:
-      - REACT_APP_BACKEND_URL=http://localhost:8000
-    depends_on:
-      - backend
-    restart: unless-stopped
-
   postgres:
     image: postgres:15
     environment:
@@ -78,11 +41,50 @@ services:
       - redis_data:/data
     restart: unless-stopped
 
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - QDRANT_URL=${QDRANT_URL}
+      - QDRANT_API_KEY=${QDRANT_API_KEY}
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/book_agent_db
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG:-False}
+      - WORKERS=4
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:80"  # Changed to 3000 to avoid conflict with nginx
+    environment:
+      - REACT_APP_BACKEND_URL=http://backend:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
   nginx:
     image: nginx:alpine
     ports:
-      - "443:443"
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./ssl:/etc/nginx/ssl

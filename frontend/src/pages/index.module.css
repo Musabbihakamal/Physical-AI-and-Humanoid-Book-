@@ -20,7 +20,7 @@
 
 @media screen and (max-width: 996px) {
   .heroBanner {
-    padding: 3rem 0; /* Increased mobile padding for better title area */
+    padding: 4rem 0; /* Increased mobile padding for better title area */
     min-height: 60vh; /* Increased mobile min-height for better title area */
     background-attachment: scroll; /* Allow scrolling on mobile devices */
   }
@@ -63,7 +63,7 @@
 
 .moduleCard:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(213, 201, 201, 0.854);
+  box-shadow: 0 8px 25px rgba(8, 7, 7, 0.854);
 }
 
 .moduleCard-1 {

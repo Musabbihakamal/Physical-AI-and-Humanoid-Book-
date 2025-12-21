@@ -5,9 +5,6 @@ title: "Chapter 2: Perception Pipelines in Isaac ROS"
 
 # Chapter 2: Perception Pipelines in Isaac ROS
 
-## Summary
-This chapter covers Isaac ROS (Robotics Sensors) packages that provide hardware-accelerated perception pipelines for robot perception and navigation, including integration with NVIDIA GPU acceleration.
-
 ## Learning Objectives
 By the end of this chapter, you will be able to:
 - Install and configure Isaac ROS packages
@@ -416,3 +413,11 @@ graph TB
 - [Isaac ROS Documentation](https://nvidia-isaac-ros.github.io/)
 - [Isaac ROS GitHub Repository](https://github.com/NVIDIA-ISAAC-ROS)
 - [ROS 2 Perception Tutorials](https://docs.ros.org/en/humble/Tutorials.html#perception)
+
+## Summary
+
+This chapter covered Isaac ROS, which provides hardware-accelerated perception algorithms leveraging NVIDIA GPUs for performance. We explored the key benefits of GPU acceleration including significantly faster processing than CPU, better power efficiency, real-time performance capabilities, and making computationally intensive algorithms feasible for robotics applications.
+
+We examined the core components of Isaac ROS perception pipelines including image acquisition, feature detection, stereo processing, object detection, semantic segmentation, and SLAM integration. The chapter detailed various Isaac ROS packages such as Isaac ROS Apriltag for GPU-accelerated fiducial detection, Isaac ROS Stereo Dense Reconstruction for depth estimation, Isaac ROS Visual Slam for visual-inertial SLAM, Isaac ROS Image Pipeline for image preprocessing and rectification, and Isaac ROS Detection NITROS for neural inference with TensorRT.
+
+Practical examples demonstrated stereo dense reconstruction, AprilTag detection, and image pipeline processing using Isaac ROS. The examples showed how to implement GPU-accelerated computer vision algorithms with standard ROS 2 interfaces, ensuring compatibility with the broader ROS 2 ecosystem while taking advantage of NVIDIA's hardware acceleration capabilities. The chapter emphasized the importance of integrating Isaac ROS with standard ROS 2 perception workflows and building perception pipelines specifically designed for humanoid robots.

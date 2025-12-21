@@ -12,10 +12,16 @@ class AnalyticsService {
   // Generate a unique user ID for tracking
   generateUserId() {
     // Try to get from localStorage, otherwise generate a new one
-    let userId = localStorage.getItem('userId');
-    if (!userId) {
-      userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('userId', userId);
+    let userId = null;
+    if (typeof window !== 'undefined') {
+      userId = localStorage.getItem('userId');
+      if (!userId) {
+        userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('userId', userId);
+      }
+    } else {
+      // For server-side rendering, generate a temporary ID
+      userId = 'ssr_user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
     return userId;
   }
@@ -104,13 +110,6 @@ class AnalyticsService {
     });
   }
 
-  // Track chapter generation
-  trackChapterGeneration(params = {}) {
-    this.trackSubagentUsage('CHAPTER_GENERATOR', {
-      action: 'generate',
-      ...params,
-    });
-  }
 
   // Track user interactions
   trackUserInteraction(interactionType, params = {}) {
@@ -152,6 +151,5 @@ export const trackSubagentUsage = analytics.trackSubagentUsage.bind(analytics);
 export const trackGlossaryGeneration = analytics.trackGlossaryGeneration.bind(analytics);
 export const trackCodeExplanation = analytics.trackCodeExplanation.bind(analytics);
 export const trackQuizCreation = analytics.trackQuizCreation.bind(analytics);
-export const trackChapterGeneration = analytics.trackChapterGeneration.bind(analytics);
 export const trackUserInteraction = analytics.trackUserInteraction.bind(analytics);
 export const trackError = analytics.trackError.bind(analytics);

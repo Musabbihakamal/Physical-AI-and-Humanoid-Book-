@@ -14,6 +14,7 @@ RUN apt-get update \
         build-essential \
         curl \
         git \
+        libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy project requirements

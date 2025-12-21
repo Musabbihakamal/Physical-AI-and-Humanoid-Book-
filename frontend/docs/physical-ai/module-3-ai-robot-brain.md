@@ -5,8 +5,6 @@ title: "Module 3: The AI-Robot Brain (NVIDIA Isaac™)"
 
 # Module 3: The AI-Robot Brain (NVIDIA Isaac™)
 
-## Summary
-This module covers advanced perception and training for humanoid robots using NVIDIA Isaac ecosystem. You'll learn about Isaac Sim for photorealistic simulation, Isaac ROS for hardware-accelerated perception, and Nav2 for path planning in humanoid navigation.
 
 ## Learning Objectives
 By the end of this module, you will be able to:

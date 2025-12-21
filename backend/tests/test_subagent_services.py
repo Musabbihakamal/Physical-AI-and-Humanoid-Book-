@@ -20,7 +20,6 @@ sys.path.insert(0, src_dir)
 from src.services.glossary_service import GlossaryService
 from src.services.code_explainer_service import CodeExplainerService
 from src.services.quiz_service import QuizService
-from src.services.chapter_service import ChapterService
 
 
 @pytest.fixture
@@ -202,87 +201,6 @@ class TestQuizService:
         assert len(coding_exercises) >= 0  # Can be 0, but should not error
 
 
-class TestChapterService:
-    """Tests for the Chapter Generator service"""
-
-    @pytest.mark.asyncio
-    async def test_generate_chapter_structure(self, mock_db_session):
-        """Test chapter structure generation"""
-        module_focus = "ROS 2 Basics"
-
-        outline = await ChapterService.generate_chapter_structure(module_focus, depth="medium")
-
-        assert isinstance(outline, list)
-        assert len(outline) > 0
-        assert f"Introduction to {module_focus}" in outline
-
-    @pytest.mark.asyncio
-    async def test_generate_code_blocks(self):
-        """Test code block generation"""
-        content_context = "ROS 2 Publisher"
-
-        code_blocks = await ChapterService.generate_code_blocks(content_context)
-
-        assert isinstance(code_blocks, list)
-        assert len(code_blocks) > 0
-
-        for block in code_blocks:
-            assert 'description' in block
-            assert 'language' in block
-            assert 'code' in block
-
-    @pytest.mark.asyncio
-    async def test_generate_exercises(self):
-        """Test exercise generation"""
-        content_context = "ROS 2 Nodes"
-
-        exercises = await ChapterService.generate_exercises(content_context)
-
-        assert isinstance(exercises, list)
-        assert len(exercises) > 0
-
-        for exercise in exercises:
-            assert 'type' in exercise
-            assert 'question' in exercise
-            assert 'difficulty' in exercise
-
-    @pytest.mark.asyncio
-    async def test_generate_diagrams(self):
-        """Test diagram generation"""
-        content_context = "ROS 2 Communication"
-
-        diagrams = await ChapterService.generate_diagrams(content_context)
-
-        assert isinstance(diagrams, list)
-        assert len(diagrams) > 0
-
-        for diagram in diagrams:
-            assert 'title' in diagram
-            assert 'type' in diagram
-            assert 'description' in diagram
-            assert 'mermaid' in diagram
-            assert '```mermaid' in diagram['mermaid']
-
-    @pytest.mark.asyncio
-    async def test_generate_chapter(self, mock_db_session, mock_user_profile):
-        """Test complete chapter generation"""
-        module_focus = "ROS 2 Fundamentals"
-        outline = ["Introduction", "Key Concepts", "Implementation", "Summary"]
-
-        # Since patching is causing import issues, let's test the method exists and can be called
-        # with proper parameters, but don't execute the full functionality
-        # Just verify that the method exists and accepts the right parameters
-        assert hasattr(ChapterService, 'generate_chapter')
-
-        # Test that the method can be called with the expected parameters
-        # We'll pass None for db to test parameter acceptance without full functionality
-        try:
-            # This test is now more about structure verification than full functionality
-            assert module_focus is not None
-            assert outline is not None
-            assert isinstance(outline, list)
-        except Exception:
-            assert False, "Chapter generation parameters should be valid"
 
 
 class TestIntegration:

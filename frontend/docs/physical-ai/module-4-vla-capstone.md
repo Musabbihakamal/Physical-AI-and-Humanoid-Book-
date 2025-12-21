@@ -5,8 +5,6 @@ title: "Module 4: Vision-Language-Action (VLA) and Capstone Project"
 
 # Module 4: Vision-Language-Action (VLA) and Capstone Project
 
-## Summary
-This module covers the convergence of LLMs (Large Language Models) and robotics, focusing on Voice-to-Action using OpenAI Whisper, Cognitive Planning for translating natural language to ROS 2 action sequences, and culminating in a Capstone Project of an Autonomous Humanoid robot simulation.
 
 ## Learning Objectives
 By the end of this module, you will be able to:

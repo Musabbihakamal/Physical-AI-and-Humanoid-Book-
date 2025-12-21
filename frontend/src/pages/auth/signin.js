@@ -5,6 +5,7 @@ import Layout from '@theme/Layout';
 import clsx from 'clsx';
 import styles from './signin-template.module.css';
 import { AuthProvider, useAuth } from '../../contexts/AuthContext';
+import { GOOGLE_OAUTH_URL, GITHUB_OAUTH_URL, API_BASE_URL } from '../../constants/apiConfig';
 
 // Wrapper component to provide Auth context
 function SignInWithAuth() {
@@ -83,6 +84,113 @@ function SignInWithAuth() {
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  // OAuth Login Functions
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+
+      // Check if backend is accessible
+      try {
+        const response = await fetch(`${API_BASE_URL}/health`);
+        if (!response.ok) {
+          throw new Error('Backend server is not accessible. Please ensure the backend server is running.');
+        }
+      } catch (connectionErr) {
+        console.error('Backend connection check failed:', connectionErr);
+        throw new Error('Cannot connect to backend server. Please ensure the backend server is running on port 8000.');
+      }
+
+      // Call the backend to get the Google OAuth URL
+      const response = await fetch(GOOGLE_OAUTH_URL, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Check if OAuth is configured
+        if (data.configured === false) {
+          throw new Error(data.detail || 'OAuth is not properly configured. Please contact the administrator.');
+        }
+
+        // Redirect to Google OAuth URL
+        if (data.auth_url) {
+          window.location.href = data.auth_url;
+        } else {
+          throw new Error('Invalid response from server - no auth_url provided');
+        }
+      } else if (response.status === 404) {
+        throw new Error('OAuth endpoints not found. Backend server may not be running or OAuth is not properly configured.');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || `Failed to initiate Google login (${response.status})`);
+      }
+    } catch (err) {
+      console.error('Google OAuth error:', err);
+      setError(err.message || 'Google login failed. Please try again or use email/password instead.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGitHubLogin = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+
+      // Check if backend is accessible
+      try {
+        const response = await fetch(`${API_BASE_URL}/health`);
+        if (!response.ok) {
+          throw new Error('Backend server is not accessible. Please ensure the backend server is running.');
+        }
+      } catch (connectionErr) {
+        console.error('Backend connection check failed:', connectionErr);
+        throw new Error('Cannot connect to backend server. Please ensure the backend server is running on port 8000.');
+      }
+
+      // Call the backend to get the GitHub OAuth URL
+      const response = await fetch(GITHUB_OAUTH_URL, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Check if OAuth is configured
+        if (data.configured === false) {
+          throw new Error(data.detail || 'OAuth is not properly configured. Please contact the administrator.');
+        }
+
+        // Redirect to GitHub OAuth URL
+        if (data.auth_url) {
+          window.location.href = data.auth_url;
+        } else {
+          throw new Error('Invalid response from server - no auth_url provided');
+        }
+      } else if (response.status === 404) {
+        throw new Error('OAuth endpoints not found. Backend server may not be running or OAuth is not properly configured.');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || `Failed to initiate GitHub login (${response.status})`);
+      }
+    } catch (err) {
+      console.error('GitHub OAuth error:', err);
+      setError(err.message || 'GitHub login failed. Please try again or use email/password instead.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -230,7 +338,11 @@ function SignInWithAuth() {
               <div className={styles.socialLogin}>
                 <p>Or continue with</p>
                 <div className={styles.socialButtons}>
-                  <button className={clsx(styles.socialButton, styles.googleButton)}>
+                  <button
+                    className={clsx(styles.socialButton, styles.googleButton)}
+                    onClick={handleGoogleLogin}
+                    type="button"
+                  >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.63 16.88 16.79 15.71 17.57V20.34H19.28C21.36 18.42 22.56 15.6 22.56 12.25Z" fill="#4285F4"/>
                       <path d="M12 23C14.97 23 17.46 22.02 19.28 20.34L15.71 17.57C14.73 18.23 13.48 18.64 12 18.64C9.14 18.64 6.72 16.69 5.85 14.05H2.18V16.86C4.04 20.53 7.72 23 12 23Z" fill="#34A853"/>
@@ -239,7 +351,11 @@ function SignInWithAuth() {
                     </svg>
                     Google
                   </button>
-                  <button className={clsx(styles.socialButton, styles.githubButton)}>
+                  <button
+                    className={clsx(styles.socialButton, styles.githubButton)}
+                    onClick={handleGitHubLogin}
+                    type="button"
+                  >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 0C5.37 0 0 5.37 0 12C0 17.3 3.43 21.8 8.2 23.39C8.8 23.5 9 23.12 9 22.78V20.66C5.72 21.33 5.05 19.2 5.05 19.2C4.47 17.75 3.64 17.38 3.64 17.38C2.5 16.63 3.71 16.65 3.71 16.65C4.95 16.73 5.55 17.88 5.55 17.88C6.65 19.67 8.38 19.16 9.09 18.86C9.2 18.08 9.52 17.5 9.88 17.2C7.15 16.9 4.27 15.86 4.27 11.47C4.27 10.39 4.65 9.49 5.27 8.79C5.16 8.51 4.81 7.49 5.43 5.85C5.43 5.85 6.28 5.58 8 6.77C8.77 6.56 9.6 6.46 10.43 6.45C11.26 6.46 12.09 6.56 12.86 6.77C14.6 5.58 15.44 5.85 15.44 5.85C16.06 7.49 15.71 8.51 15.6 8.79C16.22 9.49 16.6 10.39 16.6 11.47C16.6 15.88 13.71 16.89 10.97 17.19C11.43 17.58 11.85 18.33 11.85 19.5V22.78C11.85 23.12 12.05 23.5 12.65 23.39C17.4 21.8 20.8 17.3 20.8 12C20.8 5.37 15.43 0 12 0Z" fill="currentColor"/>
                     </svg>

@@ -1,0 +1,582 @@
+import React, { useState, useEffect, useRef } from 'react';
+import styles from './TranslateButton.module.css';
+
+const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTranslated, currentLang: propCurrentLang, setCurrentLang: propSetCurrentLang }) => {
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [currentLang, setCurrentLang] = useState(propCurrentLang || 'en'); // 'en' for English, 'ur' for Urdu
+  const [translationError, setTranslationError] = useState(null);
+  const [translatorReady, setTranslatorReady] = useState(false); // Wait for Google Translate API
+  const [isClient, setIsClient] = useState(false); // Track if we're in the browser
+  const contentRef = useRef(null);
+
+  // Load Google Translate API script - only in browser
+  useEffect(() => {
+    // Set client flag to true in browser
+    setIsClient(true);
+
+    const loadGoogleTranslateScript = () => {
+      return new Promise((resolve, reject) => {
+        if (typeof window === 'undefined') {
+          // Not in browser, resolve immediately
+          resolve();
+          return;
+        }
+
+        if (window.google && window.google.translate) {
+          resolve();
+          return;
+        }
+
+        // Check if script is already loading
+        if (document.querySelector('script[src*="translate.googleapis.com"]')) {
+          // Wait for it to load
+          const checkInterval = setInterval(() => {
+            if (window.google && window.google.translate) {
+              clearInterval(checkInterval);
+              resolve();
+            }
+          }, 100);
+          setTimeout(() => clearInterval(checkInterval), 10000); // 10 second timeout
+          return;
+        }
+
+        // Create script element
+        const script = document.createElement('script');
+        script.src = 'https://translate.googleapis.com/translate_a/element.js?cb=googleTranslateElementInit';
+        script.async = true;
+        script.defer = true;
+
+        // Define the callback function
+        window.googleTranslateElementInit = () => {
+          setTranslatorReady(true);
+          resolve();
+        };
+
+        script.onerror = () => {
+          setTranslationError('Failed to load Google Translate API. Please check your internet connection.');
+          reject(new Error('Script load error'));
+        };
+
+        document.head.appendChild(script);
+      });
+    };
+
+    loadGoogleTranslateScript().catch(error => {
+      console.error('Error loading Google Translate:', error);
+    });
+  }, []);
+
+  // Function to extract and preserve code blocks, diagrams, images, and technical terms
+  const extractAndPreserveElements = (content) => {
+    const preservedElements = [];
+    let processedContent = content;
+
+    // Extract and preserve various content types in order of complexity
+    const patterns = [
+      // 1. Full code blocks with language specification (```lang...```)
+      { regex: /(```[\s\S]*?```)/g, type: 'fenced_code_block' },
+      // 2. Images and diagrams
+      { regex: /(<img[^>]*>)/gi, type: 'image_tag' },
+      { regex: /(!\[[^\]]*\]\([^)]*\))/g, type: 'markdown_image' },
+      // 3. Inline code
+      { regex: /(`[^`]*`)/g, type: 'inline_code' },
+      // 4. Code tags
+      { regex: /(<code[^>]*>[\s\S]*?<\/code>)/gi, type: 'html_code_tag' },
+      // 5. Preformatted text blocks
+      { regex: /(<pre[^>]*>[\s\S]*?<\/pre>)/gi, type: 'html_pre_tag' },
+      // 6. Tables
+      { regex: /(\|[^\n]*\|(?:\n\|[-:|-\s]*)?\n(?:\|[^\n]*\|[\s\n]*)*)/g, type: 'markdown_table' },
+      // 7. HTML divs that might contain diagrams or special content
+      { regex: /(<div[^>]*class="[^"]*diagram[^"]*"[^>]*>[\s\S]*?<\/div>)/gi, type: 'diagram_div' },
+      { regex: /(<div[^>]*class="[^"]*mermaid[^"]*"[^>]*>[\s\S]*?<\/div>)/gi, type: 'mermaid_diagram' },
+      { regex: /(<div[^>]*>[\s\S]*?<\/div>)/gi, type: 'html_div' }, // More general divs
+      // 8. Other HTML elements that should be preserved
+      { regex: /(<figure[^>]*>[\s\S]*?<\/figure>)/gi, type: 'html_figure' },
+      { regex: /(<svg[^>]*>[\s\S]*?<\/svg>)/gi, type: 'svg_element' },
+      { regex: /(<canvas[^>]*>[\s\S]*?<\/canvas>)/gi, type: 'canvas_element' }
+    ];
+
+    let index = 0;
+
+    // Process each pattern
+    for (const pattern of patterns) {
+      let match;
+      // Use a temporary content to avoid replacement conflicts
+      let tempContent = processedContent;
+      while ((match = pattern.regex.exec(tempContent)) !== null) {
+        const placeholder = `__PRESERVED_${pattern.type.toUpperCase()}_${index}__`;
+        const original = match[0];
+
+        preservedElements.push({
+          placeholder,
+          original,
+          type: pattern.type
+        });
+
+        // Replace the match with placeholder using a global regex
+        const escapedOriginal = original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const placeholderRegex = new RegExp(escapedOriginal, 'g');
+        tempContent = tempContent.replace(placeholderRegex, placeholder);
+
+        index++;
+        // Reset regex index to continue searching from the beginning
+        pattern.regex.lastIndex = 0;
+      }
+      processedContent = tempContent;
+    }
+
+    // Extract and preserve technical terms (ROS 2, Gazebo, Isaac, URDF, etc.)
+    const technicalTerms = ['ROS 2', 'Gazebo', 'Isaac', 'URDF', 'ROS2', 'isaac', 'gazebo', 'urdf', 'Python', 'C++', 'API', 'LLM', 'AI', 'JSON', 'XML', 'HTML', 'CSS', 'JavaScript', 'TypeScript', 'Node.js', 'React', 'Docusaurus'];
+    for (const term of technicalTerms) {
+      // Create a case-insensitive regex for the term
+      const termRegex = new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+      let termMatch;
+      let termIndex = 0;
+
+      // Use a temporary content for technical terms as well
+      let tempContent = processedContent;
+      while ((termMatch = termRegex.exec(tempContent)) !== null) {
+        const placeholder = `__TECH_TERM_${index}_${termIndex}__`;
+        const original = termMatch[0];
+
+        preservedElements.push({
+          placeholder,
+          original,
+          type: 'tech_term',
+          originalTerm: term
+        });
+
+        // Replace with placeholder
+        const escapedOriginal = original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const placeholderRegex = new RegExp(escapedOriginal, 'g');
+        tempContent = tempContent.replace(placeholderRegex, placeholder);
+
+        termIndex++;
+      }
+      processedContent = tempContent;
+      index++;
+    }
+
+    return { processedContent, preservedElements };
+  };
+
+  // Function to restore preserved elements back to content
+  const restorePreservedElements = (translatedContent, preservedElements) => {
+    let result = translatedContent;
+
+    // Restore in order (not reverse) to handle nested elements properly
+    for (let i = 0; i < preservedElements.length; i++) {
+      const { placeholder, original } = preservedElements[i];
+      // Use a more robust replacement that handles special regex characters properly
+      const escapedPlaceholder = placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escapedPlaceholder, 'g');
+      result = result.replace(regex, original);
+    }
+
+    return result;
+  };
+
+  // Function to translate content using Google Translate API
+  const translateText = async (text, targetLang) => {
+    if (!window.google || !window.google.translate) {
+      throw new Error('Google Translate API is not loaded. Please refresh the page.');
+    }
+
+    if (!translatorReady) {
+      throw new Error('Translation service is not ready. Please refresh the page.');
+    }
+
+    // Validate input
+    if (!text || typeof text !== 'string') {
+      throw new Error('Invalid content provided for translation.');
+    }
+
+    setIsTranslating(true);
+    setTranslationError(null);
+
+    try {
+      // Extract and preserve code blocks and technical terms
+      const { processedContent, preservedElements } = extractAndPreserveElements(text);
+
+      // Validate that we have content to translate after processing
+      if (!processedContent || processedContent.trim().length === 0) {
+        throw new Error('No translatable content found after processing.');
+      }
+
+      return new Promise((resolve, reject) => {
+        try {
+          // Use Google Translate API directly
+          const translateElement = document.createElement('div');
+          translateElement.style.display = 'none';
+          translateElement.innerHTML = processedContent;
+          document.body.appendChild(translateElement);
+
+          // Create a hidden Google Translate element to perform the translation
+          const googleTranslateElement = document.createElement('div');
+          googleTranslateElement.id = 'google_translate_element';
+          googleTranslateElement.style.display = 'none';
+          document.body.appendChild(googleTranslateElement);
+
+          // Initialize Google Translate with the hidden element
+          new google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: targetLang,
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false
+          }, 'google_translate_element');
+
+          // Wait a bit for initialization
+          setTimeout(() => {
+            // Perform translation by temporarily changing the page language
+            const originalLang = document.documentElement.lang || 'en';
+
+            // Use Google Translate API to translate the text
+            const translateService = google.translate.TranslateService;
+            if (translateService) {
+              translateService.translateText(
+                processedContent,
+                'en', // source language
+                targetLang, // target language
+                (result) => {
+                  if (result && result.sentences && result.sentences.length > 0) {
+                    let translatedText = result.sentences.map(s => s.trans).join(' ');
+
+                    // Restore preserved elements back to the translated content
+                    const finalContent = restorePreservedElements(translatedText, preservedElements);
+
+                    // Validate the final content
+                    if (!finalContent || finalContent.trim().length === 0) {
+                      reject(new Error('Translation result is empty after processing.'));
+                      return;
+                    }
+
+                    document.body.removeChild(translateElement);
+                    document.body.removeChild(googleTranslateElement);
+
+                    resolve({
+                      translatedText: finalContent,
+                      sourceLanguage: 'en',
+                      targetLanguage: targetLang
+                    });
+                  } else {
+                    reject(new Error('Translation service returned empty result.'));
+                  }
+                }
+              );
+            } else {
+              // Fallback method using Google Translate URL
+              const encodedText = encodeURIComponent(processedContent);
+              const apiUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodedText}`;
+
+              fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                  if (data && data[0] && data[0].length > 0) {
+                    let translatedText = '';
+                    for (let i = 0; i < data[0].length; i++) {
+                      if (data[0][i][0]) {
+                        translatedText += data[0][i][0];
+                      }
+                    }
+
+                    // Restore preserved elements back to the translated content
+                    const finalContent = restorePreservedElements(translatedText, preservedElements);
+
+                    // Validate the final content
+                    if (!finalContent || finalContent.trim().length === 0) {
+                      reject(new Error('Translation result is empty after processing.'));
+                      return;
+                    }
+
+                    document.body.removeChild(translateElement);
+                    document.body.removeChild(googleTranslateElement);
+
+                    resolve({
+                      translatedText: finalContent,
+                      sourceLanguage: 'en',
+                      targetLanguage: targetLang
+                    });
+                  } else {
+                    reject(new Error('Translation service returned empty result.'));
+                  }
+                })
+                .catch(error => {
+                  document.body.removeChild(translateElement);
+                  document.body.removeChild(googleTranslateElement);
+                  reject(error);
+                });
+            }
+          }, 500);
+        } catch (error) {
+          console.error('Translation error:', error);
+          reject(error);
+        }
+      });
+    } catch (error) {
+      console.error('Translation error details:', error);
+      let errorMessage = 'Translation failed. ';
+
+      if (error.message.includes('Network Error') || error.message.includes('Failed to fetch')) {
+        errorMessage += 'Cannot connect to translation service. Check your internet connection.';
+      } else if (error.message.includes('Invalid content')) {
+        errorMessage += 'Invalid content provided for translation.';
+      } else if (error.message.includes('empty result')) {
+        errorMessage += 'Translation service returned empty result.';
+      } else {
+        errorMessage += error.message || 'Please try again or check console for details.';
+      }
+
+      setTranslationError(errorMessage);
+      throw error;
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  // Alternative method using Google Translate API directly
+  const translateTextDirect = async (text, targetLang) => {
+    if (!translatorReady) {
+      throw new Error('Translation service is not ready. Please refresh the page.');
+    }
+
+    // Validate input
+    if (!text || typeof text !== 'string') {
+      throw new Error('Invalid content provided for translation.');
+    }
+
+    setIsTranslating(true);
+    setTranslationError(null);
+
+    try {
+      // Extract and preserve code blocks, diagrams, images, and technical terms
+      const { processedContent, preservedElements } = extractAndPreserveElements(text);
+
+      // Validate that we have content to translate after processing
+      if (!processedContent || processedContent.trim().length === 0) {
+        throw new Error('No translatable content found after processing.');
+      }
+
+      // Use Google Translate API directly via fetch
+      // Encode the text properly, handling special characters
+      const encodedText = encodeURIComponent(processedContent);
+      const apiUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodedText}`;
+
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data && data[0] && data[0].length > 0) {
+        let translatedText = '';
+        for (let i = 0; i < data[0].length; i++) {
+          if (data[0][i] && data[0][i][0]) {
+            translatedText += data[0][i][0];
+          }
+        }
+
+        // Restore preserved elements back to the translated content
+        // This will put back code blocks, images, diagrams, etc. in their original positions
+        const finalContent = restorePreservedElements(translatedText, preservedElements);
+
+        // Validate the final content
+        if (!finalContent || finalContent.trim().length === 0) {
+          throw new Error('Translation result is empty after processing.');
+        }
+
+        return {
+          translatedText: finalContent,
+          sourceLanguage: 'en',
+          targetLanguage: targetLang
+        };
+      } else {
+        throw new Error('Translation service returned empty result.');
+      }
+    } catch (error) {
+      console.error('Translation error details:', error);
+      let errorMessage = 'Translation failed. ';
+
+      if (error.message.includes('Network Error') || error.message.includes('Failed to fetch')) {
+        errorMessage += 'Cannot connect to translation service. Check your internet connection.';
+      } else if (error.message.includes('Invalid content')) {
+        errorMessage += 'Invalid content provided for translation.';
+      } else if (error.message.includes('empty result')) {
+        errorMessage += 'Translation service returned empty result.';
+      } else if (error.message.includes('429')) {
+        errorMessage += 'Rate limit exceeded. Please try again later.';
+      } else {
+        errorMessage += error.message || 'Please try again or check console for details.';
+      }
+
+      setTranslationError(errorMessage);
+      throw error;
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const handleTranslate = async () => {
+    // Check if translator service is ready before attempting translation
+    if (!translatorReady) {
+      setTranslationError('Translation service not ready. Please refresh the page.');
+      setIsTranslating(false);
+      return;
+    }
+
+    setTranslationError(null);
+
+    try {
+      if (currentLang === 'en') {
+        // Translate to Urdu
+        setIsTranslating(true);
+        setTranslationError(null);
+
+        let contentToTranslate = null;
+
+        // Check if we're in the browser before accessing DOM
+        if (typeof window !== 'undefined' && window.document) {
+          // Get the current chapter content from the DOM with more specific selectors
+          // Try multiple selectors in order of preference to find the main content area
+          const selectors = [
+            'main div.markdown',           // Docusaurus main content area
+            'main article div.markdown',   // Docusaurus article content
+            'article div.markdown',        // Alternative article content
+            '.markdown',                   // Generic markdown class
+            'main article',                // Main article container
+            '.theme-doc-markdown',         // Docusaurus theme markdown
+            'main .container',             // Main container
+            'main'                         // Fallback to main
+          ];
+
+          let contentElement = null;
+          for (const selector of selectors) {
+            contentElement = document.querySelector(selector);
+            if (contentElement && contentElement.innerHTML && contentElement.innerHTML.trim()) {
+              break; // Found a valid element with content
+            }
+          }
+
+          if (contentElement && contentElement.innerHTML) {
+            // Get the full HTML content for translation
+            contentToTranslate = contentElement.innerHTML;
+          } else if (originalContentHTML) {
+            // Use the content passed from the parent component
+            contentToTranslate = originalContentHTML;
+          }
+        } else if (originalContentHTML) {
+          // Fallback for SSR - use the content passed from the parent component
+          contentToTranslate = originalContentHTML;
+        }
+
+        if (contentToTranslate && contentToTranslate.trim()) {
+          // Translate the content using Google Translate API
+          const result = await translateTextDirect(contentToTranslate, 'ur');
+
+          // Store the translated text in context
+          if (setTranslatedContent && setIsTranslated) {
+            setTranslatedContent(result.translatedText);
+            setIsTranslated(true);
+          }
+        } else if (originalContentHTML && originalContentHTML.trim()) {
+          // If DOM content wasn't found, try using the original content passed from parent
+          const result = await translateTextDirect(originalContentHTML, 'ur');
+
+          // Store the translated text in context
+          if (setTranslatedContent && setIsTranslated) {
+            setTranslatedContent(result.translatedText);
+            setIsTranslated(true);
+          }
+        } else {
+          throw new Error('No content found to translate. Please ensure the page has loaded completely before attempting translation.');
+        }
+
+        const newLang = 'ur';
+        setCurrentLang(newLang);
+        if (propSetCurrentLang) {
+          propSetCurrentLang(newLang);
+        }
+      } else {
+        // Switch back to English - reset to original content
+        if (setTranslatedContent && setIsTranslated) {
+          setTranslatedContent(null);
+          setIsTranslated(false);
+        }
+        const newLang = 'en';
+        setCurrentLang(newLang);
+        if (propSetCurrentLang) {
+          propSetCurrentLang(newLang);
+        }
+      }
+    } catch (error) {
+      console.error('Translation failed:', error);
+      // Error is already set in translateText function
+    }
+  };
+
+  // Clean up on component unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined') {
+        // Reset translation state when component unmounts if we're in translated state
+        if (currentLang === 'ur' && setTranslatedContent && setIsTranslated) {
+          setTranslatedContent(null);
+          setIsTranslated(false);
+        }
+      }
+    };
+  }, [currentLang, setTranslatedContent, setIsTranslated]);
+
+  return (
+    <div className={styles.translateContainer}>
+      <button
+        className={`${styles.translateButton} ${isTranslating ? styles.loading : ''}`}
+        onClick={handleTranslate}
+        disabled={isTranslating || !translatorReady}
+        title={currentLang === 'en' ? 'Translate this chapter to Urdu' : 'Switch back to English'}
+      >
+        {!translatorReady ? (
+          <>
+            <span className={styles.spinner}></span>
+            Initializing...
+          </>
+        ) : isTranslating ? (
+          <>
+            <span className={styles.spinner}></span>
+            Translating...
+          </>
+        ) : currentLang === 'en' ? (
+          '.Translate to Urdu'
+        ) : (
+          'Switch to English'
+        )}
+      </button>
+
+      {translationError && (
+        <div className={styles.translationError}>
+          {translationError}
+        </div>
+      )}
+
+      {currentLang === 'ur' && !isTranslating && !translationError && translatorReady && (
+        <div className={styles.translationNotice}>
+          Content translated to Urdu
+        </div>
+      )}
+
+      {currentLang === 'en' && !isTranslating && !translationError && translatorReady && (
+        <div className={styles.translationNotice}>
+          Showing content in English
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TranslateButton;

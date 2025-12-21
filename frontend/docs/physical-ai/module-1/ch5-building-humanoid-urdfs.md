@@ -5,8 +5,6 @@ title: "Chapter 5: Building Humanoid URDFs"
 
 # Chapter 5: Building Humanoid URDFs
 
-## Summary
-This chapter covers the creation and implementation of Unified Robot Description Format (URDF) files for humanoid robots, including kinematic chains, visual and collision properties, and integration with ROS 2.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:
@@ -368,3 +366,13 @@ graph TD
 - [URDF Documentation](http://wiki.ros.org/urdf)
 - [URDF Tutorials](http://wiki.ros.org/urdf/Tutorials)
 - [Robot State Publisher](http://wiki.ros.org/robot_state_publisher)
+
+## Summary
+
+This chapter covered the creation of URDF (Unified Robot Description Format) files specifically for humanoid robots. We explored the fundamental components of URDF including links (rigid bodies that make up the robot), joints (connections between links that allow relative motion), visual properties (for visualization), collision properties (for collision detection), and inertial properties (for physics simulation).
+
+The chapter emphasized the unique challenges of humanoid robot design, including bipedal locomotion requirements, balance constraints, and the need for complex joint configurations. We examined the typical structure of humanoid robots with components like torso, head, arms, hands, legs, and feet, and how kinematic chains define the connections between robot parts.
+
+We discussed humanoid-specific considerations such as balance and stability features, degrees of freedom requirements (typically 20-30+ joints), joint limits based on biological ranges of motion, and the importance of symmetry in left/right joint configurations. The chapter included practical examples of creating basic humanoid URDF files with proper materials, visual and collision properties, and inertial parameters.
+
+We also covered special humanoid features like pelvis joints for upper body movement, ankle joints for balance, complex hands with multiple joints for manipulation, and flexible spine joints for natural movement. The chapter included a URDF validation script to check for common errors and ensure proper structure. Finally, we explored how to integrate URDF files with ROS 2 simulation environments and validate them using robot_state_publisher and RViz.

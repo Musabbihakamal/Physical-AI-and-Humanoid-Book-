@@ -5,9 +5,6 @@ title: "Chapter 1.4: Advanced ROS 2 Concepts"
 
 # Chapter 1.4: Advanced ROS 2 Concepts
 
-## Summary
-This chapter explores advanced ROS 2 concepts that are essential for developing sophisticated robotic systems. We'll cover complex communication patterns, advanced node management, performance optimization, security considerations, and cutting-edge features that enable state-of-the-art robotic applications. These concepts are crucial for building robust, scalable, and secure robotic systems for physical AI and humanoid robotics.
-
 ## Learning Objectives
 By the end of this chapter, you will be able to:
 - Implement advanced communication patterns including actions and services

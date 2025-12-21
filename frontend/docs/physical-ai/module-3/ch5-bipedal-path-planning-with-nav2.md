@@ -5,8 +5,6 @@ title: "Chapter 5: Bipedal Path Planning with Nav2"
 
 # Chapter 5: Bipedal Path Planning with Nav2
 
-## Summary
-This chapter covers path planning techniques specifically designed for bipedal humanoid robots using the ROS 2 Navigation Stack (Nav2), including specialized controllers and planners for legged locomotion.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:
@@ -539,3 +537,13 @@ graph TB
 - [Nav2 Documentation](https://navigation.ros.org/)
 - [Humanoid Navigation Research](https://ieeexplore.ieee.org/document/8206276)
 - [ROS 2 Navigation Tutorials](https://docs.ros.org/en/humble/Tutorials/Navigation.html)
+
+## Summary
+
+This chapter focused on configuring and implementing Nav2 (Navigation 2) for bipedal humanoid robot navigation, addressing the unique challenges that differ significantly from wheeled robot navigation. We explored the specific challenges of bipedal navigation including balance constraints requiring the center of mass to remain within the support polygon, precise foot placement for stable locomotion, kinematic constraints from limited joint ranges and gait patterns, dynamic stability management during movement, and terrain adaptation for uneven surfaces.
+
+We examined specialized path planning approaches for bipedal robots including footstep planning to calculate safe and stable foot placements, center of mass trajectory planning for balance, Zero Moment Point (ZMP) management to maintain stability within the support polygon, capture point planning for dynamic balance recovery, and gait selection appropriate for different terrains. The chapter detailed Nav2 components adapted for humanoid robots including global planners considering bipedal constraints, local planners for footstep adjustment and obstacle avoidance, humanoid-specific motion controllers, costmaps representing navigable space for legged robots, and specialized recovery behaviors.
+
+Practical examples included comprehensive Nav2 configuration for humanoid robots with parameters specifically tuned for bipedal navigation such as step length limits, foot separation distances, turning radius constraints, and obstacle clearance requirements. We implemented a humanoid controller with footstep planning algorithms that convert global paths into sequences of foot placements, considering the robot's balance and kinematic constraints. The chapter also covered ZMP-based path planning, which ensures that the Zero Moment Point remains within the support polygon throughout the robot's movement, critical for maintaining dynamic stability during navigation.
+
+The implementation addressed key bipedal-specific navigation parameters including stance duration, step height for swing phase, linear and angular velocity limits appropriate for walking gaits, and recovery behaviors designed for bipedal balance restoration. The chapter emphasized the importance of validating navigation performance for humanoid robots and understanding how to adapt the navigation stack to account for the unique dynamics and constraints of legged locomotion.

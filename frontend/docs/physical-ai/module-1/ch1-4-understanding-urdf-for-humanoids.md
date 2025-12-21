@@ -5,8 +5,6 @@ title: "Chapter 1.4: Understanding URDF (Unified Robot Description Format) for H
 
 # Chapter 1.4: Understanding URDF (Unified Robot Description Format) for Humanoids
 
-## Summary
-This chapter provides a comprehensive guide to creating and implementing Unified Robot Description Format (URDF) files specifically for humanoid robots. It covers the unique challenges and requirements of humanoid robot modeling, including bipedal locomotion, balance, and complex kinematic structures.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

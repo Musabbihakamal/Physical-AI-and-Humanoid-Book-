@@ -1,7 +1,7 @@
 {
   "name": "book-rag-agent-system",
   "version": "1.0.0",
-  "description": "A comprehensive AI system that includes specialized subagents for book generation, a RAG-based chatbot trained on book content and external knowledge, and a complete book generation system using AI subagents. The system supports writing, managing, and interacting with a complete technical book using AI capabilities.",
+  "description": "A comprehensive AI system with specialized subagents for book generation, a RAG-based chatbot, and educational tools for interactive learning.",
   "main": "index.js",
   "scripts": {
     "init": "bash scripts/initialize.sh",
@@ -16,13 +16,19 @@
     "build": "npm run docs",
     "deploy": "docker-compose up -d",
     "deploy:prod": "docker-compose -f docker-compose.prod.yml up -d",
+    "deploy:gh-pages": "cd frontend && npm run deploy",
     "logs": "docker-compose logs -f",
     "stop": "docker-compose down",
-    "restart": "docker-compose down && docker-compose up -d"
+    "restart": "docker-compose down && docker-compose up -d",
+    "setup-dev": "npm run setup && npm run backend & npm run frontend",
+    "build-all": "npm run build && npm run backend-build",
+    "docker-build": "docker-compose build",
+    "docker-up": "docker-compose up -d",
+    "docker-down": "docker-compose down"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book-.git"
+    "url": "git+https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book.git"
   },
   "keywords": [
     "ai",
@@ -36,12 +42,15 @@
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book-/issues"
+    "url": "https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book/issues"
   },
-  "homepage": "https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book-#readme",
+  "homepage": "https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book#readme",
   "devDependencies": {
     "concurrently": "^8.2.2",
     "gh-pages": "^6.3.0",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
   }
 }

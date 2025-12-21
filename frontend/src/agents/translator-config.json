@@ -1,0 +1,88 @@
+{
+  "translatorAgent": {
+    "name": "Urdu Translator Agent",
+    "version": "1.0.0",
+    "description": "An AI agent specialized in Urdu translation with constitutional compliance",
+    "apiConfig": {
+      "baseUrl": "https://api.example.com/translate",
+      "timeout": 10000,
+      "maxRetries": 3,
+      "retryDelay": 1000
+    },
+    "translationSettings": {
+      "supportedLanguages": [
+        "ur",
+        "en",
+        "hi",
+        "pa",
+        "bn",
+        "ar",
+        "ps"
+      ],
+      "defaultTargetLanguage": "ur",
+      "qualityThreshold": 0.8,
+      "contextAwareness": true
+    },
+    "constitutionalCompliance": {
+      "respectForDiversity": true,
+      "nonDiscrimination": true,
+      "truthfulness": true,
+      "ethicalStandards": true,
+      "culturalSensitivity": true,
+      "religiousRespect": true
+    },
+    "contentFilters": {
+      "discriminatoryTerms": [
+        "hate",
+        "discriminat",
+        "inferior",
+        "superior",
+        "non-democratic"
+      ],
+      "problematicContent": [
+        "anti-state",
+        "separatist",
+        "terrorist",
+        "communal violence"
+      ],
+      "profanityAction": "mask",
+      "sensitiveTopics": [
+        "politics",
+        "religion",
+        "ethnicity"
+      ]
+    },
+    "contextTypes": {
+      "legal": {
+        "preserveLegalTerminology": true,
+        "formalTone": true,
+        "constitutionalReference": true
+      },
+      "educational": {
+        "culturalSensitivity": true,
+        "ageAppropriate": true,
+        "educationalFocus": true
+      },
+      "religious": {
+        "culturalRespect": true,
+        "sacredTermHandling": true,
+        "contextPreservation": true
+      },
+      "technical": {
+        "terminologyConsistency": true,
+        "formalAccuracy": true,
+        "jargonPreservation": true
+      }
+    },
+    "performance": {
+      "maxTextLength": 10000,
+      "rateLimit": 10,
+      "requestsPerMinute": 60
+    },
+    "logging": {
+      "level": "info",
+      "enabled": true,
+      "auditTrail": true
+    }
+  }
+}

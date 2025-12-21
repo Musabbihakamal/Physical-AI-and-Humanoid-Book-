@@ -5,8 +5,6 @@ title: "Chapter 4: Unity Robotics Visualization"
 
 # Chapter 4: Unity Robotics Visualization
 
-## Summary
-This chapter covers Unity's role in robotics visualization, including the Unity Robotics Hub, ROS# integration, and how to create high-fidelity visualizations for humanoid robots.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:
@@ -319,3 +317,11 @@ graph TB
 - [Unity Robotics Hub](https://github.com/Unity-Technologies/Unity-Robotics-Hub)
 - [ROS# Documentation](https://github.com/siemens/ros-sharp)
 - [Unity Manual](https://docs.unity3d.com/Manual/index.html)
+
+## Summary
+
+This chapter covered Unity robotics visualization, which provides high-fidelity visualization for robotics applications with photorealistic rendering, VR/AR support, real-time simulation, and cross-platform deployment capabilities. We explored the Unity Robotics Hub, which offers utilities for robotics development, samples, documentation, and tools for visualization and debugging.
+
+We examined different approaches for ROS integration in Unity, including ROS# (native Unity-C# ROS bridge), ROS TCP Connector (generic TCP-based connector), custom bridges, and asset store packages. The chapter provided practical examples of Unity-ROS integration with code examples for connecting Unity to ROS, visualizing sensor data (LiDAR and camera feeds), and animating humanoid robots based on joint states from ROS.
+
+The visualization components covered included cameras for multiple viewpoints, sensor visualizations, markers for debugging, and interaction elements for user engagement. We also explored how Unity can be used for VR/AR robot teleoperation, creating immersive visualization experiences that enhance robot monitoring and control capabilities. The chapter emphasized the importance of creating realistic visualizations for humanoid robots and deploying Unity robotics applications across different platforms.

@@ -5,8 +5,6 @@ title: "Chapter 4: Training AI Models in Simulation"
 
 # Chapter 4: Training AI Models in Simulation
 
-## Summary
-This chapter covers training AI models for humanoid robotics using Isaac Sim and synthetic data generation, including reinforcement learning, imitation learning, and sim-to-real transfer techniques.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:
@@ -586,3 +584,15 @@ graph TB
 - [Isaac Sim Synthetic Data Generation](https://docs.omniverse.nvidia.com/isaacsim/latest/features/replicator.html)
 - [Isaac ROS Documentation](https://nvidia-isaac-ros.github.io/)
 - [Reinforcement Learning for Robotics](https://arxiv.org/abs/2002.00435)
+
+## Summary
+
+This chapter covered training AI models in simulation environments, specifically focusing on Isaac Sim for generating synthetic datasets and implementing various machine learning approaches for robotics. We explored the benefits of synthetic data generation including unlimited training samples, perfect ground truth annotations, infinite variety of lighting and textures, safety during training, and cost efficiency compared to real-world data collection.
+
+We examined domain randomization techniques crucial for sim-to-real transfer, including visual domain randomization (randomizing colors, textures, lighting), physical domain randomization (randomizing friction, mass, dynamics), geometric domain randomization (randomizing shapes, sizes, layouts), and temporal domain randomization (randomizing timing and delays). These techniques help bridge the reality gap between simulation and real-world environments.
+
+The chapter delved into reinforcement learning for robotics with focus on continuous action spaces using policy gradient methods, hierarchical RL for breaking complex tasks into sub-tasks, multi-agent RL for coordinating multiple robots, and curriculum learning for gradually increasing task complexity. We also covered imitation learning approaches including behavior cloning, inverse reinforcement learning, and generative adversarial imitation learning.
+
+Practical examples demonstrated using Isaac Sim's Python API for synthetic dataset generation with various annotators for RGB images, semantic segmentation, depth data, and bounding boxes. We explored reinforcement learning implementation with actor-critic networks and the Soft Actor-Critic (SAC) algorithm for continuous control. The chapter also covered Isaac ROS integration for deploying trained models to robots, showing how to implement inference nodes that process sensor data and generate actions for robot control.
+
+The chapter addressed sim-to-real transfer challenges including the reality gap, dynamics mismatch, sensor noise differences, and actuator delays, emphasizing the importance of domain randomization and validation in simulation before real-world deployment.

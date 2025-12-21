@@ -5,8 +5,6 @@ title: "Chapter 4: Multi-Modal Interaction"
 
 # Chapter 4: Multi-Modal Interaction
 
-## Summary
-This chapter covers multi-modal interaction systems that integrate speech, vision, and gesture for natural human-robot interaction, enabling more intuitive and effective communication with humanoid robots.
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:
@@ -984,3 +982,13 @@ graph TB
 - [Multi-Modal Interaction in HRI](https://ieeexplore.ieee.org/document/8957456)
 - [Social Signal Processing](https://link.springer.com/book/10.1007/978-3-030-46150-8)
 - [Attention Mechanisms in Robotics](https://arxiv.org/abs/2103.04934)
+
+## Summary
+
+This chapter focused on multi-modal interaction systems that combine multiple input and output modalities to create natural and intuitive human-robot interaction. The core modalities covered include speech (verbal communication and command input), vision (face recognition, gesture detection, emotion recognition), gesture (hand and body movement interpretation), touch (haptic feedback and tactile interaction), and context (environmental and situational awareness).
+
+The chapter explored different approaches to modalities integration: early fusion (combining raw inputs from different modalities), late fusion (combining processed information from each modality), intermediate fusion (partial processing followed by combination), and attention-based fusion (dynamically weighting modalities based on relevance). Each approach has trade-offs in terms of computational complexity, robustness, and real-time performance.
+
+Human-Robot Interaction (HRI) principles were emphasized, focusing on naturalness (interaction should feel intuitive), predictability (robot behavior should be predictable), feedback (clear responses to user actions), adaptivity (adapting to user preferences and abilities), and social norms (following social conventions). The chapter detailed attention mechanisms including selective attention (focusing on relevant stimuli), divided attention (processing multiple simultaneous inputs), sustained attention (maintaining focus over time), and orienting attention (directing attention to important events).
+
+Social signal processing techniques were covered, including facial expression recognition for emotion and intent detection, gaze tracking for understanding attention and intention, body language interpretation for posture and movement analysis, proxemics for personal space and distance preferences, and temporal coordination for turn-taking and timing. The practical implementations demonstrated multi-modal perception systems using MediaPipe for gesture recognition, face mesh analysis, and pose estimation. A multi-modal fusion engine was presented using neural networks to combine speech, vision, and gesture features with attention mechanisms. The chapter also included attention mechanism implementations for determining primary focus and appropriate responses based on multi-modal input, creating more natural and responsive human-robot interaction.
