@@ -22,10 +22,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
 
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@60edb5dd545a775a7e84f8e0e3d09d54f2a31d98
       with:
         node-version: '18'
         cache: 'npm'
@@ -44,13 +44,13 @@ jobs:
         NODE_ENV: production
 
     - name: Setup Pages
-      uses: actions/configure-pages@v4
+      uses: actions/configure-pages@983d773fb5d4549e0b0abc9f0fefcbee0d5a9f22
 
     - name: Upload to GitHub Pages
-      uses: actions/upload-pages-artifact@v3
+      uses: actions/upload-pages-artifact@57a0aa6d1e6f0bba8e012a4e9bca1eaf8a0d9ccc
       with:
         path: ./frontend/build
 
     - name: Deploy to GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v4
+      uses: actions/deploy-pages@d79dae45a9bd3e04b1ae6c9d7cbb0ed1ff7ba4d8
