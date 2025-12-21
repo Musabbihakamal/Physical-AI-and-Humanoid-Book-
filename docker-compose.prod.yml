@@ -59,7 +59,7 @@ services:
       postgres:
         condition: service_healthy
       qdrant:
-        condition: service_started
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]

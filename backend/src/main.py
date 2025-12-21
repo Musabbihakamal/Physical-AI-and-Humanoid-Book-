@@ -31,11 +31,13 @@ def main():
     validate_api_keys(logger)
 
     # Run the application
+    import os
+    reload_option = os.getenv("RELOAD", "False").lower() == "true"
     uvicorn.run(
         "backend.src.api.main:app",
         host="0.0.0.0",
         port=8000,
-        reload=True,  # Set to False in production
+        reload=reload_option,
         log_level="info"
     )
 

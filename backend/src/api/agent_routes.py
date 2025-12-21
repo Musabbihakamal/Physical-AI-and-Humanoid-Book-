@@ -380,7 +380,7 @@ async def get_request_status(
     Get the status of an agent request.
     """
     try:
-        # Validate UUID format
+        # Validate UUID format first
         try:
             uuid.UUID(request_id)
         except ValueError:
@@ -430,6 +430,9 @@ async def get_request_status(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={"message": e.message, "field": e.field}
         )
+    except HTTPException:
+        # Re-raise HTTP exceptions (like 404, 403) to maintain proper status codes
+        raise
     except Exception as e:
         logger.error(f"Error getting request status: {str(e)}", exc_info=True)
         raise HTTPException(

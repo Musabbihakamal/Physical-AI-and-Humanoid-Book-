@@ -34,6 +34,21 @@ def authenticated_client():
     """
     test_client = TestClient(app)
 
-    # Since we can't easily create users due to bcrypt issues in tests,
-    # we'll just return the client and modify tests to expect appropriate responses
+    # Add a fake authorization header to trigger the authentication flow
+    # The actual authentication will be bypassed in test mode via the auth_dependencies
+    original_request = test_client.request
+    def patched_request(method, url, **kwargs):
+        # Add the Authorization header to trigger the authentication flow
+        if 'headers' not in kwargs:
+            kwargs['headers'] = {}
+        # Use a fake token - the actual validation will be bypassed in test mode
+        kwargs['headers']['Authorization'] = f'Bearer fake-test-token'
+        return original_request(method, url, **kwargs)
+
+    test_client.request = patched_request
+    test_client.get = lambda url, **kwargs: patched_request('GET', url, **kwargs)
+    test_client.post = lambda url, **kwargs: patched_request('POST', url, **kwargs)
+    test_client.put = lambda url, **kwargs: patched_request('PUT', url, **kwargs)
+    test_client.delete = lambda url, **kwargs: patched_request('DELETE', url, **kwargs)
+
     return test_client

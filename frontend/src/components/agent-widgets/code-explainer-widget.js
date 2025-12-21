@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import ApiService from '../../services/api';
-import { trackCodeExplanation, trackError } from '../../services/analytics';
+import getApiService from '../../services/api';
 import './code-explainer-widget.css';
 
 const CodeExplainerWidget = ({ code }) => {
@@ -11,10 +10,13 @@ const CodeExplainerWidget = ({ code }) => {
   const explainCode = async () => {
     if (!code) {
       setError('No code provided for explanation');
-      trackError(new Error('No code provided for explanation'), {
-        component: 'CodeExplainerWidget',
-        action: 'explainCode'
-      });
+      if (typeof window !== 'undefined') {
+        const { trackError } = await import('../../services/analytics');
+        trackError(new Error('No code provided for explanation'), {
+          component: 'CodeExplainerWidget',
+          action: 'explainCode'
+        });
+      }
       return;
     }
 
@@ -23,12 +25,16 @@ const CodeExplainerWidget = ({ code }) => {
 
     try {
       // Track the code explanation request
-      trackCodeExplanation({
-        code_length: code.length,
-        trigger: 'widget_button_click'
-      });
+      if (typeof window !== 'undefined') {
+        const { trackCodeExplanation } = await import('../../services/analytics');
+        trackCodeExplanation({
+          code_length: code.length,
+          trigger: 'widget_button_click'
+        });
+      }
 
-      const response = await ApiService.explainCode(code);
+      const apiService = getApiService(); // Get the API service instance
+      const response = await apiService.explainCode(code);
 
       // In a real implementation, we would get the explanation data from the response
       // For now, we'll simulate polling for the result
@@ -37,7 +43,8 @@ const CodeExplainerWidget = ({ code }) => {
       // Simulate polling for the result
       const pollForResult = async () => {
         try {
-          const statusResponse = await ApiService.getRequestStatus(requestId);
+          const apiService = getApiService(); // Get the API service instance
+          const statusResponse = await apiService.getRequestStatus(requestId);
           if (statusResponse.status === 'COMPLETED') {
             // In a real implementation, we would fetch the actual generated content
             // For now, we'll simulate a response
@@ -56,20 +63,26 @@ const CodeExplainerWidget = ({ code }) => {
             setLoading(false);
 
             // Track successful completion
-            trackCodeExplanation({
-              status: 'success',
-              request_id: requestId,
-              components_count: mockExplanation.key_components.length
-            });
+            if (typeof window !== 'undefined') {
+              const { trackCodeExplanation } = await import('../../services/analytics');
+              trackCodeExplanation({
+                status: 'success',
+                request_id: requestId,
+                components_count: mockExplanation.key_components.length
+              });
+            }
           } else if (statusResponse.status === 'FAILED') {
             setError('Code explanation failed');
             setLoading(false);
 
             // Track failure
-            trackCodeExplanation({
-              status: 'failed',
-              request_id: requestId
-            });
+            if (typeof window !== 'undefined') {
+              const { trackCodeExplanation } = await import('../../services/analytics');
+              trackCodeExplanation({
+                status: 'failed',
+                request_id: requestId
+              });
+            }
           } else {
             // Still processing, check again in 2 seconds
             setTimeout(pollForResult, 2000);
@@ -79,11 +92,14 @@ const CodeExplainerWidget = ({ code }) => {
           setLoading(false);
 
           // Track error
-          trackError(err, {
-            component: 'CodeExplainerWidget',
-            action: 'pollForResult',
-            request_id: requestId
-          });
+          if (typeof window !== 'undefined') {
+            const { trackError } = await import('../../services/analytics');
+            trackError(err, {
+              component: 'CodeExplainerWidget',
+              action: 'pollForResult',
+              request_id: requestId
+            });
+          }
         }
       };
 
@@ -94,10 +110,13 @@ const CodeExplainerWidget = ({ code }) => {
       setLoading(false);
 
       // Track error
-      trackError(err, {
-        component: 'CodeExplainerWidget',
-        action: 'explainCode'
-      });
+      if (typeof window !== 'undefined') {
+        const { trackError } = await import('../../services/analytics');
+        trackError(err, {
+          component: 'CodeExplainerWidget',
+          action: 'explainCode'
+        });
+      }
     }
   };
 

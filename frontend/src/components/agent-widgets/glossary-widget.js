@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import ApiService from '../../services/api';
-import { trackGlossaryGeneration, trackError } from '../../services/analytics';
+import getApiService from '../../services/api';
 import './glossary-widget.css';
 
 const GlossaryWidget = ({ content }) => {
@@ -11,10 +10,13 @@ const GlossaryWidget = ({ content }) => {
   const generateGlossary = async () => {
     if (!content) {
       setError('No content provided for glossary generation');
-      trackError(new Error('No content provided for glossary generation'), {
-        component: 'GlossaryWidget',
-        action: 'generateGlossary'
-      });
+      if (typeof window !== 'undefined') {
+        const { trackError } = await import('../../services/analytics');
+        trackError(new Error('No content provided for glossary generation'), {
+          component: 'GlossaryWidget',
+          action: 'generateGlossary'
+        });
+      }
       return;
     }
 
@@ -23,12 +25,16 @@ const GlossaryWidget = ({ content }) => {
 
     try {
       // Track the glossary generation request
-      trackGlossaryGeneration({
-        content_length: content.length,
-        trigger: 'widget_button_click'
-      });
+      if (typeof window !== 'undefined') {
+        const { trackGlossaryGeneration } = await import('../../services/analytics');
+        trackGlossaryGeneration({
+          content_length: content.length,
+          trigger: 'widget_button_click'
+        });
+      }
 
-      const response = await ApiService.createGlossary(content);
+      const apiService = getApiService(); // Get the API service instance
+      const response = await apiService.createGlossary(content);
 
       // In a real implementation, we would get the glossary data from the response
       // For now, we'll simulate polling for the result
@@ -37,7 +43,8 @@ const GlossaryWidget = ({ content }) => {
       // Simulate polling for the result
       const pollForResult = async () => {
         try {
-          const statusResponse = await ApiService.getRequestStatus(requestId);
+          const apiService = getApiService(); // Get the API service instance
+          const statusResponse = await apiService.getRequestStatus(requestId);
           if (statusResponse.status === 'COMPLETED') {
             // In a real implementation, we would fetch the actual generated content
             // For now, we'll simulate a response
@@ -53,20 +60,26 @@ const GlossaryWidget = ({ content }) => {
             setLoading(false);
 
             // Track successful completion
-            trackGlossaryGeneration({
-              status: 'success',
-              request_id: requestId,
-              entries_count: mockGlossary.entries.length
-            });
+            if (typeof window !== 'undefined') {
+              const { trackGlossaryGeneration } = await import('../../services/analytics');
+              trackGlossaryGeneration({
+                status: 'success',
+                request_id: requestId,
+                entries_count: mockGlossary.entries.length
+              });
+            }
           } else if (statusResponse.status === 'FAILED') {
             setError('Glossary generation failed');
             setLoading(false);
 
             // Track failure
-            trackGlossaryGeneration({
-              status: 'failed',
-              request_id: requestId
-            });
+            if (typeof window !== 'undefined') {
+              const { trackGlossaryGeneration } = await import('../../services/analytics');
+              trackGlossaryGeneration({
+                status: 'failed',
+                request_id: requestId
+              });
+            }
           } else {
             // Still processing, check again in 2 seconds
             setTimeout(pollForResult, 2000);
@@ -76,11 +89,14 @@ const GlossaryWidget = ({ content }) => {
           setLoading(false);
 
           // Track error
-          trackError(err, {
-            component: 'GlossaryWidget',
-            action: 'pollForResult',
-            request_id: requestId
-          });
+          if (typeof window !== 'undefined') {
+            const { trackError } = await import('../../services/analytics');
+            trackError(err, {
+              component: 'GlossaryWidget',
+              action: 'pollForResult',
+              request_id: requestId
+            });
+          }
         }
       };
 
@@ -91,10 +107,13 @@ const GlossaryWidget = ({ content }) => {
       setLoading(false);
 
       // Track error
-      trackError(err, {
-        component: 'GlossaryWidget',
-        action: 'generateGlossary'
-      });
+      if (typeof window !== 'undefined') {
+        const { trackError } = await import('../../services/analytics');
+        trackError(err, {
+          component: 'GlossaryWidget',
+          action: 'generateGlossary'
+        });
+      }
     }
   };
 

@@ -271,4 +271,14 @@ class ApiService {
   }
 }
 
-export default new ApiService();
+// Create API service instance lazily to avoid SSR issues during module initialization
+let apiServiceInstance = null;
+
+const getApiService = () => {
+  if (!apiServiceInstance) {
+    apiServiceInstance = new ApiService();
+  }
+  return apiServiceInstance;
+};
+
+export default getApiService;

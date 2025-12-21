@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import BrowserOnly from '@docusaurus/BrowserOnly';
 import GlossaryWidget from '../agent-widgets/glossary-widget';
 import CodeExplainerWidget from '../agent-widgets/code-explainer-widget';
 import QuizWidget from '../agent-widgets/quiz-widget';
@@ -86,7 +87,9 @@ const BookContent = ({ content }) => {
               ×
             </button>
           </div>
-          <GlossaryWidget content={persistedGlossaryContent} />
+          <BrowserOnly>
+            {() => <GlossaryWidget content={persistedGlossaryContent} />}
+          </BrowserOnly>
         </div>
       )}
 
@@ -101,13 +104,19 @@ const BookContent = ({ content }) => {
               ×
             </button>
           </div>
-          <CodeExplainerWidget code={persistedCodeContent} />
+          <BrowserOnly>
+            {() => <CodeExplainerWidget code={persistedCodeContent} />}
+          </BrowserOnly>
         </div>
       )}
 
-      <div className="standalone-widgets">
-        <QuizWidget />
-      </div>
+      {isClient && (
+        <div className="standalone-widgets">
+          <BrowserOnly>
+            {() => <QuizWidget />}
+          </BrowserOnly>
+        </div>
+      )}
     </div>
   );
 };

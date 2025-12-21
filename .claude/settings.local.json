@@ -129,7 +129,12 @@
       "Bash(del \"D:\\\\PROJECT\\\\HACKATHON 1\\\\frontend\\\\src\\\\components\\\\TranslateButton\\\\*.*\")",
       "Bash(dir \"D:\\\\PROJECT\\\\HACKATHON 1\\\\frontend\\\\static\" /s)",
       "Bash(dir \"D:\\\\PROJECT\\\\HACKATHON 1\\\\frontend\\\\static\\\\img\")",
-      "Bash(dir \"D:\\\\PROJECT\\\\HACKATHON 1\\\\.github\\\\workflows\" /b)"
+      "Bash(dir \"D:\\\\PROJECT\\\\HACKATHON 1\\\\.github\\\\workflows\" /b)",
+      "Bash(find . -name \"*.js\" -type f -exec grep -l \"analytics\" {} ;)",
+      "Bash(python -c \"\nfrom tests.conftest import authenticated_client\nfrom src.models.user import User\nfrom src.api.auth_dependencies import get_current_active_user\nimport inspect\n\n# Check if the patching is working\nprint\\(''Checking if patching is working...''\\)\nprint\\(''get_current_active_user function:'', get_current_active_user\\)\nprint\\(''Function signature:'', inspect.signature\\(get_current_active_user\\)\\)\n\")",
+      "Bash(npx docusaurus build -- --localstorage-file ./localStorage.json)",
+      "Bash(find frontend -name \"*.js\" -exec grep -l \"AuthProvider\\\\|AuthContext\" {} ;)",
+      "Bash(npx docusaurus --help:*)"
     ]
   }
 }

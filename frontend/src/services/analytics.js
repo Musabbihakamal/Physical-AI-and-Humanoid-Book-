@@ -6,7 +6,8 @@ class AnalyticsService {
     this.isEnabled = getEnvVar('REACT_APP_ANALYTICS_ENABLED', 'false') === 'true';
     this.apiKey = getEnvVar('REACT_APP_ANALYTICS_API_KEY', '');
     this.endpoint = getEnvVar('REACT_APP_ANALYTICS_ENDPOINT', '/api/analytics');
-    this.userId = this.generateUserId();
+    // Don't generate userId in constructor - it will be generated when needed
+    this.userId = null;
   }
 
   // Generate a unique user ID for tracking
@@ -14,16 +15,29 @@ class AnalyticsService {
     // Try to get from localStorage, otherwise generate a new one
     let userId = null;
     if (typeof window !== 'undefined') {
-      userId = localStorage.getItem('userId');
-      if (!userId) {
+      try {
+        userId = localStorage.getItem('userId');
+        if (!userId) {
+          userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+          localStorage.setItem('userId', userId);
+        }
+      } catch (error) {
+        // Handle localStorage errors (e.g., when it's not available in SSR)
         userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('userId', userId);
       }
     } else {
       // For server-side rendering, generate a temporary ID
       userId = 'ssr_user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
     return userId;
+  }
+
+  // Get user ID, generating it if needed
+  getUserId() {
+    if (!this.userId) {
+      this.userId = this.generateUserId();
+    }
+    return this.userId;
   }
 
   // Track an event
@@ -34,13 +48,13 @@ class AnalyticsService {
 
     try {
       const event = {
-        userId: this.userId,
+        userId: this.getUserId(),
         eventName,
         properties: {
           ...properties,
           timestamp: new Date().toISOString(),
-          userAgent: navigator.userAgent,
-          url: window.location.href,
+          userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'SSR',
+          url: typeof window !== 'undefined' ? window.location.href : 'SSR',
         },
         timestamp: new Date().toISOString(),
       };
@@ -142,14 +156,47 @@ class AnalyticsService {
   }
 }
 
-// Create and export a global analytics instance
-const analytics = new AnalyticsService();
-export default analytics;
+// Create analytics instance lazily and only in browser to avoid SSR issues
+let analyticsInstance = null;
 
-// Export individual tracking functions
-export const trackSubagentUsage = analytics.trackSubagentUsage.bind(analytics);
-export const trackGlossaryGeneration = analytics.trackGlossaryGeneration.bind(analytics);
-export const trackCodeExplanation = analytics.trackCodeExplanation.bind(analytics);
-export const trackQuizCreation = analytics.trackQuizCreation.bind(analytics);
-export const trackUserInteraction = analytics.trackUserInteraction.bind(analytics);
-export const trackError = analytics.trackError.bind(analytics);
+const getAnalytics = () => {
+  // Only create instance in browser environment
+  if (typeof window !== 'undefined' && !analyticsInstance) {
+    analyticsInstance = new AnalyticsService();
+  }
+  return analyticsInstance;
+};
+
+// Export individual tracking functions that only work in browser
+export const trackSubagentUsage = (...args) => {
+  const analytics = getAnalytics();
+  return analytics ? analytics.trackSubagentUsage(...args) : null;
+};
+
+export const trackGlossaryGeneration = (...args) => {
+  const analytics = getAnalytics();
+  return analytics ? analytics.trackGlossaryGeneration(...args) : null;
+};
+
+export const trackCodeExplanation = (...args) => {
+  const analytics = getAnalytics();
+  return analytics ? analytics.trackCodeExplanation(...args) : null;
+};
+
+export const trackQuizCreation = (...args) => {
+  const analytics = getAnalytics();
+  return analytics ? analytics.trackQuizCreation(...args) : null;
+};
+
+export const trackUserInteraction = (...args) => {
+  const analytics = getAnalytics();
+  return analytics ? analytics.trackUserInteraction(...args) : null;
+};
+
+export const trackError = (...args) => {
+  const analytics = getAnalytics();
+  return analytics ? analytics.trackError(...args) : null;
+};
+
+// Also export the analytics service for direct use
+export default getAnalytics;

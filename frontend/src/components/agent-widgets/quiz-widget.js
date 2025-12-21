@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import ApiService from '../../services/api';
-import { trackQuizCreation, trackError } from '../../services/analytics';
+import getApiService from '../../services/api';
 import './quiz-widget.css';
 
 const QuizWidget = ({ content }) => {
@@ -13,10 +12,13 @@ const QuizWidget = ({ content }) => {
   const generateQuiz = async (quizContent = content) => {
     if (!quizContent) {
       setError('No content provided for quiz generation');
-      trackError(new Error('No content provided for quiz generation'), {
-        component: 'QuizWidget',
-        action: 'generateQuiz'
-      });
+      if (typeof window !== 'undefined') {
+        const { trackError } = await import('../../services/analytics');
+        trackError(new Error('No content provided for quiz generation'), {
+          component: 'QuizWidget',
+          action: 'generateQuiz'
+        });
+      }
       return;
     }
 
@@ -25,12 +27,16 @@ const QuizWidget = ({ content }) => {
 
     try {
       // Track the quiz creation request
-      trackQuizCreation({
-        content_length: quizContent.length,
-        trigger: 'widget_button_click'
-      });
+      if (typeof window !== 'undefined') {
+        const { trackQuizCreation } = await import('../../services/analytics');
+        trackQuizCreation({
+          content_length: quizContent.length,
+          trigger: 'widget_button_click'
+        });
+      }
 
-      const response = await ApiService.createQuiz(quizContent);
+      const apiService = getApiService(); // Get the API service instance
+      const response = await apiService.createQuiz(quizContent);
 
       // In a real implementation, we would get the quiz data from the response
       // For now, we'll simulate polling for the result
@@ -39,7 +45,8 @@ const QuizWidget = ({ content }) => {
       // Simulate polling for the result
       const pollForResult = async () => {
         try {
-          const statusResponse = await ApiService.getRequestStatus(requestId);
+          const apiService = getApiService(); // Get the API service instance
+          const statusResponse = await apiService.getRequestStatus(requestId);
           if (statusResponse.status === 'COMPLETED') {
             // In a real implementation, we would fetch the actual generated content
             // For now, we'll simulate a response
@@ -76,20 +83,26 @@ const QuizWidget = ({ content }) => {
             setUserAnswers(new Array(mockQuiz.questions.multiple_choice.length, null));
 
             // Track successful completion
-            trackQuizCreation({
-              status: 'success',
-              request_id: requestId,
-              questions_count: mockQuiz.questions.multiple_choice.length + mockQuiz.questions.short_answer.length
-            });
+            if (typeof window !== 'undefined') {
+              const { trackQuizCreation } = await import('../../services/analytics');
+              trackQuizCreation({
+                status: 'success',
+                request_id: requestId,
+                questions_count: mockQuiz.questions.multiple_choice.length + mockQuiz.questions.short_answer.length
+              });
+            }
           } else if (statusResponse.status === 'FAILED') {
             setError('Quiz generation failed');
             setLoading(false);
 
             // Track failure
-            trackQuizCreation({
-              status: 'failed',
-              request_id: requestId
-            });
+            if (typeof window !== 'undefined') {
+              const { trackQuizCreation } = await import('../../services/analytics');
+              trackQuizCreation({
+                status: 'failed',
+                request_id: requestId
+              });
+            }
           } else {
             // Still processing, check again in 2 seconds
             setTimeout(pollForResult, 2000);
@@ -99,11 +112,14 @@ const QuizWidget = ({ content }) => {
           setLoading(false);
 
           // Track error
-          trackError(err, {
-            component: 'QuizWidget',
-            action: 'pollForResult',
-            request_id: requestId
-          });
+          if (typeof window !== 'undefined') {
+            const { trackError } = await import('../../services/analytics');
+            trackError(err, {
+              component: 'QuizWidget',
+              action: 'pollForResult',
+              request_id: requestId
+            });
+          }
         }
       };
 
@@ -114,10 +130,13 @@ const QuizWidget = ({ content }) => {
       setLoading(false);
 
       // Track error
-      trackError(err, {
-        component: 'QuizWidget',
-        action: 'generateQuiz'
-      });
+      if (typeof window !== 'undefined') {
+        const { trackError } = await import('../../services/analytics');
+        trackError(err, {
+          component: 'QuizWidget',
+          action: 'generateQuiz'
+        });
+      }
     }
   };
 

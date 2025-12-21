@@ -178,6 +178,11 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
 
   // Function to translate content using Google Translate API
   const translateText = async (text, targetLang) => {
+    // Check if we're in the browser environment
+    if (typeof window === 'undefined' || !isClient) {
+      throw new Error('Translation can only be performed in the browser.');
+    }
+
     if (!window.google || !window.google.translate) {
       throw new Error('Google Translate API is not loaded. Please refresh the page.');
     }
@@ -335,6 +340,11 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
 
   // Alternative method using Google Translate API directly
   const translateTextDirect = async (text, targetLang) => {
+    // Check if we're in the browser environment
+    if (typeof window === 'undefined' || !isClient) {
+      throw new Error('Translation can only be performed in the browser.');
+    }
+
     if (!translatorReady) {
       throw new Error('Translation service is not ready. Please refresh the page.');
     }
@@ -423,6 +433,12 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
   };
 
   const handleTranslate = async () => {
+    // Check if we're in the browser environment
+    if (typeof window === 'undefined' || !isClient) {
+      setTranslationError('Translation can only be performed in the browser.');
+      return;
+    }
+
     // Check if translator service is ready before attempting translation
     if (!translatorReady) {
       setTranslationError('Translation service not ready. Please refresh the page.');
@@ -523,7 +539,7 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
   // Clean up on component unmount
   useEffect(() => {
     return () => {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && isClient) {
         // Reset translation state when component unmounts if we're in translated state
         if (currentLang === 'ur' && setTranslatedContent && setIsTranslated) {
           setTranslatedContent(null);
@@ -535,28 +551,38 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
 
   return (
     <div className={styles.translateContainer}>
-      <button
-        className={`${styles.translateButton} ${isTranslating ? styles.loading : ''}`}
-        onClick={handleTranslate}
-        disabled={isTranslating || !translatorReady}
-        title={currentLang === 'en' ? 'Translate this chapter to Urdu' : 'Switch back to English'}
-      >
-        {!translatorReady ? (
-          <>
-            <span className={styles.spinner}></span>
-            Initializing...
-          </>
-        ) : isTranslating ? (
-          <>
-            <span className={styles.spinner}></span>
-            Translating...
-          </>
-        ) : currentLang === 'en' ? (
-          '.Translate to Urdu'
-        ) : (
-          'Switch to English'
-        )}
-      </button>
+      {isClient ? (
+        <button
+          className={`${styles.translateButton} ${isTranslating ? styles.loading : ''}`}
+          onClick={handleTranslate}
+          disabled={isTranslating || !translatorReady}
+          title={currentLang === 'en' ? 'Translate this chapter to Urdu' : 'Switch back to English'}
+        >
+          {!translatorReady ? (
+            <>
+              <span className={styles.spinner}></span>
+              Initializing...
+            </>
+          ) : isTranslating ? (
+            <>
+              <span className={styles.spinner}></span>
+              Translating...
+            </>
+          ) : currentLang === 'en' ? (
+            '.Translate to Urdu'
+          ) : (
+            'Switch to English'
+          )}
+        </button>
+      ) : (
+        <button
+          className={styles.translateButton}
+          disabled={true}
+          title="Translation service initializing..."
+        >
+          Loading...
+        </button>
+      )}
 
       {translationError && (
         <div className={styles.translationError}>
@@ -564,13 +590,13 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
         </div>
       )}
 
-      {currentLang === 'ur' && !isTranslating && !translationError && translatorReady && (
+      {isClient && currentLang === 'ur' && !isTranslating && !translationError && translatorReady && (
         <div className={styles.translationNotice}>
           Content translated to Urdu
         </div>
       )}
 
-      {currentLang === 'en' && !isTranslating && !translationError && translatorReady && (
+      {isClient && currentLang === 'en' && !isTranslating && !translationError && translatorReady && (
         <div className={styles.translationNotice}>
           Showing content in English
         </div>

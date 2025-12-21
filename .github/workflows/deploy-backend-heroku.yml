@@ -28,7 +28,7 @@ jobs:
         heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
         heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
         heroku_email: ${{ secrets.HEROKU_EMAIL }}
-        healthcheck: 'https://your-app-name.herokuapp.com/health'
+        healthcheck: https://${{ secrets.HEROKU_APP_NAME }}.herokuapp.com/health
         rollback-on-healthcheck-failure: true
       env:
         HD_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
