@@ -30,10 +30,11 @@ jobs:
         heroku_email: ${{ secrets.HEROKU_EMAIL }}
         healthcheck: https://${{ secrets.HEROKU_APP_NAME }}.herokuapp.com/health
         rollback-on-healthcheck-failure: true
+        appdir: 'backend'
       env:
-        HD_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        HD_QDRANT_URL: ${{ secrets.QDRANT_URL }}
-        HD_QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
-        HD_DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        HD_SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        HD_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        QDRANT_URL: ${{ secrets.QDRANT_URL }}
+        QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}

@@ -12,6 +12,21 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    # The actual deployment happens through Render's webhook integration
+    # This step just confirms that the code is ready for Render deployment
+    - name: Verify project structure
+      run: |
+        if [ ! -f "backend/requirements.txt" ]; then
+          echo "Error: backend/requirements.txt not found"
+          exit 1
+        fi
+        if [ ! -f "render.yaml" ]; then
+          echo "Error: render.yaml not found"
+          exit 1
+        fi
+        echo "Project structure verified"
+
+    # Trigger Render deployment via API
     - name: Deploy to Render
       uses: johnbeynon/render-deploy-action@v0.8
       with:

@@ -19,10 +19,18 @@ def main():
     Main function to run the FastAPI application.
     """
     # Set up logging
-    setup_logging(
-        log_level=settings.LOG_LEVEL if hasattr(settings, 'LOG_LEVEL') else 'INFO',
-        log_file="app.log"
-    )
+    # On Heroku, avoid file logging due to ephemeral filesystem
+    import os
+    if os.getenv("DYNO"):  # DYNO is set on Heroku
+        setup_logging(
+            log_level=settings.LOG_LEVEL if hasattr(settings, 'LOG_LEVEL') else 'INFO',
+            log_file=None  # Don't write to file on Heroku, use console only
+        )
+    else:
+        setup_logging(
+            log_level=settings.LOG_LEVEL if hasattr(settings, 'LOG_LEVEL') else 'INFO',
+            log_file="app.log"
+        )
 
     logger = logging.getLogger(__name__)
     logger.info("Starting Book + RAG Bot + Multi-Agent System backend...")
@@ -33,10 +41,11 @@ def main():
     # Run the application
     import os
     reload_option = os.getenv("RELOAD", "False").lower() == "true"
+    port = int(os.getenv("PORT", 8000))  # Use PORT from environment, default to 8000
     uvicorn.run(
         "backend.src.api.main:app",
         host="0.0.0.0",
-        port=8000,
+        port=port,
         reload=reload_option,
         log_level="info"
     )

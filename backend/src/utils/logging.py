@@ -13,24 +13,12 @@ def setup_logging(log_level: str = "INFO", log_file: str = "app.log"):
 
     Args:
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-        log_file: Path to the log file
+        log_file: Path to the log file (set to None to disable file logging)
     """
-    # Create logs directory if it doesn't exist
-    log_dir = Path("logs")
-    log_dir.mkdir(exist_ok=True)
-
     # Create formatter
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-
-    # Create file handler with rotation
-    file_handler = RotatingFileHandler(
-        log_dir / log_file,
-        maxBytes=10 * 1024 * 1024,  # 10MB
-        backupCount=5
-    )
-    file_handler.setFormatter(formatter)
 
     # Create console handler
     console_handler = logging.StreamHandler(sys.stdout)
@@ -40,9 +28,25 @@ def setup_logging(log_level: str = "INFO", log_file: str = "app.log"):
     root_logger = logging.getLogger()
     root_logger.setLevel(getattr(logging, log_level.upper()))
 
-    # Add handlers to root logger
-    root_logger.addHandler(file_handler)
+    # Add console handler to root logger
     root_logger.addHandler(console_handler)
+
+    # Add file handler only if log_file is specified
+    if log_file is not None:
+        # Create logs directory if it doesn't exist
+        log_dir = Path("logs")
+        log_dir.mkdir(exist_ok=True)
+
+        # Create file handler with rotation
+        file_handler = RotatingFileHandler(
+            log_dir / log_file,
+            maxBytes=10 * 1024 * 1024,  # 10MB
+            backupCount=5
+        )
+        file_handler.setFormatter(formatter)
+
+        # Add file handler to root logger
+        root_logger.addHandler(file_handler)
 
     # Set specific log levels for libraries to reduce noise
     logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
