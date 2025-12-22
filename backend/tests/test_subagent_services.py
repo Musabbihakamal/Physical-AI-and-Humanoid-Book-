@@ -1,6 +1,6 @@
 """
-Tests for all subagent services in the multi-agent book generation system.
-This includes Glossary Maker, Code Explainer, Quiz Creator, and Chapter Generator services.
+Tests for subagent services in the multi-agent book generation system.
+This includes Code Explainer and Chapter Generator services.
 """
 import pytest
 import asyncio
@@ -17,9 +17,7 @@ sys.path.insert(0, project_root)
 sys.path.insert(0, src_dir)
 
 # Import using absolute paths from the src directory
-from src.services.glossary_service import GlossaryService
 from src.services.code_explainer_service import CodeExplainerService
-from src.services.quiz_service import QuizService
 
 
 @pytest.fixture
@@ -38,62 +36,6 @@ def mock_user_profile():
         "learning_goals": ["learn ROS 2", "understand AI concepts"],
         "hardware_access": ["simulation", "cloud"]
     }
-
-
-class TestGlossaryService:
-    """Tests for the Glossary Maker service"""
-
-    @pytest.mark.asyncio
-    async def test_extract_terms_basic(self):
-        """Test basic term extraction functionality"""
-        chapter_content = """
-        This chapter discusses ROS 2 Nodes, Publishers, and Subscribers.
-        The Node is the fundamental unit of computation in ROS 2.
-        Publishers send messages to Topics, while Subscribers receive them.
-        Also covers API_ROS and other technical constants.
-        """
-
-        extracted_terms = await GlossaryService.term_extraction(chapter_content)
-
-        assert isinstance(extracted_terms, list)
-        assert len(extracted_terms) > 0
-
-        # Check that important capitalized terms are extracted (function looks for capitalized words)
-        term_texts = [term.lower() for term in extracted_terms]
-        assert any('node' in t for t in term_texts) or any(t == 'nodes' for t in term_texts)
-        assert any('publisher' in t for t in term_texts) or any(t == 'publishers' for t in term_texts)
-        assert any('topic' in t for t in term_texts) or any(t == 'topics' for t in term_texts)
-
-    @pytest.mark.asyncio
-    async def test_generate_term_definitions(self):
-        """Test term definition generation"""
-        terms = [
-            "node",
-            "publisher"
-        ]
-        content_context = "ROS 2 node is the fundamental unit, publisher sends messages"
-
-        defined_terms = await GlossaryService.term_definition_generation(terms, content_context)
-
-        assert isinstance(defined_terms, dict)
-        assert len(defined_terms) == len(terms)
-
-        for term, definition in defined_terms.items():
-            assert isinstance(term, str)
-            assert isinstance(definition, str)
-
-    @pytest.mark.asyncio
-    async def test_create_glossary_content(self):
-        """Test glossary content creation"""
-        # For this test, we'll check that the method exists and can be called
-        # Since it requires a database session, we'll just verify the method exists
-        # and that it properly handles the term extraction part
-        content = "This chapter discusses ROS 2 Nodes and Publishers."
-        terms = await GlossaryService.term_extraction(content)
-
-        assert isinstance(terms, list)
-        # Verify that the term extraction (the main functionality) works
-        assert len(terms) >= 0  # Can be 0 but should not error
 
 
 class TestCodeExplainerService:
@@ -161,69 +103,10 @@ class TestCodeExplainerService:
         assert isinstance(explanation["highlights"], dict)
 
 
-class TestQuizService:
-    """Tests for the Quiz Creator service"""
-
-    @pytest.mark.asyncio
-    async def test_generate_mcq_questions(self):
-        """Test MCQ question generation"""
-        chapter_content = "This chapter covers ROS 2 nodes. A node is a fundamental unit of computation."
-        difficulty = "MEDIUM"
-        experience_level = "BEGINNER"
-
-        mcq_questions = QuizService._generate_mcq_questions(chapter_content, difficulty, experience_level)
-
-        assert isinstance(mcq_questions, list)
-        assert len(mcq_questions) >= 0  # Can be 0, but should not error
-
-    @pytest.mark.asyncio
-    async def test_generate_short_answer_questions(self):
-        """Test short answer question generation"""
-        chapter_content = "ROS 2 uses a publish-subscribe communication model."
-        difficulty = "MEDIUM"
-        experience_level = "INTERMEDIATE"
-
-        sa_questions = QuizService._generate_short_answer_questions(chapter_content, difficulty, experience_level)
-
-        assert isinstance(sa_questions, list)
-        assert len(sa_questions) >= 0  # Can be 0, but should not error
-
-    @pytest.mark.asyncio
-    async def test_generate_coding_exercises(self):
-        """Test coding exercise generation"""
-        chapter_content = "This chapter covers basic Python programming for robotics."
-        difficulty = "MEDIUM"
-        experience_level = "INTERMEDIATE"
-
-        coding_exercises = QuizService._generate_coding_exercises(chapter_content, difficulty, experience_level)
-
-        assert isinstance(coding_exercises, list)
-        assert len(coding_exercises) >= 0  # Can be 0, but should not error
-
-
 
 
 class TestIntegration:
     """Integration tests for subagent services"""
-
-    @pytest.mark.asyncio
-    async def test_glossary_service_integration(self):
-        """Test glossary service integration"""
-        chapter_content = """
-        A ROS 2 Node is the fundamental unit of computation.
-        Publishers send messages to Topics, subscribers receive them.
-        """
-
-        # Extract terms
-        terms = await GlossaryService.term_extraction(chapter_content)
-        assert len(terms) >= 0  # Can be 0, but should not error
-
-        if len(terms) > 0:  # Only test definition generation if terms were found
-            # Generate definitions
-            content_context = "ROS 2 node is the fundamental unit of computation. Publishers send messages to topics, subscribers receive them."
-            defined_terms = await GlossaryService.term_definition_generation(terms, content_context)
-            assert isinstance(defined_terms, dict)
-            assert len(defined_terms) == len(terms)
 
     @pytest.mark.asyncio
     async def test_code_explainer_integration(self):
@@ -245,22 +128,6 @@ class TestIntegration:
 
         assert isinstance(explanation, dict)
         assert "highlights" in explanation
-
-    @pytest.mark.asyncio
-    async def test_quiz_service_integration(self):
-        """Test quiz service integration"""
-        chapter_content = "This chapter covers basic concepts in robotics."
-        difficulty = "MEDIUM"
-        experience_level = "BEGINNER"
-
-        # Generate different question types
-        mcqs = QuizService._generate_mcq_questions(chapter_content, difficulty, experience_level)
-        short_answers = QuizService._generate_short_answer_questions(chapter_content, difficulty, experience_level)
-        coding_exercises = QuizService._generate_coding_exercises(chapter_content, difficulty, experience_level)
-
-        assert isinstance(mcqs, list)
-        assert isinstance(short_answers, list)
-        assert isinstance(coding_exercises, list)
 
 
 if __name__ == "__main__":

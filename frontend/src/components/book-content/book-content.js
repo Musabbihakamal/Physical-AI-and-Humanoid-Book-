@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
-import GlossaryWidget from '../agent-widgets/glossary-widget';
 import CodeExplainerWidget from '../agent-widgets/code-explainer-widget';
-import QuizWidget from '../agent-widgets/quiz-widget';
 
 const BookContent = ({ content }) => {
   const [selectedText, setSelectedText] = useState('');
-  const [showGlossaryWidget, setShowGlossaryWidget] = useState(false);
   const [showCodeExplainer, setShowCodeExplainer] = useState(false);
-  const [persistedGlossaryContent, setPersistedGlossaryContent] = useState('');
   const [persistedCodeContent, setPersistedCodeContent] = useState('');
   const [isClient, setIsClient] = useState(false);
 
@@ -26,14 +22,6 @@ const BookContent = ({ content }) => {
     }
   };
 
-  const handleGlossaryWidget = () => {
-    // Always save the current selected text and show the widget
-    if (selectedText) {
-      setPersistedGlossaryContent(selectedText);
-      setShowGlossaryWidget(true);
-    }
-  };
-
   const handleCodeExplainerWidget = () => {
     // Always save the current selected text and show the widget
     if (selectedText) {
@@ -43,12 +31,6 @@ const BookContent = ({ content }) => {
   };
 
   // Function to update widget content without hiding the widget
-  const updateGlossaryContent = () => {
-    if (selectedText) {
-      setPersistedGlossaryContent(selectedText);
-    }
-  };
-
   const updateCodeContent = () => {
     if (selectedText) {
       setPersistedCodeContent(selectedText);
@@ -62,34 +44,11 @@ const BookContent = ({ content }) => {
       {isClient && selectedText && (
         <div className="text-selection-tools">
           <button
-            onClick={handleGlossaryWidget}
-            className="tool-btn glossary-btn"
-          >
-            Create/Update Glossary
-          </button>
-          <button
             onClick={handleCodeExplainerWidget}
             className="tool-btn code-btn"
           >
             Explain/Update Code
           </button>
-        </div>
-      )}
-
-      {isClient && showGlossaryWidget && (
-        <div className="widget-container">
-          <div className="widget-header">
-            <h3>Glossary Widget</h3>
-            <button
-              onClick={() => setShowGlossaryWidget(false)}
-              className="close-widget-btn"
-            >
-              ×
-            </button>
-          </div>
-          <BrowserOnly>
-            {() => <GlossaryWidget content={persistedGlossaryContent} />}
-          </BrowserOnly>
         </div>
       )}
 
@@ -106,14 +65,6 @@ const BookContent = ({ content }) => {
           </div>
           <BrowserOnly>
             {() => <CodeExplainerWidget code={persistedCodeContent} />}
-          </BrowserOnly>
-        </div>
-      )}
-
-      {isClient && (
-        <div className="standalone-widgets">
-          <BrowserOnly>
-            {() => <QuizWidget />}
           </BrowserOnly>
         </div>
       )}

@@ -63,7 +63,7 @@
 
 /* Ensure text is readable on the animated background */
 .hero__title {
-  color: rgb(40, 115, 243) !important;
+  color:  rgba(49, 204, 95, 0.763) !important;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.594);
   font-family: 'Arial, Helvetica, sans-serif'; /* Custom font for title */
 }
@@ -76,11 +76,11 @@
 
 /* Enhance buttons to contrast with background */
 .button--secondary {
-  background-color: rgba(40, 40, 40, 0.2) !important;
-  border: 2px solid rgb(177, 172, 172) !important;
-  color: rgb(77, 204, 255) !important;
+  background-color: rgba(44, 46, 207, 0.763) !important;
+  border: 2px solid rgb(0, 0, 0) !important;
+  color: rgb(230, 231, 231) !important;
   font-family: 'Cambria, Cochin, Georgia, Times, Times New Roman', serif; /* Custom font for button */
-  font-size: 26px;
+  font-size: 20px;
 }
 
 .button--secondary:hover {

@@ -134,7 +134,27 @@
       "Bash(python -c \"\nfrom tests.conftest import authenticated_client\nfrom src.models.user import User\nfrom src.api.auth_dependencies import get_current_active_user\nimport inspect\n\n# Check if the patching is working\nprint\\(''Checking if patching is working...''\\)\nprint\\(''get_current_active_user function:'', get_current_active_user\\)\nprint\\(''Function signature:'', inspect.signature\\(get_current_active_user\\)\\)\n\")",
       "Bash(npx docusaurus build -- --localstorage-file ./localStorage.json)",
       "Bash(find frontend -name \"*.js\" -exec grep -l \"AuthProvider\\\\|AuthContext\" {} ;)",
-      "Bash(npx docusaurus --help:*)"
+      "Bash(npx docusaurus --help:*)",
+      "Bash(del \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\glossary_maker\\\\glossary_maker.py\" \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\glossary_maker\\\\__init__.py\" \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\quiz_creator\\\\quiz_creator.py\" \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\quiz_creator\\\\__init__.py\")",
+      "Bash(del \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\glossary_maker\\\\glossary_maker.py\")",
+      "Bash(del \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\glossary_maker\\\\__init__.py\")",
+      "Bash(del \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\quiz_creator\\\\quiz_creator.py\")",
+      "Bash(del \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\quiz_creator\\\\__init__.py\")",
+      "Bash(powershell Remove-Item \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\glossary_maker\\\\glossary_maker.py\", \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\glossary_maker\\\\__init__.py\", \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\quiz_creator\\\\quiz_creator.py\", \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\quiz_creator\\\\__init__.py\" -Force)",
+      "Bash(powershell Remove-Item \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\glossary_maker\\\\glossary_maker.py\" -Force)",
+      "Bash(powershell -Command \"Remove-Item -Path ''D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\glossary_maker\\\\glossary_maker.py'' -Force\")",
+      "Bash(rm \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend/src/agents/glossary_maker/glossary_maker.py\")",
+      "Bash(dir \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\" /s)",
+      "Bash(dir \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\glossary_maker\")",
+      "Bash(rmdir \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\glossary_maker\")",
+      "Bash(rmdir \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\quiz_creator\")",
+      "Bash(rm -rf \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\glossary_maker/__pycache__\")",
+      "Bash(rm -rf \"D:\\\\PROJECT\\\\HACKATHON 1\\\\backend\\\\src\\\\agents\\\\quiz_creator/__pycache__\")",
+      "Bash(rm \"D:\\\\PROJECT\\\\HACKATHON 1\\\\frontend/src/components/agent-widgets/glossary-widget.js\" \"D:\\\\PROJECT\\\\HACKATHON 1\\\\frontend/src/components/agent-widgets/glossary-widget.css\" \"D:\\\\PROJECT\\\\HACKATHON 1\\\\frontend/src/components/agent-widgets/quiz-widget.js\" \"D:\\\\PROJECT\\\\HACKATHON 1\\\\frontend/src/components/agent-widgets/quiz-widget.css\")",
+      "Bash(rm \"D:\\\\PROJECT\\\\HACKATHON 1\\\\shared/prompts/glossary_maker_system_prompt.txt\" \"D:\\\\PROJECT\\\\HACKATHON 1\\\\shared/prompts/glossary_maker_system_prompt.py\" \"D:\\\\PROJECT\\\\HACKATHON 1\\\\shared/prompts/quiz_creator_system_prompt.txt\" \"D:\\\\PROJECT\\\\HACKATHON 1\\\\shared/prompts/quiz_creator_system_prompt.py\")",
+      "Bash(rm \"D:\\\\PROJECT\\\\HACKATHON 1\\\\frontend/docs/agent-guides/glossary-maker.md\" \"D:\\\\PROJECT\\\\HACKATHON 1\\\\frontend/docs/agent-guides/quiz-creator.md\")",
+      "Bash(powershell -Command \".specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks\")",
+      "Bash(powershell -Command \"cd specs/001-subagents-skills && D:\\\\PROJECT\\\\HACKATHON\\\\ 1\\\\.specify\\\\scripts\\\\powershell\\\\check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks\")"
     ]
   }
 }

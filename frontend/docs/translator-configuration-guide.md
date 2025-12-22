@@ -160,6 +160,6 @@ If you continue to experience issues:
 2. Verify your API provider's status page
 3. Consult the API provider's documentation
 4. Ensure your account has sufficient credits
-5. Review the [Troubleshooting Translation Guide](./troubleshooting-translation.md)
+5. Check the browser console (F12) for specific error messages
 
 For additional help, create an issue in the repository with specific error messages and your configuration details.

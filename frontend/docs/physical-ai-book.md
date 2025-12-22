@@ -7,16 +7,6 @@ title: "Physical AI & Humanoid Robotics Book"
 
 Welcome to the comprehensive guide on Physical AI & Humanoid Robotics. This book covers four essential modules required to understand and build embodied intelligence systems using modern robotics frameworks and AI integration.
 
-## Translation Feature
-
-This documentation includes a powerful translation component that allows you to translate any chapter content to Urdu while preserving technical terms, code blocks, and formatting. To use this feature:
-
-1. Navigate to any chapter
-2. Click the "Translate to Urdu" button
-3. The content will be translated while maintaining all technical accuracy
-4. Click "Switch to English" to return to the original content
-
-For setup instructions on the translation feature, see the [Translation Setup Guide](./translation-setup.md).
 
 ## Four Core Modules
 

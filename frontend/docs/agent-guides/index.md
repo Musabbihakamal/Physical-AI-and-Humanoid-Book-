@@ -8,9 +8,7 @@ This section provides comprehensive documentation for all subagents in the syste
 
 ## Available Agents
 
-- **[Glossary Maker](./glossary-maker.md)**: Automatically generates glossaries from chapter content with links to their occurrences.
 - **[Code Explainer](./code-explainer.md)**: Generates detailed explanations for code examples with specific highlighting of ROS 2 and Isaac Sim commands.
-- **[Quiz Creator](./quiz-creator.md)**: Generates MCQs, short answer questions, and coding exercises with configurable difficulty based on user profile.
 - **[Book Content Writer](./book-content-writer.md)**: Helps create and refine educational content for book chapters with a focus on clarity and pedagogical effectiveness.
 
 Each agent can be used independently or in combination with others to enhance the learning experience.

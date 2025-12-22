@@ -46,6 +46,7 @@ Cognitive planning for robotics involves:
 ## Practical Examples
 
 ### LLM-Based Task Planner
+{% raw %}
 ```python
 import asyncio
 import json
@@ -272,8 +273,10 @@ class RobotCapabilityManager:
 
         return True
 ```
+{% endraw %}
 
 ### Context-Aware Planning System
+{% raw %}
 ```python
 import asyncio
 from typing import Dict, List, Any, Optional
@@ -443,8 +446,10 @@ class ContextAwarePlanner:
                 "last_seen": obj.get("timestamp")
             })
 ```
+{% endraw %}
 
 ### Natural Language Command Processor
+{% raw %}
 ```python
 import re
 from typing import Dict, Any, List, Tuple
@@ -691,6 +696,7 @@ class NaturalLanguageCommandProcessor:
         # For now, return the relations as-is
         return relations
 ```
+{% endraw %}
 
 ## Diagrams
 

@@ -89,12 +89,8 @@ class AgentAuthMiddleware:
         Extract agent type from request path.
         """
         path = request.url.path
-        if "/glossary-maker" in path:
-            return "GLOSSARY_MAKER"
-        elif "/code-explainer" in path:
+        if "/code-explainer" in path:
             return "CODE_EXPLAINER"
-        elif "/quiz-creator" in path:
-            return "QUIZ_CREATOR"
         return "UNKNOWN"
 
 

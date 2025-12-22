@@ -160,16 +160,6 @@ class ApiService {
       } else if (endpoint.includes('/me')) {
         return Promise.resolve({ id: 1, email: 'user@example.com', name: 'Demo User' });
       }
-    } else if (endpoint.includes('/api/agents/glossary-maker')) {
-      return Promise.resolve({
-        request_id: 'mock-request-id',
-        status: 'COMPLETED',
-        result: {
-          terms: [
-            { term: 'Example Term', definition: 'This is an example definition for static deployment.' }
-          ]
-        }
-      });
     } else if (endpoint.includes('/api/agents/code-explainer')) {
       return Promise.resolve({
         request_id: 'mock-request-id',
@@ -184,16 +174,6 @@ class ApiService {
           learning_points: ['Mock learning point']
         }
       });
-    } else if (endpoint.includes('/api/agents/quiz-creator')) {
-      return Promise.resolve({
-        request_id: 'mock-request-id',
-        status: 'COMPLETED',
-        result: {
-          questions: [
-            { question: 'Example question?', options: ['A', 'B', 'C', 'D'], correct_answer_index: 0 }
-          ]
-        }
-      });
     } else if (endpoint.includes('/api/agents/status/')) {
       return Promise.resolve({
         status: 'COMPLETED',
@@ -205,17 +185,6 @@ class ApiService {
     return Promise.resolve({ message: 'Mock response for static deployment' });
   }
 
-  // Glossary Maker API
-  async createGlossary(content, parameters = {}) {
-    return this.request('/api/agents/glossary-maker', {
-      method: 'POST',
-      body: JSON.stringify({
-        content,
-        parameters,
-      }),
-    });
-  }
-
   // Code Explainer API
   async explainCode(code, language = null, parameters = {}) {
     return this.request('/api/agents/code-explainer', {
@@ -223,18 +192,6 @@ class ApiService {
       body: JSON.stringify({
         code,
         language,
-        parameters,
-      }),
-    });
-  }
-
-  // Quiz Creator API
-  async createQuiz(content, difficulty = null, parameters = {}) {
-    return this.request('/api/agents/quiz-creator', {
-      method: 'POST',
-      body: JSON.stringify({
-        content,
-        difficulty,
         parameters,
       }),
     });
