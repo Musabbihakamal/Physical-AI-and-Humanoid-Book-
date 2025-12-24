@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-
+    
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -20,6 +20,11 @@ jobs:
         python-version: '3.11'
         cache: 'pip'
         cache-dependency-path: 'backend/requirements.txt'
+
+    - name: Set PYTHONPATH
+      run: |
+        echo "PYTHONPATH=${{ github.workspace }}/backend/src:${{ github.workspace }}/shared" >> $GITHUB_ENV
+
 
     - name: Install dependencies
       run: |
