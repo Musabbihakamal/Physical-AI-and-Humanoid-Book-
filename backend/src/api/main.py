@@ -1,5 +1,5 @@
 """
-Main API application for the multi-agent book generation system.
+Main API application for the book generation system.
 """
 import sys
 import os
@@ -11,7 +11,7 @@ if project_root not in sys.path:
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from ..database.database import engine, Base
-from . import agent_routes, rag_routes, content_routes, book_content_routes, auth_routes
+from . import rag_routes, content_routes, book_content_routes, auth_routes
 from ..config import settings
 import logging
 from contextlib import asynccontextmanager
@@ -31,8 +31,8 @@ async def lifespan(app: FastAPI):
 
 # Create the FastAPI app
 app = FastAPI(
-    title="Book + RAG Bot + Multi-Agent System API",
-    description="API for interacting with specialized AI agents for book generation and RAG",
+    title="Book + RAG Bot System API",
+    description="API for book generation and RAG",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -48,7 +48,7 @@ app.add_middleware(
 
 # Import all model modules to ensure they're registered with Base.metadata
 # This ensures that all models are registered with Base.metadata before table creation
-from ..models import agent_request, generated_content, book_chapter, content_link, rag_session, user_profile, user, token
+from ..models import generated_content, book_chapter, content_link, rag_session, user_profile, user, token
 
 
 # For testing purposes, create tables immediately if in test mode
@@ -59,7 +59,6 @@ if 'pytest' in sys.modules:
     logger.info("Test database tables created successfully")
 
 # Include API routes
-app.include_router(agent_routes.router, prefix="/api/agents", tags=["agents"])
 app.include_router(rag_routes.router, prefix="/api/rag", tags=["rag"])
 app.include_router(content_routes.router, prefix="/api/content", tags=["content"])
 app.include_router(book_content_routes.router, prefix="/api/book-content", tags=["book-content"])
@@ -68,9 +67,9 @@ app.include_router(auth_routes.router, prefix="/api/auth", tags=["auth"])
 # Health check endpoint
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "multi-agent-book-system"}
+    return {"status": "healthy", "service": "book-system"}
 
 # Root endpoint
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the Book + RAG Bot + Multi-Agent System API"}
+    return {"message": "Welcome to the Book + RAG Bot System API"}

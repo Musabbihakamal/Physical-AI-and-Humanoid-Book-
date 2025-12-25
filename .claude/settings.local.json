@@ -7,9 +7,7 @@
       "Bash(npm install)",
       "Bash(npm run validate)",
       "Bash(npm test)",
-      "Bash(python -m pytest tests/test_agent_status.py::test_get_request_status_not_found -v)",
-      "Bash(python -m pytest tests/ -k \"not test_subagent_services\" --tb=short)",
-      "Bash(python -m pytest tests/test_book_content_writer.py::test_content_validation -v)",
+      "Bash(python -m pytest tests/ --tb=short)",
       "Bash(python -c \"\nfrom shared.utils.content_validation import validate_technical_accuracy\nvalid_content = ''''''\n# Introduction to ROS 2\n## Learning Objectives\n- Understand ROS 2 concepts\n\n## Detailed Theory\nROS 2 is a middleware for robotics applications.\n\n## Practical Implementation\n\\`\\`\\`python\nimport rclpy\nfrom rclpy.node import Node\n\\`\\`\\`\n\n## Hands-on Exercises\n1. Exercise 1\n2. Exercise 2\n\n## Glossary\n- **Node**: A process that performs computation\n''''''\n\nresult = validate_technical_accuracy(valid_content, ''ROS 2'')\nprint(''Valid:'', result[''valid''])\nprint(''Issues:'', result[''issues''])\n\")",
       "Bash(python -m pytest tests/test_api.py::test_glossary_maker_endpoint -v)",
       "Bash(python -m pytest tests/ -k \"not test_subagent_services\" --tb=no -q)",
@@ -154,7 +152,14 @@
       "Bash(rm \"D:\\\\PROJECT\\\\HACKATHON 1\\\\shared/prompts/glossary_maker_system_prompt.txt\" \"D:\\\\PROJECT\\\\HACKATHON 1\\\\shared/prompts/glossary_maker_system_prompt.py\" \"D:\\\\PROJECT\\\\HACKATHON 1\\\\shared/prompts/quiz_creator_system_prompt.txt\" \"D:\\\\PROJECT\\\\HACKATHON 1\\\\shared/prompts/quiz_creator_system_prompt.py\")",
       "Bash(rm \"D:\\\\PROJECT\\\\HACKATHON 1\\\\frontend/docs/agent-guides/glossary-maker.md\" \"D:\\\\PROJECT\\\\HACKATHON 1\\\\frontend/docs/agent-guides/quiz-creator.md\")",
       "Bash(powershell -Command \".specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks\")",
-      "Bash(powershell -Command \"cd specs/001-subagents-skills && D:\\\\PROJECT\\\\HACKATHON\\\\ 1\\\\.specify\\\\scripts\\\\powershell\\\\check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks\")"
+      "Bash(powershell -Command \"cd specs/001-subagents-skills && D:\\\\PROJECT\\\\HACKATHON\\\\ 1\\\\.specify\\\\scripts\\\\powershell\\\\check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks\")",
+      "Bash(rm -rf backend/src/agents)",
+      "Bash(rm -rf frontend/src/agents)",
+      "Bash(rm -f backend/tests/test_agent_status.py test_book_content_agent.py test_chapter_extension.py)",
+      "Bash(rm -rf frontend/docs/agent-guides docs/translator-agent-documentation.md translator_agent_spec.md specs/001-subagents-skills)",
+      "Bash(cat -A backend/tests/conftest.py)",
+      "Bash(ls -la backend/tests/conftest.py*)",
+      "Skill(sp.phr)"
     ]
   }
 }

@@ -1,17 +1,11 @@
 """
 Book Content Service
 
-This service provides functionality for generating book content using the Book Content Writer Agent,
+This service provides functionality for generating book content
 with proper validation, storage, and retrieval capabilities.
 """
 from typing import Dict, Any, Optional, List
 from datetime import datetime
-
-from ..agents.book_content_writer.book_content_writer_agent import (
-    BookContentWriterAgent,
-    BookContentRequest,
-    ContentComplexity
-)
 from ..models.generated_content import GeneratedContent
 from ..models.book_chapter import BookChapter
 from .content_service import ContentService
@@ -43,7 +37,6 @@ class BookContentService:
 
     def __init__(self, content_service: ContentService):
         self.content_service = content_service
-        self.agent = BookContentWriterAgent(content_service)
 
     async def generate_book_chapter(
         self,
@@ -76,32 +69,24 @@ class BookContentService:
         Returns:
             BookChapter object with generated content
         """
-        # Convert target audience string to enum
-        try:
-            complexity_enum = ContentComplexity(target_audience.lower())
-        except ValueError:
-            raise ValueError(f"Invalid target audience: {target_audience}. Must be 'beginner', 'intermediate', or 'expert'")
+        # Generate placeholder content since agent functionality is removed
+        content = f"# {chapter_title}\n\nThis is a placeholder for the chapter content on {module_focus}.\n\n"
 
-        # Create the agent request
-        request = BookContentRequest(
-            module_focus=module_focus,
-            chapter_title=chapter_title,
-            content_type=content_type,
-            target_audience=complexity_enum,
-            technical_domain=technical_domain,
-            user_profile=user_profile,
-            include_glossary=include_glossary,
-            include_exercises=include_exercises,
-            include_code_examples=include_code_examples,
-            include_diagrams=include_diagrams
-        )
+        if include_glossary:
+            content += "\n## Glossary\n\n- Term: Definition\n\n"
 
-        # Generate content using the agent
-        generated_result = await self.agent.generate_content(request)
+        if include_exercises:
+            content += "\n## Exercises\n\n1. Exercise related to the content\n\n"
 
-        # Perform additional validation using the validation utilities
+        if include_code_examples:
+            content += "\n## Code Examples\n\n```python\n# Example code for {module_focus}\nprint('Hello, {technical_domain}!')\n```\n\n"
+
+        if include_diagrams:
+            content += "\n## Diagrams\n\n![Diagram for {module_focus}](diagram-placeholder.png)\n\n"
+
+        # Perform validation using the validation utilities
         validation_results = await self._perform_comprehensive_validation(
-            generated_result["content"],
+            content,
             technical_domain
         )
 
@@ -112,12 +97,12 @@ class BookContentService:
         # Create and return the book chapter
         chapter = BookChapter(
             title=chapter_title,
-            content=generated_result["content"],
+            content=content,
             module_focus=module_focus,
             difficulty_level=target_audience.upper(),  # Map target_audience to difficulty_level
             technical_domain=technical_domain,
             validation_results=validation_results,
-            quality_score=int(generated_result["quality_score"] * 100)  # Convert from 0-1 to 0-100 scale
+            quality_score=85  # Default quality score for placeholder content
         )
 
         return chapter
@@ -285,29 +270,22 @@ class BookContentService:
         Returns:
             Extended content string
         """
-        # In a real implementation, this would fetch the existing chapter content
-        # For this implementation, we'll create a method to extend content based on the request
-        from ..agents.book_content_writer.book_content_writer_agent import ContentComplexity
+        # Generate placeholder extension content
+        extension_content = f"""
+## Extended Content: {extension_request}
 
-        complexity_enum = ContentComplexity(target_audience.lower())
+This is additional content related to {extension_request} for {technical_domain}.
 
-        # Create a request to generate content that extends the existing chapter
-        request = BookContentRequest(
-            module_focus=extension_request,
-            chapter_title=f"Extended Content: {extension_request}",
-            content_type="extension",
-            target_audience=complexity_enum,
-            technical_domain=technical_domain,
-            include_glossary=True,
-            include_exercises=True,
-            include_code_examples=True,
-            include_diagrams=True
-        )
+### Key Points:
+- Important point about {extension_request}
+- How it relates to {technical_domain}
+- Practical applications
 
-        # Generate the extension content
-        generated_result = await self.agent.generate_content(request)
-
-        return generated_result["content"]
+### Examples:
+- Example 1: Usage in {target_audience} context
+- Example 2: Implementation details
+"""
+        return extension_content
 
     async def expand_chapter_topic(
         self,
@@ -330,38 +308,26 @@ class BookContentService:
         Returns:
             Content with expanded topic section
         """
-        from ..agents.book_content_writer.book_content_writer_agent import ContentComplexity
+        # Generate expanded content for the specific topic
+        expanded_topic_content = f"""
 
-        complexity_enum = ContentComplexity(target_audience.lower())
-
-        # Create a focused request for expanding the specific topic
-        request = BookContentRequest(
-            module_focus=f"Expanding: {topic_to_expand}",
-            chapter_title=f"Detailed Coverage of {topic_to_expand}",
-            content_type="detailed_explanation",
-            target_audience=complexity_enum,
-            technical_domain=technical_domain,
-            include_glossary=False,  # Will be added to existing glossary
-            include_exercises=False,  # Will be added to existing exercises
-            include_code_examples=True,
-            include_diagrams=True
-        )
-
-        # Generate detailed content for the specific topic
-        generated_result = await self.agent.generate_content(request)
-
-        # Combine with existing content
-        expanded_content = f"""
-{existing_content}
-
-## Extended Coverage: {topic_to_expand}
+## Detailed Coverage: {topic_to_expand}
 
 {expansion_details}
 
-{generated_result["content"]}
+### In-Depth Analysis:
+- Detailed explanation of {topic_to_expand}
+- How it applies to {technical_domain}
+- Best practices for {target_audience} level understanding
+
+### Advanced Considerations:
+- Potential challenges with {topic_to_expand}
+- Solutions and workarounds
+- Integration with other concepts
+
 """
 
-        return expanded_content
+        return existing_content + expanded_topic_content
 
     async def add_advanced_content_section(
         self,
@@ -384,31 +350,28 @@ class BookContentService:
         Returns:
             Content with new advanced section
         """
-        from ..agents.book_content_writer.book_content_writer_agent import ContentComplexity
-
-        complexity_enum = ContentComplexity(target_audience.lower())
-
-        # Create a request for advanced content
-        request = BookContentRequest(
-            module_focus=f"Advanced: {', '.join(advanced_topics)}",
-            chapter_title=section_title,
-            content_type="advanced_concepts",
-            target_audience=complexity_enum,
-            technical_domain=technical_domain,
-            include_glossary=False,
-            include_exercises=True,
-            include_code_examples=True,
-            include_diagrams=True
-        )
-
-        # Generate advanced content
-        generated_result = await self.agent.generate_content(request)
-
-        # Add the advanced section to existing content
+        # Generate advanced content section
         advanced_content = f"""
+
 ## {section_title}
 
-{generated_result["content"]}
+This section covers advanced topics in {', '.join(advanced_topics)} for {technical_domain}.
+
+### Advanced Concepts:
+"""
+        for topic in advanced_topics:
+            advanced_content += f"- Advanced aspect of {topic}\n"
+
+        advanced_content += f"""
+### Expert-Level Considerations:
+- Complex scenarios involving {', '.join(advanced_topics)}
+- Performance implications for {target_audience} users
+- Integration challenges and solutions
+
+### Best Practices:
+- Recommended approaches for {technical_domain}
+- Common pitfalls to avoid
+- Optimization strategies
 """
 
         return existing_content + advanced_content
@@ -436,36 +399,74 @@ class BookContentService:
         Returns:
             Generated module content string
         """
-        from ..agents.book_content_writer.book_content_writer_agent import ContentComplexity
+        # Generate comprehensive module content
+        content = f"""
+# {content_focus} in {module_focus}
 
-        complexity_enum = ContentComplexity(target_audience.lower())
+## Overview
+This module covers {content_focus} within the context of {module_focus} for {technical_domain}.
 
-        # Create a request for comprehensive module content
-        request = BookContentRequest(
-            module_focus=module_focus,
-            chapter_title=f"{content_focus} in {module_focus}",
-            content_type="comprehensive",
-            target_audience=complexity_enum,
-            technical_domain=technical_domain,
-            include_glossary=True,
-            include_exercises=include_assessment,  # Include exercises as part of assessment
-            include_code_examples=include_practical_examples,
-            include_diagrams=True
-        )
+## Learning Objectives
+- Understand the fundamentals of {content_focus}
+- Apply concepts in practical scenarios
+- Connect to broader {module_focus} principles
 
-        # Generate the module content
-        generated_result = await self.agent.generate_content(request)
+"""
+        if include_practical_examples:
+            content += f"""
+## Practical Examples
+
+### Example 1: Basic Implementation
+```python
+# Basic implementation of {content_focus}
+def basic_example():
+    print("Implementing {content_focus} in {technical_domain}")
+```
+
+### Example 2: Advanced Usage
+```python
+# Advanced usage patterns
+def advanced_example():
+    print("Advanced {content_focus} techniques")
+```
+
+"""
+
+        if include_assessment:
+            content += f"""
+## Assessment Questions
+
+1. What are the key principles of {content_focus}?
+2. How does {content_focus} apply to {technical_domain}?
+3. What are the common challenges when implementing {content_focus}?
+
+### Self-Assessment Rubric
+- Beginner: Can describe basic concepts
+- Intermediate: Can implement basic examples
+- Expert: Can solve complex problems
+
+"""
+
+        content += f"""
+## Summary
+This module on {content_focus} in {module_focus} provides foundational knowledge for {target_audience} level understanding of {technical_domain} concepts.
+
+## Next Steps
+- Practice the examples provided
+- Explore related topics in {module_focus}
+- Apply knowledge to real-world scenarios
+"""
 
         # Validate the generated content
         validation_results = await self._perform_comprehensive_validation(
-            generated_result["content"],
+            content,
             technical_domain
         )
 
         if not validation_results["overall_valid"]:
             raise ValueError(f"Module content failed validation: {validation_results['issues']}")
 
-        return generated_result["content"]
+        return content
 
     async def enhance_existing_content(
         self,
@@ -486,38 +487,27 @@ class BookContentService:
         Returns:
             Enhanced content string
         """
-        from ..agents.book_content_writer.book_content_writer_agent import ContentComplexity
-
-        complexity_enum = ContentComplexity(target_audience.lower())
-
-        # Create a request to generate enhancement content
-        request = BookContentRequest(
-            module_focus="Content Enhancement",
-            chapter_title="Enhanced Content",
-            content_type="enhancement",
-            target_audience=complexity_enum,
-            technical_domain=technical_domain,
-            include_glossary=True,
-            include_exercises=False,  # Exercises would be separate
-            include_code_examples=True,
-            include_diagrams=True
-        )
-
-        # In a real implementation, we would analyze the existing content
-        # and generate specific enhancements based on the request
-        # For now, we'll generate content that addresses the enhancement_request
-
-        generated_result = await self.agent.generate_content(request)
-
-        # In a real implementation, we would intelligently merge the new content
-        # with the existing content to create an enhanced version
-        # For now, we'll return a combination of both
-        enhanced_content = f"""
-{existing_content}
+        # Generate enhancement content based on the request
+        enhancement_content = f"""
 
 ## Enhancement: {enhancement_request}
 
-{generated_result["content"]}
+This section provides additional insights and improvements to the existing content related to {enhancement_request} in {technical_domain}.
+
+### Enhancement Details:
+- Specific improvements for {enhancement_request}
+- Advanced techniques for {target_audience} level understanding
+- Best practices and recommendations
+
+### Applied Enhancements:
+- Improved explanations of complex concepts
+- Additional examples and use cases
+- Enhanced practical applications
+
+### Summary of Improvements:
+- Better clarity on {enhancement_request} concepts
+- More comprehensive coverage of {technical_domain} aspects
+- Enhanced learning experience for {target_audience} level users
 """
 
-        return enhanced_content
+        return existing_content + enhancement_content

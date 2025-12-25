@@ -160,48 +160,10 @@ class ApiService {
       } else if (endpoint.includes('/me')) {
         return Promise.resolve({ id: 1, email: 'user@example.com', name: 'Demo User' });
       }
-    } else if (endpoint.includes('/api/agents/code-explainer')) {
-      return Promise.resolve({
-        request_id: 'mock-request-id',
-        status: 'COMPLETED',
-        result: {
-          overview: 'This is a mock code explanation for static deployment.',
-          key_components: [{ type: 'function', name: 'example', declaration: 'def example():' }],
-          ros2_specifics: ['rclpy'],
-          isaac_sim_specifics: ['omni.isaac'],
-          technical_concepts: ['Mock concept'],
-          usage_context: 'Mock usage',
-          learning_points: ['Mock learning point']
-        }
-      });
-    } else if (endpoint.includes('/api/agents/status/')) {
-      return Promise.resolve({
-        status: 'COMPLETED',
-        progress: 100
-      });
     }
 
     // Default mock response
     return Promise.resolve({ message: 'Mock response for static deployment' });
-  }
-
-  // Code Explainer API
-  async explainCode(code, language = null, parameters = {}) {
-    return this.request('/api/agents/code-explainer', {
-      method: 'POST',
-      body: JSON.stringify({
-        code,
-        language,
-        parameters,
-      }),
-    });
-  }
-
-
-  // Get request status
-  async getRequestStatus(requestId) {
-    // Don't cache status requests as they change frequently
-    return this.request(`/api/agents/status/${requestId}`);
   }
 
   // Get user profile
@@ -211,7 +173,7 @@ class ApiService {
 
   // Get user session info
   async getSessionInfo() {
-    return this.request('/api/agents/session-info');
+    return this.request('/api/session-info');
   }
 
   // Get cached results for completed requests

@@ -1,8 +1,7 @@
 """
-API module for the multi-agent book generation system.
+API module.
 """
 from .main import app
-from . import agent_routes
 from . import rag_routes
 from . import content_routes
 

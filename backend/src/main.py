@@ -1,5 +1,5 @@
 """
-Main entry point for the multi-agent book generation system backend.
+Main entry point for the book generation system backend.
 """
 import sys
 import os
@@ -33,7 +33,7 @@ def main():
         )
 
     logger = logging.getLogger(__name__)
-    logger.info("Starting Book + RAG Bot + Multi-Agent System backend...")
+    logger.info("Starting Book + RAG Bot backend...")
 
     # Validate required API keys at startup
     validate_api_keys(logger)

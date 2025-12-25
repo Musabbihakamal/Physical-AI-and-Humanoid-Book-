@@ -20,6 +20,9 @@ jobs:
         python-version: '3.11'
         cache: 'pip'
         cache-dependency-path: 'backend/requirements.txt'
+        
+      name: Set PYTHONPATH
+      run: echo "PYTHONPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
 
     - name: Install dependencies
       run: |
