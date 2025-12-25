@@ -3,8 +3,16 @@ Pytest configuration for the multi-agent book generation system API tests.
 """
 import sys
 import os
-# Add the project root directory to the Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+# Get repo root
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+
+# Add paths for imports
+sys.path.insert(0, os.path.join(REPO_ROOT, "backend", "src"))
+sys.path.insert(0, os.path.join(REPO_ROOT, "shared"))
+
+# Import the application and models
+
 
 import pytest
 from fastapi.testclient import TestClient
