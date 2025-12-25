@@ -16,20 +16,21 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      uses: actions/checkout@v4
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: 'frontend/package-lock.json'
+        cache-dependency-path: frontend/package-lock.json
 
     - name: Install frontend dependencies
       run: |
@@ -44,13 +45,14 @@ jobs:
         NODE_ENV: production
 
     - name: Setup Pages
-      uses: actions/configure-pages@983d773fb5d4549e0b0abc9f0fefcbee0d5a9f22
+      uses: actions/configure-pages@v5
 
-    - name: Upload to GitHub Pages
-      uses: actions/upload-pages-artifact@57a0aa6d1e6f0bba8e012a4e9bca1eaf8a0d9ccc
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
       with:
-        path: ./frontend/build
+        path: frontend/build
 
     - name: Deploy to GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@d79dae45a9bd3e04b1ae6c9d7cbb0ed1ff7ba4d8
+      uses: actions/deploy-pages@v4
+
