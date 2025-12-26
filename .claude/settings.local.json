@@ -159,7 +159,22 @@
       "Bash(rm -rf frontend/docs/agent-guides docs/translator-agent-documentation.md translator_agent_spec.md specs/001-subagents-skills)",
       "Bash(cat -A backend/tests/conftest.py)",
       "Bash(ls -la backend/tests/conftest.py*)",
-      "Skill(sp.phr)"
+      "Skill(sp.phr)",
+      "Bash(find . -name \"*.py\" -exec python -m py_compile {} ;)",
+      "Bash(find . -name \"*.py\" -not -path \"./.git/*\" -not -path \"./history/*\" -exec python -c \"import ast; ast.parse\\(open\\(''{}'', ''r''\\).read\\(\\)\\) or print\\(''OK: {}''\\)\" ;)",
+      "Bash(python -m py_compile tests/conftest.py)",
+      "Bash(python -m flake8 --max-line-length=120 --ignore=E203,W503 --exclude=__pycache__,.git,__pycache__,.pytest_cache .)",
+      "Bash(python -c \"import ast; import os; [ast.parse\\(open\\(os.path.join\\(root, file\\), ''r'', encoding=''utf-8''\\).read\\(\\)\\) for root, dirs, files in os.walk\\(''backend/src''\\) for file in files if file.endswith\\(''.py''\\)]\")",
+      "Bash(python -c \"import ast; import os; [ast.parse\\(open\\(os.path.join\\(root, file\\), ''r'', encoding=''utf-8''\\).read\\(\\)\\) for root, dirs, files in os.walk\\(''backend/tests''\\) for file in files if file.endswith\\(''.py''\\)]\")",
+      "Bash(python -c \"from src.api.main import app; print\\(''Application imported successfully''\\)\")",
+      "Bash(python -c \"from src.api.main import app; print\\(''App title:'', app.title\\); print\\(''App routes count:'', len\\(app.routes\\)\\)\")",
+      "Bash(python -m pytest tests/ -v --tb=short -k \"test_health\")",
+      "Bash(python -c \"import tests.conftest; print\\(''conftest.py imported successfully''\\)\")",
+      "Bash(python -m pytest tests/conftest.py -v --tb=short --collect-only)",
+      "Bash(python -m pytest tests/test_subagent_services.py::test_health_check -v --tb=short)",
+      "Bash(python -m pytest tests/ -k \"health\" -v --tb=short)",
+      "Bash(python -c \"\nimport sys\nimport os\n\n# Add paths as conftest.py does\nREPO_ROOT = os.path.abspath\\(os.path.join\\(''tests'', ''../..''\\)\\)\nsys.path.insert\\(0, os.path.join\\(REPO_ROOT, ''backend'', ''src''\\)\\)\nsys.path.insert\\(0, os.path.join\\(REPO_ROOT, ''shared''\\)\\)\n\nfrom src.models import \\(\n    generated_content,\n    book_chapter,\n    content_link,\n    rag_session,\n    user_profile,\n    user,\n    token,\n\\)\nprint\\(''All imports successful''\\)\n\")",
+      "Bash(.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks)"
     ]
   }
 }
