@@ -12,12 +12,13 @@ const config = {
   url: 'https://Musabbihakamal.github.io',  // Updated to actual GitHub username
   // Set the /<baseUrl>/ pathname under which your site is served
   // For local development, use root path; for GitHub pages, use repo name
-  baseUrl: process.env.NODE_ENV === 'development' ? '/' : '/Physical-AI-and-Humanoid-Book',  // Dynamic base URL
+  baseUrl: process.env.NODE_ENV === 'development' ? '/' : '/Physical-AI-and-Humanoid-Book-/',  // Dynamic base URL
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'Musabbihakamal', // Updated to actual GitHub username
   projectName: 'Physical-AI-and-Humanoid-Book-', // Usually your repo name.
+  deploymentBranch: 'gh-pages',
 
   onBrokenLinks: 'throw',
   markdown: {
