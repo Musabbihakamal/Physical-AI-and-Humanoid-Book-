@@ -567,3 +567,124 @@
 .form-group:nth-child(4) {
   animation-delay: 0.3s;
 }
+
+/* Additional styles for profile page */
+.userInfo {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f7fafc;
+  border-radius: 8px;
+  border-left: 4px solid #48bb78;
+}
+
+.userInfo p {
+  margin: 0.5rem 0;
+  color: #2d3748;
+}
+
+.userInfo strong {
+  color: #1a202c;
+}
+
+.addButton {
+  background: #48bb78;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-left: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.addButton:hover {
+  background: #38a169;
+}
+
+.tagList {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  background: #e6fffa;
+  border: 1px solid #81c784;
+  border-radius: 20px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  color: #22543d;
+}
+
+.tagRemove {
+  background: none;
+  border: none;
+  color: #22543d;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0 0.25rem;
+}
+
+.tagRemove:hover {
+  color: #c53030;
+}
+
+.dangerButton {
+  background: linear-gradient(135deg, #e53e3e, #c53030) !important;
+  border-color: #e53e3e !important;
+}
+
+.dangerButton:hover {
+  background: linear-gradient(135deg, #d52f2f, #b52020) !important;
+  border-color: #d52f2f !important;
+}
+
+/* Styles for the two-column layout */
+.imageSection {
+  flex: 1;
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  color: white;
+  padding: 3rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imageSectionContent {
+  text-align: center;
+}
+
+.imageSectionContent h2 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.imageSectionContent p {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2rem;
+}
+
+.formSection {
+  flex: 1;
+  padding: 3rem 2rem;
+  background: white;
+}
+
+@media (max-width: 992px) {
+  .authCard {
+    flex-direction: column;
+  }
+
+  .imageSection,
+  .formSection {
+    width: 100%;
+    padding: 2rem 1.5rem;
+  }
+}

@@ -76,8 +76,8 @@
 
 /* Enhance buttons to contrast with background */
 .button--secondary {
-  background-color: rgba(44, 46, 207, 0.763) !important;
-  border: 2px solid rgb(0, 0, 0) !important;
+  background-color: rgba(88, 91, 227, 0.763) !important;
+  border: 2px solid rgb(20, 128, 205) !important;
   color: rgb(230, 231, 231) !important;
   font-family: 'Cambria, Cochin, Georgia, Times, Times New Roman', serif; /* Custom font for button */
   font-size: 20px;

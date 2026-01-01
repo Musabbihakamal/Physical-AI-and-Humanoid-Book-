@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import getApiService from '../../services/api';
+import { getApiService } from '../../services/api';
 import './code-explainer-widget.css';
 
 const CodeExplainerWidget = ({ code }) => {

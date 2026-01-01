@@ -171,6 +171,14 @@ class ApiService {
     return this.request('/api/auth/me');
   }
 
+  // Update user profile
+  async updateUserProfile(profileData) {
+    return this.request('/api/auth/me', {
+      method: 'PUT',
+      body: JSON.stringify(profileData)
+    });
+  }
+
   // Get user session info
   async getSessionInfo() {
     return this.request('/api/session-info');
@@ -200,4 +208,20 @@ const getApiService = () => {
   return apiServiceInstance;
 };
 
-export default getApiService;
+// Create an API object that mimics Axios interface
+const api = {
+  request: (endpoint, options = {}) => getApiService().request(endpoint, options),
+  get: (endpoint, options = {}) => getApiService().request(endpoint, { ...options, method: 'GET' }),
+  post: (endpoint, data, options = {}) => getApiService().request(endpoint, { ...options, method: 'POST', body: JSON.stringify(data) }),
+  put: (endpoint, data, options = {}) => getApiService().request(endpoint, { ...options, method: 'PUT', body: JSON.stringify(data) }),
+  delete: (endpoint, options = {}) => getApiService().request(endpoint, { ...options, method: 'DELETE' }),
+  // Additional methods that might be needed
+  getUserProfile: () => getApiService().getUserProfile(),
+  updateUserProfile: (profileData) => getApiService().updateUserProfile(profileData),
+  getSessionInfo: () => getApiService().getSessionInfo(),
+  getCachedResult: (requestId, type) => getApiService().getCachedResult(requestId, type),
+  cacheResult: (requestId, type, result) => getApiService().cacheResult(requestId, type, result),
+};
+
+export default api;
+export { getApiService }; // Export the factory function for other use cases

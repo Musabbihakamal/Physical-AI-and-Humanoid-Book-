@@ -98,6 +98,16 @@ class OAuthLoginResponse(BaseModel):
     is_new_user: bool  # Whether this was a new user registration
 
 
+class UpdateProfileRequest(BaseModel):
+    full_name: Optional[str] = None
+    experience_level: Optional[str] = None
+    technical_background: Optional[str] = None
+    preferred_difficulty: Optional[str] = None
+    learning_goals: Optional[list] = None
+    hardware_access: Optional[list] = None
+    language_preference: Optional[str] = None
+
+
 @router.post("/oauth-login", response_model=OAuthLoginResponse)
 async def oauth_login(
     request: OAuthLoginRequest,
@@ -674,4 +684,80 @@ async def get_user_profile(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while retrieving user profile"
+        )
+
+
+@router.put("/me")
+async def update_user_profile(
+    request: UpdateProfileRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Update current user's profile information.
+    """
+    from ..services.user_service import UserService
+
+    try:
+        # Update user's basic information if provided
+        if request.full_name is not None:
+            current_user.full_name = request.full_name
+            db.add(current_user)
+
+        # Get or create user profile
+        user_profile = db.query(UserProfile).filter(
+            UserProfile.user_id == current_user.id
+        ).first()
+
+        if user_profile:
+            # Update existing profile
+            updated_profile = UserService.update_user_profile(
+                db=db,
+                user_id=current_user.id,
+                experience_level=request.experience_level,
+                technical_background=request.technical_background,
+                preferred_difficulty=request.preferred_difficulty,
+                learning_goals=request.learning_goals,
+                hardware_access=request.hardware_access,
+                language_preference=request.language_preference
+            )
+        else:
+            # Create new profile if it doesn't exist
+            updated_profile = UserService.create_user_profile(
+                db=db,
+                experience_level=request.experience_level or "BEGINNER",
+                technical_background=request.technical_background,
+                preferred_difficulty=request.preferred_difficulty,
+                learning_goals=request.learning_goals or [],
+                hardware_access=request.hardware_access or [],
+                language_preference=request.language_preference or "en"
+            )
+            # Link the profile to the user by setting the user_id to match the user's id
+            updated_profile.user_id = current_user.id
+            db.add(updated_profile)
+
+        db.commit()
+
+        # Return updated user information
+        return {
+            "user_id": str(current_user.id),
+            "email": current_user.email,
+            "full_name": current_user.full_name,
+            "is_active": current_user.is_active,
+            "profile": {
+                "experience_level": updated_profile.experience_level,
+                "technical_background": updated_profile.technical_background,
+                "preferred_difficulty": updated_profile.preferred_difficulty,
+                "learning_goals": updated_profile.learning_goals,
+                "hardware_access": updated_profile.hardware_access,
+                "language_preference": updated_profile.language_preference
+            }
+        }
+
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error updating user profile: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while updating user profile"
         )

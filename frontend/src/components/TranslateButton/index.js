@@ -5,65 +5,17 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
   const [isTranslating, setIsTranslating] = useState(false);
   const [currentLang, setCurrentLang] = useState(propCurrentLang || 'en'); // 'en' for English, 'ur' for Urdu
   const [translationError, setTranslationError] = useState(null);
-  const [translatorReady, setTranslatorReady] = useState(false); // Wait for Google Translate API
+  const [translatorReady, setTranslatorReady] = useState(true); // Ready by default since using LLM-based translation
   const [isClient, setIsClient] = useState(false); // Track if we're in the browser
   const contentRef = useRef(null);
 
-  // Load Google Translate API script - only in browser
+  // Initialize translator readiness - no longer dependent on Google Translate API
   useEffect(() => {
     // Set client flag to true in browser
     setIsClient(true);
 
-    const loadGoogleTranslateScript = () => {
-      return new Promise((resolve, reject) => {
-        if (typeof window === 'undefined') {
-          // Not in browser, resolve immediately
-          resolve();
-          return;
-        }
-
-        if (window.google && window.google.translate) {
-          resolve();
-          return;
-        }
-
-        // Check if script is already loading
-        if (document.querySelector('script[src*="translate.googleapis.com"]')) {
-          // Wait for it to load
-          const checkInterval = setInterval(() => {
-            if (window.google && window.google.translate) {
-              clearInterval(checkInterval);
-              resolve();
-            }
-          }, 100);
-          setTimeout(() => clearInterval(checkInterval), 10000); // 10 second timeout
-          return;
-        }
-
-        // Create script element
-        const script = document.createElement('script');
-        script.src = 'https://translate.googleapis.com/translate_a/element.js?cb=googleTranslateElementInit';
-        script.async = true;
-        script.defer = true;
-
-        // Define the callback function
-        window.googleTranslateElementInit = () => {
-          setTranslatorReady(true);
-          resolve();
-        };
-
-        script.onerror = () => {
-          setTranslationError('Failed to load Google Translate API. Please check your internet connection.');
-          reject(new Error('Script load error'));
-        };
-
-        document.head.appendChild(script);
-      });
-    };
-
-    loadGoogleTranslateScript().catch(error => {
-      console.error('Error loading Google Translate:', error);
-    });
+    // Set translator as ready immediately since we're using LLM-based translation
+    setTranslatorReady(true);
   }, []);
 
   // Function to extract and preserve code blocks, diagrams, images, and technical terms
@@ -338,15 +290,11 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
     }
   };
 
-  // Alternative method using Google Translate API directly
+  // Alternative method using OpenAI-compatible API for translation
   const translateTextDirect = async (text, targetLang) => {
     // Check if we're in the browser environment
     if (typeof window === 'undefined' || !isClient) {
       throw new Error('Translation can only be performed in the browser.');
-    }
-
-    if (!translatorReady) {
-      throw new Error('Translation service is not ready. Please refresh the page.');
     }
 
     // Validate input
@@ -366,31 +314,64 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
         throw new Error('No translatable content found after processing.');
       }
 
-      // Use Google Translate API directly via fetch
-      // Encode the text properly, handling special characters
-      const encodedText = encodeURIComponent(processedContent);
-      const apiUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodedText}`;
+      // Determine target language name for the prompt
+      const targetLanguageName = targetLang === 'ur' ? 'Urdu' : 'English';
+
+      // Create a prompt for translation with preserved elements
+      const prompt = `Translate the following text to ${targetLanguageName}.
+      Preserve the meaning and context. Do not translate technical terms, code blocks,
+      or special formatting placeholders. Return only the translated text without any additional commentary:
+
+      ${processedContent}`;
+
+      // Get API configuration from environment or defaults
+      const apiKey = process.env.REACT_APP_TRANSLATOR_API_KEY ||
+                    (typeof window !== 'undefined' && window.REACT_APP_TRANSLATOR_API_KEY) ||
+                    '';
+      const apiUrl = process.env.REACT_APP_TRANSLATOR_API_URL ||
+                    (typeof window !== 'undefined' && window.REACT_APP_TRANSLATOR_API_URL) ||
+                    'https://api.openai.com/v1/chat/completions';
+
+      // Check if we have API credentials
+      if (!apiKey) {
+        console.warn('No translation API key found, using fallback behavior');
+        // Return the original content with a note that translation isn't available
+        return {
+          translatedText: `[TRANSLATION NOT AVAILABLE: ${processedContent}]`,
+          sourceLanguage: 'en',
+          targetLanguage: targetLang
+        };
+      }
+
+      // Prepare the request for the LLM-based translation
+      const requestBody = {
+        model: 'gpt-3.5-turbo', // or 'gpt-4' if you prefer
+        messages: [
+          { role: 'system', content: `You are a professional translator. Translate the user's text to the target language while preserving technical terms, code blocks, and special formatting. Do not add any explanations or commentary.` },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.3,
+        max_tokens: Math.min(processedContent.length * 2, 4000) // Adjust based on content length
+      };
 
       const response = await fetch(apiUrl, {
-        method: 'GET',
+        method: 'POST',
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Translation API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
       }
 
       const data = await response.json();
 
-      if (data && data[0] && data[0].length > 0) {
-        let translatedText = '';
-        for (let i = 0; i < data[0].length; i++) {
-          if (data[0][i] && data[0][i][0]) {
-            translatedText += data[0][i][0];
-          }
-        }
+      if (data.choices && data.choices.length > 0) {
+        let translatedText = data.choices[0].message?.content?.trim() || '';
 
         // Restore preserved elements back to the translated content
         // This will put back code blocks, images, diagrams, etc. in their original positions
@@ -419,6 +400,8 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
         errorMessage += 'Invalid content provided for translation.';
       } else if (error.message.includes('empty result')) {
         errorMessage += 'Translation service returned empty result.';
+      } else if (error.message.includes('401') || error.message.toLowerCase().includes('authorization')) {
+        errorMessage += 'Invalid API key. Please check your translation API configuration.';
       } else if (error.message.includes('429')) {
         errorMessage += 'Rate limit exceeded. Please try again later.';
       } else {
@@ -436,13 +419,6 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
     // Check if we're in the browser environment
     if (typeof window === 'undefined' || !isClient) {
       setTranslationError('Translation can only be performed in the browser.');
-      return;
-    }
-
-    // Check if translator service is ready before attempting translation
-    if (!translatorReady) {
-      setTranslationError('Translation service not ready. Please refresh the page.');
-      setIsTranslating(false);
       return;
     }
 
@@ -492,7 +468,7 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
         }
 
         if (contentToTranslate && contentToTranslate.trim()) {
-          // Translate the content using Google Translate API
+          // Translate the content using LLM-based translation
           const result = await translateTextDirect(contentToTranslate, 'ur');
 
           // Store the translated text in context
@@ -555,15 +531,10 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
         <button
           className={`${styles.translateButton} ${isTranslating ? styles.loading : ''}`}
           onClick={handleTranslate}
-          disabled={isTranslating || !translatorReady}
+          disabled={isTranslating}
           title={currentLang === 'en' ? 'Translate this chapter to Urdu' : 'Switch back to English'}
         >
-          {!translatorReady ? (
-            <>
-              <span className={styles.spinner}></span>
-              Initializing...
-            </>
-          ) : isTranslating ? (
+          {isTranslating ? (
             <>
               <span className={styles.spinner}></span>
               Translating...

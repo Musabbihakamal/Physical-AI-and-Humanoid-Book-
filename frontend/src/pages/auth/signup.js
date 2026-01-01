@@ -196,7 +196,12 @@ function SignupWithAuth() {
       }
     } catch (err) {
       console.error('Google OAuth error:', err);
-      setError(err.message || 'Google login failed. Please try again or use email/password instead.');
+      // Handle the specific "Failed to fetch" error with more helpful message
+      if (err.message.includes('Failed to fetch')) {
+        setError('Cannot connect to the authentication server. Please make sure the backend server is running and accessible.');
+      } else {
+        setError(err.message || 'Google login failed. Please try again or use email/password instead.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -244,7 +249,12 @@ function SignupWithAuth() {
       }
     } catch (err) {
       console.error('GitHub OAuth error:', err);
-      setError(err.message || 'GitHub login failed. Please try again or use email/password instead.');
+      // Handle the specific "Failed to fetch" error with more helpful message
+      if (err.message.includes('Failed to fetch')) {
+        setError('Cannot connect to the authentication server. Please make sure the backend server is running and accessible.');
+      } else {
+        setError(err.message || 'GitHub login failed. Please try again or use email/password instead.');
+      }
     } finally {
       setIsLoading(false);
     }

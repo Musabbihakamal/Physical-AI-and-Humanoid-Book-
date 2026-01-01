@@ -176,7 +176,15 @@
       "Bash(python -c \"\nimport sys\nimport os\n\n# Add paths as conftest.py does\nREPO_ROOT = os.path.abspath\\(os.path.join\\(''tests'', ''../..''\\)\\)\nsys.path.insert\\(0, os.path.join\\(REPO_ROOT, ''backend'', ''src''\\)\\)\nsys.path.insert\\(0, os.path.join\\(REPO_ROOT, ''shared''\\)\\)\n\nfrom src.models import \\(\n    generated_content,\n    book_chapter,\n    content_link,\n    rag_session,\n    user_profile,\n    user,\n    token,\n\\)\nprint\\(''All imports successful''\\)\n\")",
       "Bash(.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks)",
       "Bash(python -m py_compile backend/tests/conftest.py)",
-      "Bash(python -m py_compile backend/src/services/translation_service.py)"
+      "Bash(python -m py_compile backend/src/services/translation_service.py)",
+      "Bash(find history/ -name \"*.md\" -exec grep -l \"coding\\\\|vibe\\\\|hackathon\" {} ;)",
+      "Bash(find . -name \"*.md\" -exec grep -l \"Better Auth\\\\|OAuth\\\\|authentication\" {} ;)",
+      "Bash(dir)",
+      "Bash(cat requirements.txt)",
+      "Bash(cd D:/PROJECT/HACKATHON 1/backend)",
+      "Bash(pip install fastapi uvicorn[standard] pydantic[email] python-multipart passlib[bcrypt] python-jose[cryptography] python-dotenv sqlalchemy psycopg2-binary qdrant-client openai)",
+      "Bash(pip install alembic pytest pytest-asyncio httpx pydantic-settings requests cryptography anthropic bcrypt)",
+      "Bash(cd D:PROJECTHACKATHON 1frontend)"
     ]
   }
 }

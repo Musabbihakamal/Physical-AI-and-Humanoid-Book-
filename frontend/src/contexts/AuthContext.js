@@ -201,11 +201,38 @@ const AuthProvider = ({ children }) => {
     dispatch({ type: 'LOGOUT' });
   };
 
+  const updateProfile = async (profileData) => {
+    dispatch({ type: 'REGISTER_START' });
+
+    try {
+      const response = await apiService.updateUserProfile(profileData);
+
+      dispatch({
+        type: 'REGISTER_SUCCESS',
+        payload: {
+          user: response,
+          accessToken: response.access_token || localStorage.getItem('accessToken'),
+          refreshToken: response.refresh_token || localStorage.getItem('refreshToken')
+        }
+      });
+
+      return { success: true, user: response };
+    } catch (error) {
+      const errorMessage = error.message || 'Profile update failed';
+      dispatch({
+        type: 'REGISTER_FAILURE',
+        payload: errorMessage
+      });
+      return { success: false, error: errorMessage };
+    }
+  };
+
   const value = {
     ...state,
     login,
     register,
     logout,
+    updateProfile,
     clearError: () => dispatch({ type: 'CLEAR_ERROR' })
   };
 
