@@ -189,7 +189,10 @@
       "Bash(findstr /v /i \"node_modules\\\\|\\\\.git\\\\|__pycache__\\\\|\\\\.pyc\\\\|\\\\.DS_Store\\\\|\\\\.vscode\")",
       "Bash(findstr \"\\\\.\")",
       "Bash(dir /s D:PROJECTHACKATHON 1 /b)",
-      "Bash(cat nul)"
+      "Bash(cat nul)",
+      "Bash(git config user.email \"musabbihakamal@gmail.com\")",
+      "Bash(git pull origin main)",
+      "Bash(git add .)"
     ]
   }
 }
