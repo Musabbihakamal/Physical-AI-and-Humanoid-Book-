@@ -9,15 +9,14 @@ const config = {
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://Musabbihakamal.github.io',  // Updated to actual GitHub username
+  url: 'https://your-project-name.vercel.app',  // Update to your Vercel deployment URL
   // Set the /<baseUrl>/ pathname under which your site is served
-  // For local development, use root path; for GitHub pages, use repo name
-  baseUrl: process.env.NODE_ENV === 'development' ? '/' : '/Physical-AI-and-Humanoid-Book',  // Dynamic base URL
+  // For Vercel deployment, typically use root path
+  baseUrl: '/',
 
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'Musabbihakamal', // Updated to actual GitHub username
-  projectName: 'Physical-AI-and-Humanoid-Book', // Usually your repo name.
+  // GitHub pages deployment config (remove or comment out for Vercel)
+  // organizationName: 'Musabbihakamal', // GitHub username for GitHub Pages
+  // projectName: 'Physical-AI-and-Humanoid-Book', // GitHub repo name for GitHub Pages
 
   onBrokenLinks: 'throw',
   markdown: {

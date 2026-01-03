@@ -37,7 +37,7 @@ By participating in this project, you agree to abide by our code of conduct. Ple
 
 1. Clone your fork:
    ```bash
-   git clone https://github.com/your-username/your-repo.git
+   git clone https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book.git
    cd your-repo
    ```
 

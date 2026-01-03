@@ -1,12 +1,13 @@
-# GitHub Deployment Guide
+# Vercel and GitHub Deployment Guide
 
-This guide explains how to deploy the Physical AI & Humanoid Robotics Book application to GitHub.
+This guide explains how to deploy the Physical AI & Humanoid Robotics Book application to Vercel and GitHub.
 
 ## Prerequisites
 
 1. A GitHub account
 2. Repository access permissions
 3. API keys for external services (OpenAI, Qdrant, etc.)
+4. For Vercel deployment: A Vercel account
 
 ## Step 1: Create GitHub Repository
 
@@ -16,7 +17,7 @@ This guide explains how to deploy the Physical AI & Humanoid Robotics Book appli
 4. Clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/your-username/Physical-AI-and-Humanoid-Book.git
+git clone https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book.git
 cd Physical-AI-and-Humanoid-Book
 ```
 
@@ -30,16 +31,57 @@ git commit -m "Initial commit: Physical AI & Humanoid Robotics Book application"
 git push origin main
 ```
 
-## Step 3: Configure GitHub Pages for Frontend
+## Step 3: Deploy to Vercel (Frontend)
 
-1. Go to your repository on GitHub
-2. Navigate to Settings > Pages
-3. Under "Source", select "GitHub Actions"
-4. This will use the workflow in `.github/workflows/deploy-frontend.yml`
+### Option A: Deploy via Vercel CLI
 
-## Step 4: Set Up GitHub Secrets
+1. Install the Vercel CLI:
+```bash
+npm install -g vercel
+```
 
-For the backend to work properly, you need to configure secrets in your GitHub repository:
+2. Navigate to the frontend directory:
+```bash
+cd frontend
+```
+
+3. Deploy to Vercel:
+```bash
+vercel --prod
+```
+
+4. Follow the prompts to link your GitHub account and configure the project
+
+### Option B: Deploy via Vercel Dashboard
+
+1. Go to [vercel.com](https://vercel.com) and sign in
+2. Click "New Project" and import your GitHub repository
+3. Configure the project settings:
+   - Framework: Docusaurus
+   - Build Command: `npm run build`
+   - Output Directory: `build`
+   - Root Directory: `frontend`
+4. Add environment variables in the Vercel dashboard (see Step 4)
+
+### Option C: Deploy via Git Integration
+
+1. Go to [vercel.com](https://vercel.com) and sign in
+2. Import your GitHub repository
+3. Vercel will automatically detect the Docusaurus configuration from `vercel.json`
+4. Configure the build settings to point to the `frontend` directory
+
+## Step 4: Set Up Environment Variables
+
+### For Vercel Deployment:
+
+1. Go to your Vercel dashboard
+2. Select your project
+3. Navigate to Settings > Environment Variables
+4. Add the following variables:
+   - `NODE_ENV` - Set to `production`
+   - `REACT_APP_BACKEND_URL` - Your backend API URL (e.g., `https://your-backend-app.herokuapp.com`)
+
+### For GitHub Deployment (Backend):
 
 1. Go to your repository on GitHub
 2. Navigate to Settings > Secrets and variables > Actions
@@ -51,7 +93,49 @@ For the backend to work properly, you need to configure secrets in your GitHub r
    - `SECRET_KEY` - Your application secret key
    - `POSTGRES_PASSWORD` - Your PostgreSQL password
 
-## Step 5: Configure Environment Variables
+## Step 5: Configure Vercel Settings
+
+### Update vercel.json for Frontend:
+
+The project already includes a `vercel.json` file in the root directory with the following configuration:
+
+```json
+{
+  "version": 2,
+  "framework": "docusaurus",
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "github": {
+    "enabled": true,
+    "autoJobCancelation": true
+  }
+}
+```
+
+### Update Docusaurus Configuration:
+
+In `frontend/docusaurus.config.js`, make sure the URL and base URL are properly configured for Vercel deployment:
+
+```js
+// For Vercel deployment, update these values:
+url: 'https://your-project-name.vercel.app',  // Replace with your actual Vercel URL
+baseUrl: '/',  // For Vercel, typically use root path
+```
+
+## Step 6: Configure Environment Variables
 
 Create a `.env` file in the root of your repository with the following structure (but don't commit it to the repository):
 
@@ -66,22 +150,23 @@ POSTGRES_PASSWORD=your_secure_password
 DEBUG=False
 
 # Frontend configuration
-REACT_APP_BACKEND_URL=https://your-username.github.io/Physical-AI-and-Humanoid-Book
+REACT_APP_BACKEND_URL=https://your-backend-app.herokuapp.com  # Replace with your backend URL
 ```
 
-## Step 6: Deploy the Application
+## Step 7: Deploy the Application
 
-### Frontend Deployment (GitHub Pages)
+### Frontend Deployment (Vercel)
 
-The frontend will automatically deploy when you push to the main branch. The GitHub Actions workflow will:
+When you deploy to Vercel, the platform will:
 
-1. Install dependencies
-2. Build the Docusaurus application
-3. Deploy to GitHub Pages
+1. Install dependencies in the frontend directory
+2. Run `npm run build` to build the Docusaurus application
+3. Serve the built files from the `build` directory
+4. Automatically deploy on pushes to main branch (if Git integration is used)
 
 ### Backend Deployment Options
 
-Since GitHub doesn't host backend applications directly, you have several options:
+For the backend, you still need to deploy separately:
 
 #### Option A: Deploy to Heroku
 1. Create a Heroku account
@@ -102,22 +187,20 @@ Since GitHub doesn't host backend applications directly, you have several option
 3. Configure the web service with the Dockerfile
 4. Set environment variables
 
-## Step 7: Update Configuration Files
-
-Before deployment, make sure to update the following files with your actual repository information:
-
-1. `frontend/docusaurus.config.js` - Update `url`, `baseUrl`, `organizationName`, and `projectName`
-2. Update the GitHub links in the navigation bar
-3. Make sure the `editUrl` points to your repository
-
 ## Step 8: Verification
 
 After deployment:
 
-1. Frontend: Visit `https://your-username.github.io/Physical-AI-and-Humanoid-Book/`
+1. Frontend on Vercel: Visit `https://your-project-name.vercel.app`
 2. Backend: Visit your backend URL (e.g., `https://your-app.herokuapp.com/health`)
 
 ## Troubleshooting
+
+### Vercel Deployment Issues
+- Check the Vercel dashboard for build logs and error messages
+- Ensure your `vercel.json` is properly configured
+- Verify that the build command runs successfully in the frontend directory
+- Make sure all required environment variables are set in Vercel
 
 ### GitHub Pages Not Deploying
 - Check the Actions tab for workflow errors
@@ -140,26 +223,28 @@ After deployment:
 1. Make changes to your local repository
 2. Test locally using `npm run dev`
 3. Commit and push changes to the main branch
-4. GitHub Actions will automatically deploy frontend changes
+4. Vercel will automatically deploy frontend changes (if Git integration is used)
 5. For backend, redeploy to your hosting platform
 
 ### Monitoring
-- Monitor GitHub Actions for deployment status
+- Monitor Vercel dashboard for deployment status
 - Check your backend health endpoints regularly
 - Monitor API usage for external services
 
 ## Security Best Practices
 
 1. Never commit API keys or secrets to the repository
-2. Use GitHub Secrets for sensitive information
-3. Regularly rotate API keys
-4. Enable two-factor authentication on your GitHub account
-5. Review access permissions regularly
+2. Use Vercel Environment Variables for frontend secrets
+3. Use GitHub Secrets for backend secrets
+4. Regularly rotate API keys
+5. Enable two-factor authentication on your GitHub and Vercel accounts
+6. Review access permissions regularly
 
 ## Support
 
 For deployment issues, please:
-1. Check the GitHub Actions logs
-2. Verify all configuration files
-3. Ensure all required services are running
-4. Create an issue in the repository with detailed information
+1. Check the Vercel dashboard logs
+2. Check the GitHub Actions logs
+3. Verify all configuration files
+4. Ensure all required services are running
+5. Create an issue in the repository with detailed information

@@ -184,7 +184,12 @@
       "Bash(cd D:/PROJECT/HACKATHON 1/backend)",
       "Bash(pip install fastapi uvicorn[standard] pydantic[email] python-multipart passlib[bcrypt] python-jose[cryptography] python-dotenv sqlalchemy psycopg2-binary qdrant-client openai)",
       "Bash(pip install alembic pytest pytest-asyncio httpx pydantic-settings requests cryptography anthropic bcrypt)",
-      "Bash(cd D:PROJECTHACKATHON 1frontend)"
+      "Bash(cd D:PROJECTHACKATHON 1frontend)",
+      "Bash(dir /s /b D:PROJECTHACKATHON 1)",
+      "Bash(findstr /v /i \"node_modules\\\\|\\\\.git\\\\|__pycache__\\\\|\\\\.pyc\\\\|\\\\.DS_Store\\\\|\\\\.vscode\")",
+      "Bash(findstr \"\\\\.\")",
+      "Bash(dir /s D:PROJECTHACKATHON 1 /b)",
+      "Bash(cat nul)"
     ]
   }
 }
