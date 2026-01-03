@@ -42,7 +42,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book/edit/main/frontend/docs/',
+            'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book-/edit/main/frontend/docs/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -76,7 +76,7 @@ const config = {
             position: 'right',
           },
           {
-            href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book',
+            href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book-',
             label: 'GitHub',
             position: 'right',
           },
@@ -89,12 +89,12 @@ const config = {
             title: 'Documentation',
             items: [
               {
-                label: 'Tutorials',
-                to: '/docs/category/tutorials',
+                label: 'docs',
+                to: '/docs',
               },
               {
                 label: 'API Reference',
-                href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book#api-documentation', // Link to README section
+                href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book-#api-documentation', // Link to README section
               },
             ],
           },
@@ -103,11 +103,11 @@ const config = {
             items: [
               {
                 label: 'GitHub',
-                href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book',
+                href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book-',
               },
               {
                 label: 'Issues',
-                href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book/issues',
+                href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book-/issues',
               },
             ],
           },
@@ -116,7 +116,7 @@ const config = {
             items: [
               {
                 label: 'GitHub',
-                href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book',
+                href: 'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book-',
               },
             ],
           },
