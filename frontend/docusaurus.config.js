@@ -58,7 +58,6 @@ const config = {
       image: 'img/docusaurus-social-card.jpg',
       navbar: {
         title: 'Physical AI and Humanoid Book',
-        titleHref: '/docs',
         items: [
           {
             type: 'docSidebar',
