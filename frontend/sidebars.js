@@ -56,14 +56,22 @@ const sidebars = {
       type: 'category',
       label: 'Module 5: Advanced Control Systems and Locomotion for Humanoid Robots',
       items: [
-        'physical-ai/module-5-advanced-control-locomotion'
+        'physical-ai/module-5/ch1-advanced-control-systems-for-humanoid-stability',
+        'physical-ai/module-5/ch2-bipedal-locomotion-algorithms-for-humanoid-robots',
+        'physical-ai/module-5/ch3-feedback-control-systems-for-humanoid-actuators',
+        'physical-ai/module-5/ch4-inverse-kinematics-dynamics-humanoid-motion',
+        'physical-ai/module-5/ch5-adaptive-control-perception-integration'
       ],
     },
     {
       type: 'category',
       label: 'Module 6: Safety, Ethics, and Human-Robot Interaction in Physical AI',
       items: [
-        'physical-ai/module-6-safety-ethics-hri'
+        'physical-ai/module-6/ch1-safety-frameworks-physical-ai',
+        'physical-ai/module-6/ch2-ethical-considerations-robotics-ai',
+        'physical-ai/module-6/ch3-human-robot-interaction-principles',
+        'physical-ai/module-6/ch4-standards-compliance-robot-systems',
+        'physical-ai/module-6/ch5-social-implications-humanoid-robots'
       ],
     },
   ],
