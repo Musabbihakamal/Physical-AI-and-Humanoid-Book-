@@ -52,6 +52,20 @@ const sidebars = {
         'physical-ai/module-4/ch5-capstone-project-humanoid-ai-companion'
       ],
     },
+    {
+      type: 'category',
+      label: 'Module 5: Advanced Control Systems and Locomotion for Humanoid Robots',
+      items: [
+        'physical-ai/module-5-advanced-control-locomotion'
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Module 6: Safety, Ethics, and Human-Robot Interaction in Physical AI',
+      items: [
+        'physical-ai/module-6-safety-ethics-hri'
+      ],
+    },
   ],
 };
 
