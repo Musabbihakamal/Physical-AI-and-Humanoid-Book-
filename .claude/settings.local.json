@@ -194,7 +194,9 @@
       "Bash(git pull origin main)",
       "Bash(git add .)",
       "Bash(git commit -m \"feat: update deployment docs for Vercel and fix Docusaurus config\n\n- Update deployment guide to include Vercel deployment instructions\n- Modify Docusaurus config for Vercel compatibility \\(baseUrl and URL\\)\n- Remove temporary files \\(temp_build_test.js, intro_summaries.txt\\)\n- Update GitHub links in local config\n- Prepare documentation for Vercel deployment with proper build settings\")",
-      "Bash(git commit --amend --author=\"DEVELOPER <musabbihakamal@gmail.com>\")"
+      "Bash(git commit --amend --author=\"DEVELOPER <musabbihakamal@gmail.com>\")",
+      "Bash(git stash pop)",
+      "Bash(git add .claude/settings.local.json)"
     ]
   }
 }
