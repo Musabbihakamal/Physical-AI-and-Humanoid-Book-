@@ -196,7 +196,14 @@
       "Bash(git commit -m \"feat: update deployment docs for Vercel and fix Docusaurus config\n\n- Update deployment guide to include Vercel deployment instructions\n- Modify Docusaurus config for Vercel compatibility \\(baseUrl and URL\\)\n- Remove temporary files \\(temp_build_test.js, intro_summaries.txt\\)\n- Update GitHub links in local config\n- Prepare documentation for Vercel deployment with proper build settings\")",
       "Bash(git commit --amend --author=\"DEVELOPER <musabbihakamal@gmail.com>\")",
       "Bash(git stash pop)",
-      "Bash(git add .claude/settings.local.json)"
+      "Bash(git add .claude/settings.local.json)",
+      "Bash(git commit -m \"Update Claude settings with git commands\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\")",
+      "Bash(git stash show -p)",
+      "Bash(git add frontend/docs/physical-ai/module-5/ frontend/docs/physical-ai/module-6/)",
+      "Bash(git commit -m \"Add 5 chapters each to Module 5 and Module 6\n\n- Created 5 detailed chapters for Advanced Control Systems and Locomotion module\n- Created 5 detailed chapters for Safety, Ethics, and Human-Robot Interaction module\n- All chapters follow the established pattern with Learning Objectives, Core Theory, Practical Examples, Diagrams, Exercises, Quiz, References and Summary sections\n- Updated sidebar navigation to include all new chapters\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\")",
+      "Bash(dir frontenddocs*.md)",
+      "Bash(ls frontend/docs/*.md)",
+      "Bash(git add -A)"
     ]
   }
 }
