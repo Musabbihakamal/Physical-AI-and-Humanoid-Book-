@@ -2,7 +2,7 @@
 sidebar_position: 5
 ---
 
-# Chapter 1.5: Adaptive Control and Perception Integration for Humanoid Robots
+# Chapter 5: Adaptive Control and Perception Integration for Humanoid Robots
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

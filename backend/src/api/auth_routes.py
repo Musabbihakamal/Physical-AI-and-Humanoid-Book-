@@ -261,6 +261,7 @@ async def github_login(request: Request):
 # OAuth Callback endpoints - These handle the response from OAuth providers
 @router.get("/google/callback")
 async def google_callback(
+    request: Request,
     code: str,
     state: str,
     db: Session = Depends(get_db)
@@ -271,7 +272,8 @@ async def google_callback(
     """
     import os
     import requests
-    from urllib.parse import urlencode
+    from urllib.parse import urlencode, quote
+    from fastapi.responses import RedirectResponse
 
     google_client_id = os.getenv("GOOGLE_CLIENT_ID")
     google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
@@ -316,15 +318,6 @@ async def google_callback(
             detail="Failed to get user info from Google."
         )
 
-    # Create or update user in database using the OAuth login endpoint
-    oauth_request = OAuthLoginRequest(
-        provider="google",
-        access_token=access_token,
-        email=user_info["email"],
-        full_name=user_info.get("name", user_info.get("email", "Unknown")),
-        avatar_url=user_info.get("picture")
-    )
-
     # Process OAuth login and get tokens
     existing_user = db.query(User).filter(User.email == user_info["email"]).first()
 
@@ -349,20 +342,23 @@ async def google_callback(
         )
         is_new_user = True
 
-    # Return tokens (in a real app, you might redirect to frontend with tokens)
-    return OAuthLoginResponse(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        token_type="bearer",
-        user_id=str(existing_user.id if existing_user else user.id),
-        email=user_info["email"],
-        full_name=user_info.get("name", user_info.get("email", "Unknown")),
-        is_new_user=is_new_user
-    )
+    # Redirect to frontend with tokens as URL parameters
+    # Determine the frontend URL based on the request
+    frontend_base_url = str(request.url).split('/api/auth/google/callback')[0].rstrip('/')
+
+    # For development, typically the frontend runs on port 3000
+    if 'localhost' in frontend_base_url or '127.0.0.1' in frontend_base_url:
+        # Try common frontend ports
+        frontend_base_url = f"{request.url.scheme}://{request.url.hostname}:3000"
+
+    redirect_url = f"{frontend_base_url}/auth/callback?provider=google&access_token={access_token}&refresh_token={refresh_token}&user_id={str(existing_user.id if existing_user else user.id)}&email={quote(user_info['email'])}&full_name={quote(user_info.get('name', user_info.get('email', 'Unknown')))}&is_new_user={is_new_user}"
+
+    return RedirectResponse(url=redirect_url)
 
 
 @router.get("/github/callback")
 async def github_callback(
+    request: Request,
     code: str,
     state: str,
     db: Session = Depends(get_db)
@@ -373,7 +369,8 @@ async def github_callback(
     """
     import os
     import requests
-    from urllib.parse import urlencode
+    from urllib.parse import urlencode, quote
+    from fastapi.responses import RedirectResponse
 
     github_client_id = os.getenv("GITHUB_CLIENT_ID")
     github_client_secret = os.getenv("GITHUB_CLIENT_SECRET")
@@ -422,15 +419,6 @@ async def github_callback(
         # If no primary email found, get the first verified email
         primary_email = next((email["email"] for email in emails if email["verified"]), user_info.get("login", "") + "@github.com")
 
-    # Create or update user in database
-    oauth_request = OAuthLoginRequest(
-        provider="github",
-        access_token=access_token,
-        email=primary_email,
-        full_name=user_info.get("name", user_info.get("login", "Unknown")),
-        avatar_url=user_info.get("avatar_url")
-    )
-
     # Process OAuth login and get tokens
     existing_user = db.query(User).filter(User.email == primary_email).first()
 
@@ -455,16 +443,18 @@ async def github_callback(
         )
         is_new_user = True
 
-    # Return tokens (in a real app, you might redirect to frontend with tokens)
-    return OAuthLoginResponse(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        token_type="bearer",
-        user_id=str(existing_user.id if existing_user else user.id),
-        email=primary_email,
-        full_name=user_info.get("name", user_info.get("login", "Unknown")),
-        is_new_user=is_new_user
-    )
+    # Redirect to frontend with tokens as URL parameters
+    # Determine the frontend URL based on the request
+    frontend_base_url = str(request.url).split('/api/auth/github/callback')[0].rstrip('/')
+
+    # For development, typically the frontend runs on port 3000
+    if 'localhost' in frontend_base_url or '127.0.0.1' in frontend_base_url:
+        # Try common frontend ports
+        frontend_base_url = f"{request.url.scheme}://{request.url.hostname}:3000"
+
+    redirect_url = f"{frontend_base_url}/auth/callback?provider=github&access_token={access_token}&refresh_token={refresh_token}&user_id={str(existing_user.id if existing_user else user.id)}&email={quote(primary_email)}&full_name={quote(user_info.get('name', user_info.get('login', 'Unknown')))}&is_new_user={is_new_user}"
+
+    return RedirectResponse(url=redirect_url)
 
 
 @router.post("/register", response_model=TokenResponse)

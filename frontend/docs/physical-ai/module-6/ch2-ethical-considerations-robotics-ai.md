@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# Chapter 2.2: Ethical Considerations in Robotics and AI Development
+# Chapter 2: Ethical Considerations in Robotics and AI Development
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

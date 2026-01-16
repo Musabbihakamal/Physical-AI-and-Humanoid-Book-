@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# Chapter 1.2: Bipedal Locomotion Algorithms for Humanoid Robots
+# Chapter 2: Bipedal Locomotion Algorithms for Humanoid Robots
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

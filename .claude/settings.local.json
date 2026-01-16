@@ -203,7 +203,10 @@
       "Bash(git commit -m \"Add 5 chapters each to Module 5 and Module 6\n\n- Created 5 detailed chapters for Advanced Control Systems and Locomotion module\n- Created 5 detailed chapters for Safety, Ethics, and Human-Robot Interaction module\n- All chapters follow the established pattern with Learning Objectives, Core Theory, Practical Examples, Diagrams, Exercises, Quiz, References and Summary sections\n- Updated sidebar navigation to include all new chapters\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\")",
       "Bash(dir frontenddocs*.md)",
       "Bash(ls frontend/docs/*.md)",
-      "Bash(git add -A)"
+      "Bash(git add -A)",
+      "Bash(git commit -m \"Remove conflicting index.md file to fix Docusaurus routing error\n\n- Removed docs/index.md that was conflicting with site routing\n- This resolves the ''Module not found: Error: Can''t resolve @site/docs/index.md'' error\n- The intro.md file serves as the main documentation entry point\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\")",
+      "Bash(dir .env)",
+      "Bash(dir D:PROJECTHACKATHON 1frontenddocsphysical-aimodule-5)"
     ]
   }
 }

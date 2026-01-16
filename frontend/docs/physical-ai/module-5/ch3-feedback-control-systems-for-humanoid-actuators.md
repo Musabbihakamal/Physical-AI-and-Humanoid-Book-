@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# Chapter 1.3: Feedback Control Systems for Humanoid Actuators
+# Chapter 3: Feedback Control Systems for Humanoid Actuators
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

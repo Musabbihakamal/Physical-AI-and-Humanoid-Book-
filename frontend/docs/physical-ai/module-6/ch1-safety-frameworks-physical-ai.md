@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Chapter 2.1: Safety Frameworks for Physical AI Systems
+# Chapter 1: Safety Frameworks for Physical AI Systems
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

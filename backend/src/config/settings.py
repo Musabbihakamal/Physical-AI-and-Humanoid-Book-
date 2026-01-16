@@ -28,6 +28,14 @@ class Settings(BaseSettings):
     CLAUDE_API_KEY: Optional[str] = None
     ANTHROPIC_API_KEY: Optional[str] = None
 
+    # OAuth settings
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    GITHUB_CLIENT_ID: Optional[str] = None
+    GITHUB_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_REDIRECT_URI: Optional[str] = None
+    GITHUB_REDIRECT_URI: Optional[str] = None
+
     # Agent settings
     DEFAULT_AGENT_TIMEOUT: int = 30  # seconds
     MAX_CONTENT_LENGTH: int = 100000  # characters

@@ -2,7 +2,7 @@
 sidebar_position: 4
 ---
 
-# Chapter 2.4: Standards and Compliance for Robot Systems
+# Chapter 4: Standards and Compliance for Robot Systems
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

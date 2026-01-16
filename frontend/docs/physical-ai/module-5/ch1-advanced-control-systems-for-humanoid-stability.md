@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Chapter 1.1: Advanced Control Systems for Humanoid Stability
+# Chapter 1: Advanced Control Systems for Humanoid Stability
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

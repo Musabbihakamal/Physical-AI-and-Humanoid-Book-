@@ -2,7 +2,7 @@
 sidebar_position: 5
 ---
 
-# Chapter 2.5: Social Implications and Future Considerations
+# Chapter 5: Social Implications and Future Considerations
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

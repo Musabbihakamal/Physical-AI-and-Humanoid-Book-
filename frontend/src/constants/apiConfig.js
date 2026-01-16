@@ -15,19 +15,19 @@ export const getBackendUrl = () => {
     const hostname = window.location.hostname;
     const port = window.location.port ? window.location.port : '8000'; // Default to 8000 for backend
 
-    // For localhost development, use port 8001 for backend
+    // For localhost development, use port 8000 for backend (standard FastAPI port)
     // For production, try same origin or default to common ports
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return `${protocol}//${hostname}:8001`;
+      return `${protocol}//${hostname}:8000`;
     } else {
       // For production, try the same origin (if backend is served from same domain)
       // or default to common ports
-      return `${protocol}//${hostname}:8001`;
+      return `${protocol}//${hostname}:8000`;
     }
   }
 
   // Fallback for server-side rendering or other environments
-  return 'http://localhost:8001';
+  return 'http://localhost:8000';
 };
 
 // API base URL

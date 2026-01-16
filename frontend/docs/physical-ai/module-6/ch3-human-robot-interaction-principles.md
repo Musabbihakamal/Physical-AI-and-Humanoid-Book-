@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# Chapter 2.3: Human-Robot Interaction Principles
+# Chapter 3: Human-Robot Interaction Principles
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

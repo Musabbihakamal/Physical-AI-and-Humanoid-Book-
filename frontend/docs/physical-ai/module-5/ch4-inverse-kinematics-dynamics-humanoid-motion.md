@@ -2,7 +2,7 @@
 sidebar_position: 4
 ---
 
-# Chapter 1.4: Inverse Kinematics and Dynamics for Humanoid Motion
+# Chapter 4: Inverse Kinematics and Dynamics for Humanoid Motion
 
 ## Learning Objectives
 By the end of this chapter, you will be able to:

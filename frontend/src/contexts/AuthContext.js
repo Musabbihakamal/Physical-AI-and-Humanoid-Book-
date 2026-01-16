@@ -201,6 +201,46 @@ const AuthProvider = ({ children }) => {
     dispatch({ type: 'LOGOUT' });
   };
 
+  const loginWithTokens = async (tokensData) => {
+    dispatch({ type: 'LOGIN_START' });
+
+    try {
+      const { access_token, refresh_token, user_id, email, full_name, is_new_user } = tokensData;
+
+      // Store tokens in localStorage (only in browser)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('accessToken', access_token);
+        localStorage.setItem('refreshToken', refresh_token);
+      }
+
+      // Create a mock user object with the data from OAuth
+      const user = {
+        user_id,
+        email,
+        full_name,
+        is_new_user
+      };
+
+      dispatch({
+        type: 'LOGIN_SUCCESS',
+        payload: {
+          user,
+          accessToken: access_token,
+          refreshToken: refresh_token
+        }
+      });
+
+      return { success: true, user };
+    } catch (error) {
+      const errorMessage = error.message || 'OAuth login failed';
+      dispatch({
+        type: 'LOGIN_FAILURE',
+        payload: errorMessage
+      });
+      return { success: false, error: errorMessage };
+    }
+  };
+
   const updateProfile = async (profileData) => {
     dispatch({ type: 'REGISTER_START' });
 
@@ -232,6 +272,7 @@ const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    loginWithTokens,
     updateProfile,
     clearError: () => dispatch({ type: 'CLEAR_ERROR' })
   };
