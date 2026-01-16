@@ -39,6 +39,7 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
+          routeBasePath: 'docs',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
@@ -90,7 +91,8 @@ const config = {
             items: [
               {
                 label: 'docs',
-                to: '/docs',
+                to: '/docs/constitution'
+',
               },
               {
                 label: 'API Reference',
