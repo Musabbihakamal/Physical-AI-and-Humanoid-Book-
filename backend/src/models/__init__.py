@@ -8,6 +8,7 @@ from .generated_content import GeneratedContent
 from .content_link import ContentLink
 from .rag_session import RAGSession, RAGQuery
 from .book_chapter import BookChapter
+from .agent_request import AgentRequest
 
 __all__ = [
     "User",
@@ -17,5 +18,6 @@ __all__ = [
     "ContentLink",
     "RAGSession",
     "RAGQuery",
-    "BookChapter"
+    "BookChapter",
+    "AgentRequest"
 ]

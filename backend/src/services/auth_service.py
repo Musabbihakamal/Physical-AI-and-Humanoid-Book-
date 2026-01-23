@@ -215,14 +215,19 @@ class AuthService:
 
             # Verify password (with bcrypt error handling)
             try:
-                password_valid = user.check_password(password)
-            except ValueError as ve:
-                # Handle bcrypt password length error during verification
-                if "password cannot be longer than 72 bytes" in str(ve):
+                password_valid = User.verify_password(password, user.hashed_password)
+            except (ValueError, Exception) as ve:
+                # Handle various password verification errors
+                error_msg = str(ve).lower()
+                if "cannot be longer than 72 bytes" in error_msg:
                     logger.warning(f"Authentication failed: password too long for user {email}")
                     return None
+                elif "hash could not be identified" in error_msg or "unknown hash algorithm" in error_msg:
+                    logger.error(f"Authentication failed: invalid hash format for user {email}")
+                    return None
                 else:
-                    raise ve
+                    logger.error(f"Authentication failed: password verification error for user {email} - {str(ve)}")
+                    return None
 
             if not password_valid:
                 logger.warning(f"Authentication failed: incorrect password for user {email}")
@@ -346,6 +351,42 @@ class AuthService:
         except Exception as e:
             logger.error(f"Error logging out user: {str(e)}")
             return False
+
+    @staticmethod
+    def generate_tokens(user: User, db: Session = None) -> Tuple[str, str]:
+        """
+        Generate access and refresh tokens for a user.
+
+        Args:
+            user: User object
+            db: Database session (optional, required if storing refresh token in DB)
+
+        Returns:
+            Tuple of (access_token, refresh_token)
+        """
+        access_token = AuthService.create_access_token(
+            data={"sub": str(user.id), "email": user.email}
+        )
+        refresh_token = AuthService.create_refresh_token(
+            data={"sub": str(user.id), "email": user.email}
+        )
+
+        # If db session is provided, store the refresh token in the database
+        if db is not None:
+            from datetime import datetime, timedelta
+            from ..models.token import Token
+
+            token_expires = datetime.utcnow() + timedelta(days=30)
+            token_record = Token(
+                user_id=str(user.id),
+                token=refresh_token,
+                token_type="refresh",
+                expires_at=token_expires
+            )
+            db.add(token_record)
+            db.commit()
+
+        return access_token, refresh_token
 
     @staticmethod
     def get_current_user(db: Session, token: str) -> Optional[User]:

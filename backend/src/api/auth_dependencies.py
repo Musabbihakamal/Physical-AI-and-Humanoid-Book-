@@ -42,16 +42,25 @@ def get_current_user(
 
     try:
         token = credentials.credentials
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+
+        # Use AuthService.verify_token to properly handle token validation and blacklisting
+        payload = AuthService.verify_token(token)
+        if not payload:
+            raise credentials_exception
+
         user_id: str = payload.get("sub")
 
         if user_id is None:
             raise credentials_exception
 
-        # Check if token is blacklisted by looking for it in the tokens table
-        # Only refresh tokens are typically blacklisted, but we'll check for any token type
+        # Additional check: ensure refresh token is not blacklisted in the database
+        # Access tokens are not stored in the database, only refresh tokens are
         from ..models.token import Token
-        token_record = db.query(Token).filter(Token.token == token).first()
+        # Only check for refresh tokens in the database (they're the ones that can be blacklisted)
+        token_record = db.query(Token).filter(
+            Token.token == token,
+            Token.token_type == "refresh"
+        ).first()
         if token_record and token_record.is_blacklisted:
             raise credentials_exception
 

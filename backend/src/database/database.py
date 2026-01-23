@@ -23,7 +23,6 @@ if TESTING:
 
 # Import appropriate types based on database
 # Check if we're using SQLite (which doesn't support native UUID)
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost/book_agent_db")
 if 'sqlite' in DATABASE_URL.lower() or TESTING:
     # For SQLite, use String type for UUID
     from sqlalchemy import String, DateTime, Text, JSON

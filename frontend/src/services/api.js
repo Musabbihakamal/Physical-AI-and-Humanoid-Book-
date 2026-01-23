@@ -1,10 +1,9 @@
 // frontend/src/services/api.js
 import cache from '../utils/cache';
-import { getEnvVar, isProduction } from '../utils/env';
+import { API_BASE_URL } from '../constants/apiConfig';
 
 // Use a mock API URL for static deployments or fallback to backend
-const API_BASE_URL = getEnvVar('REACT_APP_BACKEND_URL',
-  isProduction() ? '' : 'http://localhost:8000'); // Empty string for static deployment
+// API_BASE_URL is imported from constants/apiConfig.js which handles the environment configuration
 
 class ApiService {
   constructor() {
@@ -78,15 +77,18 @@ class ApiService {
   }
 
   // Helper method to make API requests with auth
-  async request(endpoint, options = {}) {
+  async request(endpoint, options = {}, includeAuth = true) {
     // If no base URL is configured (static deployment), return mock responses
     if (!this.baseUrl || this.baseUrl === '') {
       return this.getMockResponse(endpoint, options);
     }
 
     let config = {
-      headers: {
+      headers: includeAuth ? {
         ...this.getAuthHeaders(),
+        ...options.headers,
+      } : {
+        'Content-Type': 'application/json',
         ...options.headers,
       },
       ...options,
@@ -116,6 +118,8 @@ class ApiService {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
           }
+          // Re-throw the error to be handled upstream
+          throw refreshError;
         }
       }
 
@@ -134,13 +138,33 @@ class ApiService {
       }
 
       if (!response.ok) {
-        throw new Error(data.detail?.message || data.message || 'API request failed');
+        // If we get a 401 after all retries, make sure to clear tokens
+        if (response.status === 401) {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+          }
+        }
+        throw new Error(data.detail?.message || data.message || `API request failed with status ${response.status}`);
       }
 
       return data;
     } catch (error) {
-      console.error(`API request failed: ${endpoint}`, error);
-      throw error;
+      // Check if this is a network error (fetch failed to reach the server)
+      if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('network'))) {
+        console.error(`Network error connecting to ${url}:`, error.message);
+        throw new Error(`Unable to connect to the server. Please ensure the backend server is running on ${this.baseUrl}. Network error: ${error.message}`);
+      } else {
+        // For 401 errors specifically, also clear tokens
+        if (error.message && (error.message.includes('401') || response?.status === 401)) {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+          }
+        }
+        console.error(`API request failed: ${endpoint}`, error);
+        throw error;
+      }
     }
   }
 
@@ -184,6 +208,18 @@ class ApiService {
     return this.request('/api/session-info');
   }
 
+  // Translate content
+  async translateContent(text, targetLanguage = 'ur', sourceLanguage = 'en') {
+    return this.request('/api/translate/translate', {
+      method: 'POST',
+      body: JSON.stringify({
+        text: text,
+        target_language: targetLanguage,
+        source_language: sourceLanguage
+      })
+    });
+  }
+
   // Get cached results for completed requests
   async getCachedResult(requestId, type) {
     const cacheKey = `result:${type}:${requestId}`;
@@ -210,15 +246,16 @@ const getApiService = () => {
 
 // Create an API object that mimics Axios interface
 const api = {
-  request: (endpoint, options = {}) => getApiService().request(endpoint, options),
+  request: (endpoint, options = {}, includeAuth = true) => getApiService().request(endpoint, options, includeAuth),
   get: (endpoint, options = {}) => getApiService().request(endpoint, { ...options, method: 'GET' }),
-  post: (endpoint, data, options = {}) => getApiService().request(endpoint, { ...options, method: 'POST', body: JSON.stringify(data) }),
+  post: (endpoint, data, options = {}, includeAuth = true) => getApiService().request(endpoint, { ...options, method: 'POST', body: JSON.stringify(data) }, includeAuth),
   put: (endpoint, data, options = {}) => getApiService().request(endpoint, { ...options, method: 'PUT', body: JSON.stringify(data) }),
   delete: (endpoint, options = {}) => getApiService().request(endpoint, { ...options, method: 'DELETE' }),
   // Additional methods that might be needed
   getUserProfile: () => getApiService().getUserProfile(),
   updateUserProfile: (profileData) => getApiService().updateUserProfile(profileData),
   getSessionInfo: () => getApiService().getSessionInfo(),
+  translateContent: (text, targetLanguage = 'ur', sourceLanguage = 'en') => getApiService().translateContent(text, targetLanguage, sourceLanguage),
   getCachedResult: (requestId, type) => getApiService().getCachedResult(requestId, type),
   cacheResult: (requestId, type, result) => getApiService().cacheResult(requestId, type, result),
 };

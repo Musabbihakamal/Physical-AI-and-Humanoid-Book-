@@ -10,18 +10,17 @@ export const getBackendUrl = () => {
       return window.REACT_APP_BACKEND_URL;
     }
 
-    // Fallback to current host with common backend port
+    // Fallback to current host with backend port
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
-    const port = window.location.port ? window.location.port : '8000'; // Default to 8000 for backend
 
-    // For localhost development, use port 8000 for backend (standard FastAPI port)
-    // For production, try same origin or default to common ports
+    // For localhost development, the backend typically runs on port 8000 while frontend runs on 3000
+    // So we should always target port 8000 for backend API calls
+    // Special handling for localhost to avoid common development issues
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return `${protocol}//${hostname}:8000`;
     } else {
-      // For production, try the same origin (if backend is served from same domain)
-      // or default to common ports
+      // For other hosts, construct the backend URL appropriately
       return `${protocol}//${hostname}:8000`;
     }
   }

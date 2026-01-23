@@ -82,6 +82,14 @@
   background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
 }
 
+.moduleCard-5 {
+  background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%);
+}
+
+.moduleCard-6 {
+  background: linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%);
+}
+
 .moduleIcon {
   margin: 0 auto 1rem auto;
   width: 48px;

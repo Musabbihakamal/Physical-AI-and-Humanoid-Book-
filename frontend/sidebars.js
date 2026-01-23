@@ -4,6 +4,7 @@
 const sidebars = {
   tutorialSidebar: [
     'physical-ai-book',
+    'constitution',
     {
       type: 'category',
       label: 'Module 1: The Robotic Nervous System (ROS 2)',

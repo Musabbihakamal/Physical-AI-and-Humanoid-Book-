@@ -114,10 +114,14 @@ const AuthProvider = ({ children }) => {
 
     try {
       // Use the apiService instead of direct fetch
+      // Don't include auth headers for login request
       const response = await apiService.request('/api/auth/login', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ email, password }),
-      });
+      }, false); // Don't include auth headers for login
 
       // Store tokens in localStorage (only in browser)
       if (typeof window !== 'undefined') {
@@ -152,6 +156,9 @@ const AuthProvider = ({ children }) => {
       // Use the apiService instead of direct fetch
       const response = await apiService.request('/api/auth/register', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           email: userData.email,
           password: userData.password,
@@ -163,7 +170,7 @@ const AuthProvider = ({ children }) => {
           hardware_access: userData.hardware_access || [],
           language_preference: userData.language_preference || 'en'
         })
-      });
+      }, false); // Don't include auth headers for registration
 
       // Store tokens in localStorage (only in browser)
       if (typeof window !== 'undefined') {
@@ -191,11 +198,29 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     // Clear tokens from localStorage (only in browser)
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      // First try to call the backend logout endpoint
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        if (accessToken) {
+          await apiService.request('/api/auth/logout', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            }
+          }, false); // Don't include auth headers as we're providing it manually
+        }
+      } catch (error) {
+        // If logout API fails, still clear local tokens
+        console.warn('Logout API call failed, clearing local tokens anyway:', error.message);
+      } finally {
+        // Always clear local tokens regardless of API success
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+      }
     }
 
     dispatch({ type: 'LOGOUT' });

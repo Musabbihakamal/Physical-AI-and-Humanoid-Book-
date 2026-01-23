@@ -77,7 +77,7 @@
 /* Enhance buttons to contrast with background */
 .button--secondary {
   background-color: rgba(88, 91, 227, 0.763) !important;
-  border: 2px solid rgb(20, 128, 205) !important;
+  border: 2px solid rgb(46, 111, 159) !important;
   color: rgb(230, 231, 231) !important;
   font-family: 'Cambria, Cochin, Georgia, Times, Times New Roman', serif; /* Custom font for button */
   font-size: 20px;
@@ -85,7 +85,7 @@
 
 .button--secondary:hover {
   background-color: rgba(255, 255, 255, 0.3) !important;
-  color: white !important;
+  color: rgb(0, 0, 0) !important;
 }
 
 .button--primary {
@@ -102,7 +102,7 @@
 
 /* Additional styling for features section */
 .features {
-  background-color: #377bbe;
+  background-color: #000000;
 }
 
 .features h2,

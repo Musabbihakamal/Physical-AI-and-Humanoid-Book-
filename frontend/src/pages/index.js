@@ -96,7 +96,9 @@ export default function Home() {
                       </Link>
                     </div>
                   </div>
+                </div>
 
+                <div className="row" style={{gap: '1rem', justifyContent: 'center', marginTop: '2rem'}}>
                   <div className="col col--3" style={{margin: 0, padding: '1rem'}}>
                     <div className={`${styles.moduleCard} ${styles.moduleCard4}`}>
                       <div className={styles.moduleIcon}>
@@ -111,6 +113,44 @@ export default function Home() {
                       <h3>Module 4: Vision-Language-Action & Capstone</h3>
                       <p>Integrate multi-modal systems and complete your humanoid robotics project.</p>
                       <Link className="button button--primary button--block" to="/docs/physical-ai/module-4/ch1-introduction-to-vla">
+                        Start Module
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="col col--3" style={{margin: 0, padding: '1rem'}}>
+                    <div className={`${styles.moduleCard} ${styles.moduleCard5}`}>
+                      <div className={styles.moduleIcon}>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2Z" fill="#4b86b4"/>
+                          <path d="M21 9V7C21 5.9 20.1 5 19 5H16.1C15.8 4.4 15.2 4 14.5 4H9.4C8.8 4 8.2 4.4 7.9 5H5C3.9 5 3 5.9 3 7V9C1.9 9 1 9.9 1 11V15C1 16.1 1.9 17 3 17H5C5.6 19.4 7.8 21 10.5 21H13.5C16.2 21 18.4 19.4 19 17H21C22.1 17 23 16.1 23 15V11C23 9.9 22.1 9 21 9ZM19 15C19 15 18.9 15.5 18.6 15.8C18.2 16.2 17.6 16.5 17 16.5H7C6.4 16.5 5.8 16.2 5.4 15.8C5.1 15.5 5 15 5 15V11H19V15Z" fill="#2a4d69"/>
+                          <path d="M8 11H6V13H8V11Z" fill="#4b86b4"/>
+                          <path d="M18 11H16V13H18V11Z" fill="#4b86b4"/>
+                          <path d="M15 7H9V9H15V7Z" fill="#4b86b4"/>
+                        </svg>
+                      </div>
+                      <h3>Module 5: Advanced Control Systems and Locomotion</h3>
+                      <p>Master advanced control systems, bipedal locomotion, and inverse kinematics for humanoid robots.</p>
+                      <Link className="button button--primary button--block" to="/docs/physical-ai/module-5/ch1-advanced-control-systems-for-humanoid-stability">
+                        Start Module
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="col col--3" style={{margin: 0, padding: '1rem'}}>
+                    <div className={`${styles.moduleCard} ${styles.moduleCard6}`}>
+                      <div className={styles.moduleIcon}>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2Z" fill="#4b86b4"/>
+                          <path d="M21 9V7C21 5.9 20.1 5 19 5H16.1C15.8 4.4 15.2 4 14.5 4H9.4C8.8 4 8.2 4.4 7.9 5H5C3.9 5 3 5.9 3 7V9C1.9 9 1 9.9 1 11V15C1 16.1 1.9 17 3 17H5C5.6 19.4 7.8 21 10.5 21H13.5C16.2 21 18.4 19.4 19 17H21C22.1 17 23 16.1 23 15V11C23 9.9 22.1 9 21 9ZM19 15C19 15 18.9 15.5 18.6 15.8C18.2 16.2 17.6 16.5 17 16.5H7C6.4 16.5 5.8 16.2 5.4 15.8C5.1 15.5 5 15 5 15V11H19V15Z" fill="#2a4d69"/>
+                          <path d="M8 11H6V13H8V11Z" fill="#4b86b4"/>
+                          <path d="M18 11H16V13H18V11Z" fill="#4b86b4"/>
+                          <path d="M15 7H9V9H15V7Z" fill="#4b86b4"/>
+                        </svg>
+                      </div>
+                      <h3>Module 6: Safety, Ethics, and Human-Robot Interaction</h3>
+                      <p>Explore safety frameworks, ethical considerations, and human-robot interaction principles.</p>
+                      <Link className="button button--primary button--block" to="/docs/physical-ai/module-6/ch1-safety-frameworks-physical-ai">
                         Start Module
                       </Link>
                     </div>

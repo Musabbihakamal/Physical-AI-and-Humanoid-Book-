@@ -122,7 +122,7 @@ async def oauth_login(
 
         if existing_user:
             # User exists, generate tokens
-            access_token, refresh_token = AuthService.generate_tokens(existing_user)
+            access_token, refresh_token = AuthService.generate_tokens(existing_user, db)
 
             logger.info(f"OAuth login successful for existing user: {request.email}")
 
@@ -192,7 +192,12 @@ async def google_login(request: Request):
 
     google_client_id = os.getenv("GOOGLE_CLIENT_ID")
     google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
-    redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", f"{str(request.url.origin)}/api/auth/google/callback")
+
+    # Check if the dummy values are set (meaning OAuth is not configured)
+    if google_client_id and "dummy_for_now" in google_client_id:
+        google_client_id = None
+
+    redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", f"{request.url.scheme}://{request.url.netloc}/api/auth/google/callback")
 
     if not google_client_id:
         # Return configuration error instead of raising exception to ensure route exists
@@ -233,7 +238,12 @@ async def github_login(request: Request):
 
     github_client_id = os.getenv("GITHUB_CLIENT_ID")
     github_client_secret = os.getenv("GITHUB_CLIENT_SECRET")
-    redirect_uri = os.getenv("GITHUB_REDIRECT_URI", f"{str(request.url.origin)}/api/auth/github/callback")
+
+    # Check if the dummy values are set (meaning OAuth is not configured)
+    if github_client_id and "dummy_for_now" in github_client_id:
+        github_client_id = None
+
+    redirect_uri = os.getenv("GITHUB_REDIRECT_URI", f"{request.url.scheme}://{request.url.netloc}/api/auth/github/callback")
 
     if not github_client_id:
         # Return configuration error instead of raising exception to ensure route exists
@@ -323,7 +333,7 @@ async def google_callback(
 
     if existing_user:
         # User exists, generate tokens
-        access_token, refresh_token = AuthService.generate_tokens(existing_user)
+        access_token, refresh_token = AuthService.generate_tokens(existing_user, db)
         is_new_user = False
     else:
         # User doesn't exist, create new user
@@ -424,7 +434,7 @@ async def github_callback(
 
     if existing_user:
         # User exists, generate tokens
-        access_token, refresh_token = AuthService.generate_tokens(existing_user)
+        access_token, refresh_token = AuthService.generate_tokens(existing_user, db)
         is_new_user = False
     else:
         # User doesn't exist, create new user

@@ -41,9 +41,7 @@ const config = {
           sidebarPath: require.resolve('./sidebars.js'),
           routeBasePath: 'docs',
           // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/Musabbihakamal/Physical-AI-and-Humanoid-Book-/edit/main/frontend/docs/',
+          // Removed the "edit this page" links.
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -91,8 +89,7 @@ const config = {
             items: [
               {
                 label: 'docs',
-                to: '/docs/constitution'
-',
+                to: '/docs/constitution',
               },
               {
                 label: 'API Reference',

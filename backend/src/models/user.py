@@ -9,7 +9,7 @@ import uuid
 import hashlib
 
 
-# Password hashing context with fallback
+# Password hashing context - must be identical to AuthService
 try:
     # Try to initialize bcrypt context
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -33,14 +33,20 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    def __init__(self, email: str, password: str, full_name: str):
-        # Validate password length (bcrypt limitation is 72 bytes)
-        if len(password.encode('utf-8')) > 72:
-            raise ValueError("Password cannot be longer than 72 bytes")
+    def __init__(self, email: str = None, password: str = None, full_name: str = None, **kwargs):
+        # If password is provided, this is a new user being created
+        if password is not None:
+            # Validate password length (bcrypt limitation is 72 bytes)
+            if len(password.encode('utf-8')) > 72:
+                raise ValueError("Password cannot be longer than 72 bytes")
 
-        self.email = email
-        self.hashed_password = self.get_password_hash(password)
-        self.full_name = full_name
+            super().__init__(**kwargs)
+            self.email = email
+            self.hashed_password = self.get_password_hash(password)
+            self.full_name = full_name
+        else:
+            # This is being instantiated by SQLAlchemy from DB, let the ORM handle it
+            super().__init__(**kwargs)
 
     @staticmethod
     def get_password_hash(password: str) -> str:
@@ -62,4 +68,4 @@ class User(Base):
 
     def check_password(self, password: str) -> bool:
         """Check if the provided password matches the stored hash."""
-        return self.verify_password(password, self.hashed_password)
+        return User.verify_password(password, self.hashed_password)

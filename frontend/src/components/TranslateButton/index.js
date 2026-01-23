@@ -11,11 +11,14 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
 
   // Initialize translator readiness - no longer dependent on Google Translate API
   useEffect(() => {
-    // Set client flag to true in browser
-    setIsClient(true);
+    // Check if we're in the browser environment before setting client flag
+    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+      // Set client flag to true in browser
+      setIsClient(true);
 
-    // Set translator as ready immediately since we're using LLM-based translation
-    setTranslatorReady(true);
+      // Set translator as ready immediately since we're using LLM-based translation
+      setTranslatorReady(true);
+    }
   }, []);
 
   // Function to extract and preserve code blocks, diagrams, images, and technical terms
@@ -290,8 +293,8 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
     }
   };
 
-  // Alternative method using OpenAI-compatible API for translation
-  const translateTextDirect = async (text, targetLang) => {
+  // Method using Google Translate API directly
+  const translateTextViaGoogle = async (text, targetLang) => {
     // Check if we're in the browser environment
     if (typeof window === 'undefined' || !isClient) {
       throw new Error('Translation can only be performed in the browser.');
@@ -314,64 +317,58 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
         throw new Error('No translatable content found after processing.');
       }
 
-      // Determine target language name for the prompt
-      const targetLanguageName = targetLang === 'ur' ? 'Urdu' : 'English';
-
-      // Create a prompt for translation with preserved elements
-      const prompt = `Translate the following text to ${targetLanguageName}.
-      Preserve the meaning and context. Do not translate technical terms, code blocks,
-      or special formatting placeholders. Return only the translated text without any additional commentary:
-
-      ${processedContent}`;
-
-      // Get API configuration from environment or defaults
-      const apiKey = process.env.REACT_APP_TRANSLATOR_API_KEY ||
-                    (typeof window !== 'undefined' && window.REACT_APP_TRANSLATOR_API_KEY) ||
-                    '';
-      const apiUrl = process.env.REACT_APP_TRANSLATOR_API_URL ||
-                    (typeof window !== 'undefined' && window.REACT_APP_TRANSLATOR_API_URL) ||
-                    'https://api.openai.com/v1/chat/completions';
-
-      // Check if we have API credentials
-      if (!apiKey) {
-        console.warn('No translation API key found, using fallback behavior');
-        // Return the original content with a note that translation isn't available
-        return {
-          translatedText: `[TRANSLATION NOT AVAILABLE: ${processedContent}]`,
-          sourceLanguage: 'en',
-          targetLanguage: targetLang
-        };
+      // Use Google Translate API via Google Translate Element
+      // First, ensure the Google Translate script is loaded
+      if (typeof google === 'undefined' || !google.translate) {
+        // Load the Google Translate script dynamically
+        return await translateViaFetchAPI(processedContent, targetLang, preservedElements);
       }
 
-      // Prepare the request for the LLM-based translation
-      const requestBody = {
-        model: 'gpt-3.5-turbo', // or 'gpt-4' if you prefer
-        messages: [
-          { role: 'system', content: `You are a professional translator. Translate the user's text to the target language while preserving technical terms, code blocks, and special formatting. Do not add any explanations or commentary.` },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.3,
-        max_tokens: Math.min(processedContent.length * 2, 4000) // Adjust based on content length
-      };
+      // For now, using the fetch API approach as it's more reliable
+      return await translateViaFetchAPI(processedContent, targetLang, preservedElements);
+    } catch (error) {
+      console.error('Translation error details:', error);
+      let errorMessage = 'Translation failed. ';
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(requestBody)
-      });
+      if (error.message.includes('Network Error') || error.message.includes('Failed to fetch')) {
+        errorMessage += 'Cannot connect to Google Translate service. Check your internet connection.';
+      } else if (error.message.includes('Invalid content')) {
+        errorMessage += 'Invalid content provided for translation.';
+      } else if (error.message.includes('empty result')) {
+        errorMessage += 'Translation service returned empty result.';
+      } else {
+        errorMessage += error.message || 'Please try again or check console for details.';
+      }
+
+      setTranslationError(errorMessage);
+      throw error;
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  // Helper function to translate via Google Translate API
+  const translateViaFetchAPI = async (text, targetLang, preservedElements) => {
+    try {
+      // Encode the text for the URL
+      const encodedText = encodeURIComponent(text);
+      const apiUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodedText}`;
+
+      const response = await fetch(apiUrl);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Translation API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        throw new Error(`Google Translate API error: ${response.status}`);
       }
 
       const data = await response.json();
 
-      if (data.choices && data.choices.length > 0) {
-        let translatedText = data.choices[0].message?.content?.trim() || '';
+      if (data && data[0]) {
+        let translatedText = '';
+        for (let i = 0; i < data[0].length; i++) {
+          if (data[0][i][0]) {
+            translatedText += data[0][i][0];
+          }
+        }
 
         // Restore preserved elements back to the translated content
         // This will put back code blocks, images, diagrams, etc. in their original positions
@@ -388,30 +385,11 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
           targetLanguage: targetLang
         };
       } else {
-        throw new Error('Translation service returned empty result.');
+        throw new Error('Google Translate service returned empty result.');
       }
     } catch (error) {
-      console.error('Translation error details:', error);
-      let errorMessage = 'Translation failed. ';
-
-      if (error.message.includes('Network Error') || error.message.includes('Failed to fetch')) {
-        errorMessage += 'Cannot connect to translation service. Check your internet connection.';
-      } else if (error.message.includes('Invalid content')) {
-        errorMessage += 'Invalid content provided for translation.';
-      } else if (error.message.includes('empty result')) {
-        errorMessage += 'Translation service returned empty result.';
-      } else if (error.message.includes('401') || error.message.toLowerCase().includes('authorization')) {
-        errorMessage += 'Invalid API key. Please check your translation API configuration.';
-      } else if (error.message.includes('429')) {
-        errorMessage += 'Rate limit exceeded. Please try again later.';
-      } else {
-        errorMessage += error.message || 'Please try again or check console for details.';
-      }
-
-      setTranslationError(errorMessage);
+      console.error('Google Translate API error:', error);
       throw error;
-    } finally {
-      setIsTranslating(false);
     }
   };
 
@@ -468,8 +446,8 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
         }
 
         if (contentToTranslate && contentToTranslate.trim()) {
-          // Translate the content using LLM-based translation
-          const result = await translateTextDirect(contentToTranslate, 'ur');
+          // Translate the content using Google Translate API
+          const result = await translateTextViaGoogle(contentToTranslate, 'ur');
 
           // Store the translated text in context
           if (setTranslatedContent && setIsTranslated) {
@@ -478,7 +456,7 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
           }
         } else if (originalContentHTML && originalContentHTML.trim()) {
           // If DOM content wasn't found, try using the original content passed from parent
-          const result = await translateTextDirect(originalContentHTML, 'ur');
+          const result = await translateTextViaGoogle(originalContentHTML, 'ur');
 
           // Store the translated text in context
           if (setTranslatedContent && setIsTranslated) {
