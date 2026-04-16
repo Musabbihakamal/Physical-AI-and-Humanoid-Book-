@@ -12,11 +12,8 @@ REPO_ROOT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "../..")
 )
 
-# backend/src → for `src.*` imports
-sys.path.insert(0, os.path.join(REPO_ROOT, "backend", "src"))
-
-# shared → for `shared.*` imports
-sys.path.insert(0, os.path.join(REPO_ROOT, "shared"))
+# Add backend root so we can import src.*
+sys.path.insert(0, os.path.join(REPO_ROOT, "backend"))
 
 # -------------------------------------------------
 # Normal imports AFTER path fix
@@ -46,8 +43,13 @@ _ = (
     token,
 )
 
+# Explicitly import RAG models to ensure they're registered
+from src.models.rag_session import RAGSession, RAGQuery
+
 # Create tables for testing
+print("Creating test database tables...")
 Base.metadata.create_all(bind=engine)
+print("Test database tables created successfully")
 
 
 @pytest.fixture(scope="module")
