@@ -18,8 +18,13 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    # CORS settings
-    ALLOWED_ORIGINS: List[str] = ["*"]  # In production, specify exact origins
+    # CORS settings - environment-specific
+    ALLOWED_ORIGINS: List[str] = [
+        "http://localhost:3000",           # Dev frontend
+        "http://localhost:8000",           # Dev backend
+        "http://127.0.0.1:3000",           # Dev frontend alt
+        "http://127.0.0.1:8000",           # Dev backend alt
+    ]
 
     # External API keys
     OPENAI_API_KEY: Optional[str] = None
@@ -52,6 +57,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"  # Ignore extra fields in .env file
 
 
 settings = Settings()
