@@ -28,7 +28,7 @@ from src.services.quiz_service import QuizService
 from src.services.book_content_service import BookContentService
 from src.services.content_service import ContentService
 from src.database.database import get_db
-from shared.utils.content_validation import validate_content_safety
+from ..shared.utils.content_validation import validate_content_safety
 
 
 class SubagentValidator:

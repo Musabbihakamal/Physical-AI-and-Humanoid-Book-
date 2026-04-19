@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from backend.src.models.generated_content import GeneratedContent
-from shared.utils.content_validation import (
+from ..shared.utils.content_validation import (
     validate_technical_accuracy,
     validate_docusaurus_formatting,
     validate_educational_structure,

@@ -13,7 +13,7 @@ from ..models.book_chapter import BookChapter
 from ..database.database import get_db
 try:
     # Try importing from the installed package structure
-    from shared.utils.content_validation import validate_content_safety
+    from ..shared.utils.content_validation import validate_content_safety
 except ImportError:
     # Fallback to relative import for development
     import sys
@@ -21,7 +21,7 @@ except ImportError:
     from pathlib import Path
     project_root = Path(__file__).parent.parent.parent.parent
     sys.path.insert(0, str(project_root))
-    from shared.utils.content_validation import validate_content_safety
+    from backend.src.shared.utils.content_validation import validate_content_safety
 
 
 router = APIRouter(prefix="/book-content", tags=["book-content"])

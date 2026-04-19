@@ -5,7 +5,10 @@
       "Bash(git commit -m 'Clean up codebase: remove unnecessary files and directories *)",
       "Bash(git push *)",
       "Bash(git restore *)",
-      "Bash(git pull *)"
+      "Bash(git pull *)",
+      "Bash(git commit -m 'Refactor: Move utils to shared folder and update imports *)",
+      "Bash(git commit -m 'Fix import paths for Railway deployment *)",
+      "Bash(curl -s https://railway.com/project/ae72bd2e-fc65-4089-830a-02675fd9dda3)"
     ]
   }
 }
