@@ -24,7 +24,7 @@ except ImportError:
     from pathlib import Path
     project_root = Path(__file__).parent.parent.parent.parent
     sys.path.insert(0, str(project_root))
-    from shared.utils.content_validation import (
+    from backend.src.shared.utils.content_validation import (
         validate_technical_accuracy,
         validate_docusaurus_formatting,
         validate_educational_structure,
