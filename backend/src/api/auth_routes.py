@@ -9,7 +9,7 @@ from ..database.database import get_db
 from ..services.auth_service import AuthService
 from ..models.user import User
 from ..models.user_profile import UserProfile
-from ..utils.errors import ValidationError
+from ..shared.utils.errors import ValidationError
 from .dependencies import get_current_user, get_token_from_header
 import logging
 import secrets

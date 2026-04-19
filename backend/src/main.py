@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 import uvicorn
 from .api.main import app
-from .utils.logging import setup_logging
+from .shared.utils.logging import setup_logging
 from .config import settings
 import logging
 

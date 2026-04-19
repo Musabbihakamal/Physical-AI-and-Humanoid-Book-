@@ -6,8 +6,8 @@ from typing import List, Dict, Any, Optional
 from hashlib import sha256
 from ..models.generated_content import GeneratedContent
 from ..models.content_link import ContentLink
-from ..utils.content_formatter import extract_terms_from_content
-from ..utils import agent_cache, get_cache_key
+from ..shared.utils.content_formatter import extract_terms_from_content
+from ..shared.utils import agent_cache, get_cache_key
 import logging
 import json
 

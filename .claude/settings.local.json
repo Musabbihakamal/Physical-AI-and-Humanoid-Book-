@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m 'Clean up codebase: remove unnecessary files and directories *)",
+      "Bash(git push *)",
+      "Bash(git restore *)",
+      "Bash(git pull *)"
     ]
   }
 }

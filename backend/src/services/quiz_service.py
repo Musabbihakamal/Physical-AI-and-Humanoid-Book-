@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from typing import Dict, Any, Optional, List
 from ..models.generated_content import GeneratedContent
 from ..models.user_profile import UserProfile
-from ..utils.content_formatter import sanitize_content
+from ..shared.utils.content_formatter import sanitize_content
 import logging
 import json
 import random

@@ -4,7 +4,7 @@ Code explainer service for the multi-agent book generation system.
 from sqlalchemy.orm import Session
 from typing import Dict, Any, Optional, List
 from ..models.generated_content import GeneratedContent
-from ..utils.content_formatter import sanitize_content
+from ..shared.utils.content_formatter import sanitize_content
 import logging
 import re
 import json

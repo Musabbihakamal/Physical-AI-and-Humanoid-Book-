@@ -12,7 +12,7 @@ from ..models.user import User
 from ..models.user_profile import UserProfile
 from ..models.token import Token
 from ..config import settings
-from ..utils.errors import ValidationError
+from ..shared.utils.errors import ValidationError
 import logging
 from passlib.context import CryptContext
 
