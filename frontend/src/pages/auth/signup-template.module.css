@@ -400,6 +400,25 @@
   border-radius: 3px;
 }
 
+/* Field-level error styling */
+.fieldError {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+  display: block;
+  animation: slideIn 0.2s ease;
+}
+
+.formControlError {
+  border-color: #dc3545 !important;
+  background-color: rgba(220, 53, 69, 0.05) !important;
+}
+
+.formControlError:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1) !important;
+}
+
 /* Error message */
 .alert {
   border-radius: 8px;

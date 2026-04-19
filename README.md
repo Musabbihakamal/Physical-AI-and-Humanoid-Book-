@@ -1,4 +1,4 @@
-# Physical AI and Humanoid Book - Deployed on GitHub Pages
+# Physical AI and Humanoid Robotics - Educational System
 
 <div align="center">
 
@@ -6,272 +6,273 @@
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Node.js](https://img.shields.io/badge/node.js-18+-green.svg)](https://nodejs.org/)
 [![FastAPI](https://img.shields.io/badge/fastapi-0.104.1-red.svg)](https://fastapi.tiangolo.com/)
-[![Docusaurus](https://img.shields.io/badge/docusaurus-3.9.2-blue.svg)](https://docusaurus.io/)
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Deployed-2ea44f)](https://github.com/features/pages)
+[![Docusaurus](https://img.shields.io/badge/docusaurus-3.1.0-blue.svg)](https://docusaurus.io/)
 
 </div>
 
-Comprehensive Educational System for Physical AI & Humanoid Robotics with integrated AI agents and Urdu translation capabilities. This project is configured for deployment to GitHub Pages with automated CI/CD.
+Comprehensive educational platform for Physical AI & Humanoid Robotics with RAG-powered chatbot, multi-agent architecture, and Urdu translation capabilities.
 
-## 🚀 Features
+## 🎯 Overview
 
-### Multi-Agent Architecture
-- **Research Agent**: Gathers accurate, verifiable information and provides citations
-- **Writer Agent**: Expands outlines into full chapters with clarity and flow
-- **Editor Agent**: Performs structural editing and ensures grammar and clarity
-- **RAG Engineer Agent**: Builds retrieval pipelines and handles embeddings
-- **Developer Agent**: Writes clean, production-ready code
-- **Documentation Agent**: Creates polished, structured documentation
-- **Project Planner Agent**: Breaks large tasks into steps and defines milestones
+This project provides a complete learning ecosystem for robotics and AI, featuring:
 
-### Educational Features
-- **Glossary Maker**: Automatically generates glossaries from chapter content with links to occurrences
-- **Code Explainer**: Explains complex code examples with ROS 2 and Isaac Sim command highlighting
-- **Quiz Creator**: Generates MCQs, short answer questions, and coding exercises with configurable difficulty
-- **Chapter Generator**: Creates well-structured educational content following pedagogical best practices
+- **6 Educational Modules** covering ROS 2, Digital Twins, NVIDIA Isaac, and VLA systems
+- **RAG Chatbot** for intelligent Q&A with source citations
+- **Ingestion Pipeline** for automated content processing and embedding
+- **Multi-Agent System** with specialized AI agents for content generation
+- **Urdu Translation** with technical term preservation
+- **Interactive Documentation** built with Docusaurus
 
-### Translation Feature
-- **Urdu Translation**: Full chapter translation from English to Urdu using Google Translate API
-- **Content Preservation**: Preserves code blocks, diagrams, images, tables, and formatting during translation
-- **In-Browser Translation**: Translates content directly in the browser without redirects
-- **Technical Term Preservation**: Maintains programming language keywords and technical terminology
+## 🚀 Quick Start
 
-### RAG System
-- Vector database for efficient content retrieval
-- Full-book, section, and paragraph-level retrieval
-- Source citation capabilities
-- Integration with Docusaurus-based documentation website
+### Prerequisites
 
-## 🚀 GitHub Pages Deployment
+- Python 3.11+
+- Node.js 18+
+- Cohere API key (for RAG and embeddings)
+- Qdrant instance (vector database)
 
-This project is configured for deployment to GitHub Pages with automated CI/CD. Follow these steps to deploy:
+### Installation
 
-### 1. Fork the Repository
-Fork this repository to your GitHub account.
+```bash
+# Clone the repository
+git clone <repository-url>
+cd <repository-name>
 
-### 2. Enable GitHub Pages
-1. Go to your repository's **Settings** tab
-2. In the left sidebar, click **Pages**
-3. Under **Source**, select **GitHub Actions** (this will be used by the workflow)
-4. Click **Save**
+# Install dependencies
+npm install
 
-### 3. GitHub Actions Workflow
-The deployment is automated through GitHub Actions. The workflow file `.github/workflows/deploy-frontend.yml` will:
-1. Checkout your code
-2. Setup Node.js environment
-3. Install dependencies
-4. Build the Docusaurus site
-5. Deploy to GitHub Pages
-
-### 4. Trigger Deployment
-The site will automatically deploy when:
-- You push to the `main` or `master` branch
-- You create a pull request to `main` or `master`
-
-### 5. View Your Site
-After the workflow completes successfully, your site will be available at:
-```
-https://your-username.github.io/your-repo-name
+# Configure environment
+cp .env.example .env
+# Edit .env with your API keys
 ```
 
-## 🛠️ Prerequisites
+### Running the System
 
-- **Python** 3.11+
-- **Node.js** 18+
-- **Access to OpenAI API** (for embeddings and agent capabilities)
-- **Qdrant Cloud account** (or local Qdrant instance)
-- **PostgreSQL** (or compatible database)
+```bash
+# Start both backend and frontend
+npm run dev
 
-## 🏗️ Architecture
+# Or run separately:
+npm run backend  # Backend API on http://localhost:8000
+npm run frontend # Frontend on http://localhost:3000
+```
 
-The system is built with a multi-service architecture:
+### RAG Pipeline Usage
+
+```bash
+# Ingest content from Docusaurus site
+python backend/main.py --mode ingest --url http://localhost:3000
+
+# Interactive chat mode
+python backend/main.py --mode chat
+
+# Single question
+python backend/main.py --mode ask --query "What is ROS 2?"
+```
+
+## 📁 Project Structure
 
 ```
 ├── backend/                    # FastAPI backend services
+│   ├── main.py                # Unified RAG bot and ingestion pipeline
+│   ├── test_pipeline.py       # Pipeline tests
+│   ├── rag_bot/               # Modular RAG components
+│   │   ├── crawler.py         # Web crawler
+│   │   ├── extractor.py       # Text extraction
+│   │   ├── chunker.py         # Content chunking
+│   │   ├── embedder.py        # Embedding generation
+│   │   └── storage.py         # Vector storage
+│   └── src/                   # FastAPI application
+│       ├── api/               # API routes
+│       ├── models/            # Database models
+│       └── config/            # Configuration
+├── frontend/                   # Docusaurus documentation site
+│   ├── docs/                  # Educational content (6 modules)
 │   ├── src/
-│   │   ├── agents/            # AI agent implementations
-│   │   ├── models/            # Database models
-│   │   ├── services/          # Business logic services
-│   │   ├── api/               # API routes
-│   │   └── database/          # Database configuration
-│   ├── requirements.txt       # Python dependencies
-│   └── tests/                 # Backend tests
-├── frontend/                   # Docusaurus frontend for GitHub Pages
-│   ├── docs/                  # Documentation files
-│   ├── src/                   # Custom React components (including translation)
-│   │   ├── components/        # UI components
+│   │   ├── components/        # React components
+│   │   │   ├── RAGChatWidget/ # Chat interface
+│   │   │   └── TranslateButton/ # Urdu translation
 │   │   └── contexts/          # React contexts
-│   ├── static/                # Static assets
-│   ├── package.json
 │   └── docusaurus.config.js
-├── shared/                     # Shared utilities and prompts
-├── docs/                       # Documentation files
-├── scripts/                    # Initialization and utility scripts
-├── data/                       # Data files and database
-├── specs/                      # Specification documents
-├── .github/workflows/          # GitHub Actions workflows (including deploy-frontend.yml)
-└── history/                    # Prompt History Records
+├── docs/                       # Project documentation
+│   ├── README.md              # Documentation index
+│   ├── DEPLOYMENT.md          # Deployment guide
+│   ├── PROJECT_SUMMARY.md     # Project overview
+│   └── HACKATHON_COMPLETION_REPORT.md
+├── specs/                      # Feature specifications
+├── history/                    # Prompt history records
+├── scripts/                    # Utility scripts
+└── .specify/                   # SpecKit Plus templates
 ```
 
-## 📦 Setup
+## 🎓 Educational Content
 
-### Quick Initialization
+### Module 1: The Robotic Nervous System (ROS 2)
+- ROS 2 architecture and fundamentals
+- Nodes, topics, publishers & subscribers
+- Robot control with rclpy
+- URDF modeling for humanoids
 
-The easiest way to set up the project is using the initialization scripts:
+### Module 2: Digital Twin Simulation
+- Gazebo simulation environment
+- URDF and SDF formats
+- Physics and sensor simulation
+- Unity robotics visualization
 
-**On Unix/Linux/macOS:**
-```bash
-npm run init
-# or
-bash scripts/initialize.sh
+### Module 3: The AI-Robot Brain (NVIDIA Isaac)
+- Isaac Sim foundations
+- Perception pipelines
+- VSLAM and navigation
+- AI model training in simulation
+
+### Module 4: Vision-Language-Action & Capstone
+- VLA system architecture
+- Voice-to-action with Whisper
+- Multimodal fusion
+- Humanoid AI companion project
+
+### Modules 5-6: Advanced Topics (Bonus)
+- Advanced control & locomotion
+- Safety, ethics & human-robot interaction
+
+## 🤖 RAG System Architecture
+
+```
+User Query
+    ↓
+RAG Chat Widget (Frontend)
+    ↓
+FastAPI Backend (/api/rag/query)
+    ↓
+RagBot Class
+    ↓
+┌─────────────────┬──────────────────┐
+│                 │                  │
+Qdrant Vector DB  Cohere API
+(Semantic Search) (Answer Generation)
+│                 │
+└─────────────────┴──────────────────┘
+    ↓
+Response + Source Citations
 ```
 
-**On Windows:**
-```cmd
-npm run init:windows
-# or
-scripts\initialize.bat
-```
+## 🔧 Key Features
 
-**Using Python (cross-platform):**
-```bash
-python scripts/initialize.py
-```
+### RAG Chatbot
+- Semantic search with Qdrant vector database
+- Context-aware responses using Cohere
+- Source citations with URLs
+- Configurable similarity threshold
+- Interactive and single-query modes
 
-### Manual Installation
+### Ingestion Pipeline
+- Docusaurus site crawler with robots.txt compliance
+- Clean text extraction preserving structure
+- Smart chunking (400-700 words, 10-15% overlap)
+- Cohere embeddings with batching
+- Idempotent storage via content hashing
 
-If you prefer to set up manually:
+### Translation System
+- In-browser Urdu translation
+- Preserves code blocks, diagrams, and technical terms
+- Google Translate API integration
+- Toggle between English and Urdu
 
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd <repository-name>
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   # This will install both backend and frontend dependencies
-   ```
-
-3. Set up environment variables:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys and database URLs
-   ```
-
-4. Set up backend services:
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install --upgrade pip
-   pip install -r requirements.txt
-   ```
-
-5. Set up frontend/Docusaurus:
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-6. Initialize database (if needed):
-   ```bash
-   cd backend
-   python -m scripts.init_db
-   ```
-
-## 🚀 Usage
-
-### Running the System Locally
-
-**Development Mode (Recommended):**
-```bash
-npm run dev
-# This starts both backend and frontend in development mode
-```
-
-**Separate Services:**
-```bash
-# Start backend only:
-npm run backend
-# or
-cd backend && python -m src.main
-
-# Start frontend only:
-npm run frontend
-# or
-cd frontend && npm start
-```
-
-**Production Build:**
-```bash
-npm run build
-npm run deploy
-```
-
-### GitHub Pages Deployment
-
-The project is configured for GitHub Pages deployment. The workflow automatically builds and deploys the frontend when changes are pushed to main branch.
-
-### API Documentation
-
-Once the backend is running, API documentation is available at:
-- http://localhost:8000/docs
-- http://localhost:8000/redoc
-
-### Using the Translation Feature
-
-The Urdu translation functionality is available directly in the documentation pages:
-1. Navigate to any chapter
-2. Click the "Translate to Urdu" button
-3. The content will be translated while preserving code blocks, diagrams, and formatting
-
-## 🧪 Testing
-
-Run backend tests:
-```bash
-npm run test
-# or
-cd backend && python -m pytest tests/
-```
-
-Validate all subagents:
-```bash
-npm run validate
-```
+### Authentication
+- Email/password authentication
+- OAuth support (Google, GitHub)
+- User profile management
+- Experience level tracking
 
 ## 📚 Documentation
 
-- **Initialization Guide**: `docs/INITIALIZATION.md`
-- **Deployment Guide**: `docs/DEPLOYMENT.md`
-- **Project Summary**: `docs/PROJECT_SUMMARY.md`
-- **API Documentation**: Available at http://localhost:8000/docs when running
+- **[Documentation Index](docs/README.md)** - Complete documentation overview
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Production deployment
+- **[Project Summary](docs/PROJECT_SUMMARY.md)** - Detailed project overview
+- **[Hackathon Report](docs/HACKATHON_COMPLETION_REPORT.md)** - Completion analysis
+- **[API Documentation](http://localhost:8000/docs)** - Interactive API docs (when running)
+
+## 🧪 Testing
+
+```bash
+# Run backend tests
+cd backend
+python test_pipeline.py
+
+# Test ingestion pipeline
+python main.py --mode ingest --url http://localhost:3000
+
+# Test RAG chatbot
+python main.py --mode ask --query "Explain ROS 2 nodes"
+```
+
+## 🚢 Deployment
+
+### Docker Compose (Recommended)
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f
+```
+
+### GitHub Pages (Frontend Only)
+
+The frontend is configured for GitHub Pages deployment via GitHub Actions. Push to `main` branch to trigger automatic deployment.
+
+## 🛠️ Technology Stack
+
+### Backend
+- **FastAPI** - Modern Python web framework
+- **Cohere** - Embeddings and text generation
+- **Qdrant** - Vector database for semantic search
+- **SQLAlchemy** - Database ORM
+- **Pydantic** - Data validation
+
+### Frontend
+- **Docusaurus 3.1.0** - Documentation framework
+- **React 18.2.0** - UI library
+- **Axios** - HTTP client
+- **CSS Modules** - Component styling
+
+### Infrastructure
+- **Docker** - Containerization
+- **GitHub Actions** - CI/CD
+- **Nginx** - Reverse proxy (production)
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Add tests if applicable
-5. Run tests (`npm test`)
-6. Commit your changes (`git commit -m 'Add some amazing feature'`)
-7. Push to the branch (`git push origin feature/amazing-feature`)
-8. Open a Pull Request
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📞 Support
-
-If you encounter any issues or have questions:
-- Check the [Issues](https://github.com/your-username/your-repo/issues) page
-- Review the documentation in the `docs/` directory
-- Create a new issue with detailed information about your problem
-
 ## 🙏 Acknowledgments
 
-- Thanks to the FastAPI and Docusaurus communities for excellent frameworks
-- Special thanks to the OpenAI team for their powerful APIs
-- Appreciation to all contributors who have helped improve this project
+- FastAPI and Docusaurus communities
+- Cohere for powerful AI APIs
+- NVIDIA for Isaac Sim and robotics tools
+- Open Robotics for ROS 2
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/your-username/your-repo/issues)
+- **Documentation**: [docs/](docs/)
+- **API Docs**: http://localhost:8000/docs (when running)
+
+---
+
+**Built with ❤️ for robotics education and AI research**

@@ -6,6 +6,7 @@ import Layout from '@theme/Layout';
 import clsx from 'clsx';
 import styles from './auth.module.css';
 import { AuthProvider, useAuth } from '../../contexts/AuthContext';
+import PrivateRoute from '../../components/PrivateRoute';
 import { API_BASE_URL } from '../../constants/apiConfig';
 
 // Wrapper component to provide Auth context
@@ -137,27 +138,6 @@ function ProfileWithAuth() {
     logout();
     history.push('/auth/signin');
   };
-
-  if (!user) {
-    return (
-      <Layout title={`Profile - ${siteConfig.title}`} description="Please sign in to view your profile">
-        <main className={styles.authContainer}>
-          <div className={styles.authCard}>
-            <div className={styles.formSection}>
-              <h1>Profile Access</h1>
-              <p>Please sign in to access your profile.</p>
-              <button
-                className={styles.primaryButton}
-                onClick={() => history.push('/auth/signin')}
-              >
-                Sign In
-              </button>
-            </div>
-          </div>
-        </main>
-      </Layout>
-    );
-  }
 
   return (
     <Layout
@@ -402,11 +382,13 @@ function ProfileWithAuth() {
   );
 }
 
-// Main component that wraps content with AuthProvider
+// Main component that wraps content with AuthProvider and PrivateRoute
 export default function Profile() {
   return (
     <AuthProvider>
-      <ProfileWithAuth />
+      <PrivateRoute>
+        <ProfileWithAuth />
+      </PrivateRoute>
     </AuthProvider>
   );
 }

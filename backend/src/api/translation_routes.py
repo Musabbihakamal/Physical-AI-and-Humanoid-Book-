@@ -1,12 +1,10 @@
 """
 Translation API routes for the book generation system.
 """
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from ..services.translation_service import translate_text
-from ..api.dependencies import get_current_user
-from ..models.user import User
 
 router = APIRouter()
 
@@ -24,12 +22,11 @@ class TranslationResponse(BaseModel):
 
 
 @router.post("/translate", response_model=TranslationResponse)
-async def translate_content(
-    request: TranslationRequest,
-    current_user: User = Depends(get_current_user)
-):
+async def translate_content(request: TranslationRequest):
     """
     Translate content from source language to target language.
+    Public endpoint - no authentication required.
+    Uses TranslationServiceFactory for multi-provider support.
     """
     try:
         # Validate input
@@ -39,11 +36,11 @@ async def translate_content(
         if not request.target_language:
             raise HTTPException(status_code=400, detail="Target language is required")
 
-        # Perform translation using the service
+        # Use the translation service factory to get the appropriate service
         translated_text = await translate_text(
             text=request.text,
             target_language=request.target_language,
-            source_language=request.source_language
+            source_language=request.source_language or "en"
         )
 
         return TranslationResponse(
@@ -51,13 +48,10 @@ async def translate_content(
             source_language=request.source_language or "en",
             target_language=request.target_language
         )
+
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Translation failed: {str(e)}")
 
 
-@router.get("/health")
-async def translation_health():
-    """
-    Health check for the translation service.
-    """
-    return {"status": "healthy", "service": "translation"}

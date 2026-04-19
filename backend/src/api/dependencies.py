@@ -105,3 +105,36 @@ def get_optional_current_user(
         return None
 
     return user
+
+
+def get_current_user_optional(
+    authorization: Optional[str] = Header(None),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    """
+    Dependency to optionally get the current authenticated user.
+    Returns None if no auth header or invalid token.
+    Does not raise exceptions for missing/invalid auth.
+
+    Args:
+        authorization: Optional Authorization header
+        db: Database session
+
+    Returns:
+        Current user object or None
+    """
+    if not authorization:
+        return None
+
+    try:
+        scheme, token = authorization.split()
+        if scheme.lower() != "bearer":
+            return None
+
+        user = AuthService.get_current_user(db, token)
+        if user and user.is_active:
+            return user
+    except (ValueError, Exception):
+        pass
+
+    return None

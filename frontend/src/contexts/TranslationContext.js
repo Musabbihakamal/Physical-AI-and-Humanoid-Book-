@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const TranslationContext = createContext();
 
@@ -7,6 +7,11 @@ export const TranslationProvider = ({ children }) => {
   const [translatedContent, setTranslatedContent] = useState(null);
   const [isTranslated, setIsTranslated] = useState(false);
   const [currentLang, setCurrentLang] = useState('en');
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const value = {
     translatedContent,
@@ -14,7 +19,8 @@ export const TranslationProvider = ({ children }) => {
     isTranslated,
     setIsTranslated,
     currentLang,
-    setCurrentLang
+    setCurrentLang,
+    isClient
   };
 
   return (

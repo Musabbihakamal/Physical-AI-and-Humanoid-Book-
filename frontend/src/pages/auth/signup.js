@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from '@docusaurus/router';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
@@ -29,6 +29,47 @@ function SignupWithAuth() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [oauthConfig, setOauthConfig] = useState({
+    google: { configured: false, loading: true },
+    github: { configured: false, loading: true }
+  });
+
+  // Check OAuth configuration on component mount
+  useEffect(() => {
+    const checkOAuthConfig = async () => {
+      try {
+        // Check Google OAuth
+        const googleResponse = await fetch(GOOGLE_OAUTH_URL);
+        const googleData = await googleResponse.json();
+
+        // Check GitHub OAuth
+        const githubResponse = await fetch(GITHUB_OAUTH_URL);
+        const githubData = await githubResponse.json();
+
+        setOauthConfig({
+          google: {
+            configured: googleData.configured === true,
+            loading: false,
+            error: googleData.configured === false ? googleData.detail : null
+          },
+          github: {
+            configured: githubData.configured === true,
+            loading: false,
+            error: githubData.configured === false ? githubData.detail : null
+          }
+        });
+      } catch (error) {
+        console.error('Failed to check OAuth configuration:', error);
+        setOauthConfig({
+          google: { configured: false, loading: false, error: 'Failed to check configuration' },
+          github: { configured: false, loading: false, error: 'Failed to check configuration' }
+        });
+      }
+    };
+
+    checkOAuthConfig();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,13 +78,55 @@ function SignupWithAuth() {
       [name]: value
     }));
 
-    // Calculate password strength when password changes
-    if (name === 'password') {
-      calculatePasswordStrength(value);
+    // Clear field-specific errors when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
     }
 
-    // Clear error when user starts typing
+    // Clear general error when user starts typing
     if (error) setError('');
+
+    // Real-time validation feedback
+    if (name === 'name' && value) {
+      if (value.trim().split(' ').length < 2) {
+        setFieldErrors(prev => ({
+          ...prev,
+          name: 'Please enter your full name (first and last name)'
+        }));
+      }
+    }
+
+    if (name === 'email' && value) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) {
+        setFieldErrors(prev => ({
+          ...prev,
+          email: 'Please enter a valid email address'
+        }));
+      }
+    }
+
+    if (name === 'password') {
+      calculatePasswordStrength(value);
+      if (value && value.length < 8) {
+        setFieldErrors(prev => ({
+          ...prev,
+          password: 'Password must be at least 8 characters'
+        }));
+      }
+    }
+
+    if (name === 'confirmPassword' && value) {
+      if (value !== formData.password) {
+        setFieldErrors(prev => ({
+          ...prev,
+          confirmPassword: 'Passwords do not match'
+        }));
+      }
+    }
   };
 
   const calculatePasswordStrength = (password) => {
@@ -296,13 +379,19 @@ function SignupWithAuth() {
                     type="text"
                     id="name"
                     name="name"
-                    className={styles.formControl}
+                    className={clsx(styles.formControl, fieldErrors.name && styles.formControlError)}
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Enter your full name"
                     autoComplete="name"
+                    aria-describedby={fieldErrors.name ? "name-error" : undefined}
                   />
                 </div>
+                {fieldErrors.name && (
+                  <div id="name-error" className={styles.fieldError}>
+                    {fieldErrors.name}
+                  </div>
+                )}
               </div>
 
               <div className={styles.formGroup}>
@@ -316,13 +405,19 @@ function SignupWithAuth() {
                     type="email"
                     id="email"
                     name="email"
-                    className={styles.formControl}
+                    className={clsx(styles.formControl, fieldErrors.email && styles.formControlError)}
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="Enter your email address"
                     autoComplete="email"
+                    aria-describedby={fieldErrors.email ? "email-error" : undefined}
                   />
                 </div>
+                {fieldErrors.email && (
+                  <div id="email-error" className={styles.fieldError}>
+                    {fieldErrors.email}
+                  </div>
+                )}
               </div>
 
               <div className={styles.formGroup}>
@@ -335,11 +430,12 @@ function SignupWithAuth() {
                     type={showPassword ? "text" : "password"}
                     id="password"
                     name="password"
-                    className={styles.formControl}
+                    className={clsx(styles.formControl, fieldErrors.password && styles.formControlError)}
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="Create a strong password"
                     autoComplete="new-password"
+                    aria-describedby={fieldErrors.password ? "password-error" : undefined}
                   />
                   <button
                     type="button"
@@ -360,6 +456,11 @@ function SignupWithAuth() {
                     )}
                   </button>
                 </div>
+                {fieldErrors.password && (
+                  <div id="password-error" className={styles.fieldError}>
+                    {fieldErrors.password}
+                  </div>
+                )}
                 <div className={styles.passwordStrength}>
                   <div className={styles.passwordStrengthBar}>
                     <div
@@ -386,11 +487,12 @@ function SignupWithAuth() {
                     type={showConfirmPassword ? "text" : "password"}
                     id="confirmPassword"
                     name="confirmPassword"
-                    className={styles.formControl}
+                    className={clsx(styles.formControl, fieldErrors.confirmPassword && styles.formControlError)}
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     placeholder="Confirm your password"
                     autoComplete="new-password"
+                    aria-describedby={fieldErrors.confirmPassword ? "confirmPassword-error" : undefined}
                   />
                   <button
                     type="button"
@@ -411,6 +513,11 @@ function SignupWithAuth() {
                     )}
                   </button>
                 </div>
+                {fieldErrors.confirmPassword && (
+                  <div id="confirmPassword-error" className={styles.fieldError}>
+                    {fieldErrors.confirmPassword}
+                  </div>
+                )}
               </div>
 
               <div className={styles.formGroup}>
@@ -462,29 +569,42 @@ function SignupWithAuth() {
               <div className={styles.socialLogin}>
                 <p>Or sign up with</p>
                 <div className={styles.socialButtons}>
-                  <button
-                    className={clsx(styles.socialButton, styles.googleButton)}
-                    onClick={handleGoogleLogin}
-                    type="button"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.63 16.88 16.79 15.71 17.57V20.34H19.28C21.36 18.42 22.56 15.6 22.56 12.25Z" fill="#4285F4"/>
-                      <path d="M12 23C14.97 23 17.46 22.02 19.28 20.34L15.71 17.57C14.73 18.23 13.48 18.64 12 18.64C9.14 18.64 6.72 16.69 5.85 14.05H2.18V16.86C4.04 20.53 7.72 23 12 23Z" fill="#34A853"/>
-                      <path d="M5.85 14.05C5.63 13.38 5.5 12.68 5.5 12C5.5 11.32 5.63 10.62 5.85 9.95V7.14H2.18C1.43 8.64 1 10.28 1 12C1 13.72 1.43 15.36 2.18 16.86L5.85 14.05Z" fill="#FBBC05"/>
-                      <path d="M12 5.36C13.62 5.36 15.06 5.93 16.21 7.03L19.39 3.85C17.44 2.03 14.96 1 12 1C7.72 1 4.04 3.47 2.18 7.14L5.85 9.95C6.72 7.31 9.14 5.36 12 5.36Z" fill="#EA4335"/>
-                    </svg>
-                    Google
-                  </button>
-                  <button
-                    className={clsx(styles.socialButton, styles.githubButton)}
-                    onClick={handleGitHubLogin}
-                    type="button"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 0C5.37 0 0 5.37 0 12C0 17.3 3.43 21.8 8.2 23.39C8.8 23.5 9 23.12 9 22.78V20.66C5.72 21.33 5.05 19.2 5.05 19.2C4.47 17.75 3.64 17.38 3.64 17.38C2.5 16.63 3.71 16.65 3.71 16.65C4.95 16.73 5.55 17.88 5.55 17.88C6.65 19.67 8.38 19.16 9.09 18.86C9.2 18.08 9.52 17.5 9.88 17.2C7.15 16.9 4.27 15.86 4.27 11.47C4.27 10.39 4.65 9.49 5.27 8.79C5.16 8.51 4.81 7.49 5.43 5.85C5.43 5.85 6.28 5.58 8 6.77C8.77 6.56 9.6 6.46 10.43 6.45C11.26 6.46 12.09 6.56 12.86 6.77C14.6 5.58 15.44 5.85 15.44 5.85C16.06 7.49 15.71 8.51 15.6 8.79C16.22 9.49 16.6 10.39 16.6 11.47C16.6 15.88 13.71 16.89 10.97 17.19C11.43 17.58 11.85 18.33 11.85 19.5V22.78C11.85 23.12 12.05 23.5 12.65 23.39C17.4 21.8 20.8 17.3 20.8 12C20.8 5.37 15.43 0 12 0Z" fill="currentColor"/>
-                    </svg>
-                    GitHub
-                  </button>
+                  {oauthConfig.google.configured && (
+                    <button
+                      className={clsx(styles.socialButton, styles.googleButton)}
+                      onClick={handleGoogleLogin}
+                      type="button"
+                      disabled={isLoading}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.63 16.88 16.79 15.71 17.57V20.34H19.28C21.36 18.42 22.56 15.6 22.56 12.25Z" fill="#4285F4"/>
+                        <path d="M12 23C14.97 23 17.46 22.02 19.28 20.34L15.71 17.57C14.73 18.23 13.48 18.64 12 18.64C9.14 18.64 6.72 16.69 5.85 14.05H2.18V16.86C4.04 20.53 7.72 23 12 23Z" fill="#34A853"/>
+                        <path d="M5.85 14.05C5.63 13.38 5.5 12.68 5.5 12C5.5 11.32 5.63 10.62 5.85 9.95V7.14H2.18C1.43 8.64 1 10.28 1 12C1 13.72 1.43 15.36 2.18 16.86L5.85 14.05Z" fill="#FBBC05"/>
+                        <path d="M12 5.36C13.62 5.36 15.06 5.93 16.21 7.03L19.39 3.85C17.44 2.03 14.96 1 12 1C7.72 1 4.04 3.47 2.18 7.14L5.85 9.95C6.72 7.31 9.14 5.36 12 5.36Z" fill="#EA4335"/>
+                      </svg>
+                      Google
+                    </button>
+                  )}
+                  {oauthConfig.github.configured && (
+                    <button
+                      className={clsx(styles.socialButton, styles.githubButton)}
+                      onClick={handleGitHubLogin}
+                      type="button"
+                      disabled={isLoading}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 0C5.37 0 0 5.37 0 12C0 17.3 3.43 21.8 8.2 23.39C8.8 23.5 9 23.12 9 22.78V20.66C5.72 21.33 5.05 19.2 5.05 19.2C4.47 17.75 3.64 17.38 3.64 17.38C2.5 16.63 3.71 16.65 3.71 16.65C4.95 16.73 5.55 17.88 5.55 17.88C6.65 19.67 8.38 19.16 9.09 18.86C9.2 18.08 9.52 17.5 9.88 17.2C7.15 16.9 4.27 15.86 4.27 11.47C4.27 10.39 4.65 9.49 5.27 8.79C5.16 8.51 4.81 7.49 5.43 5.85C5.43 5.85 6.28 5.58 8 6.77C8.77 6.56 9.6 6.46 10.43 6.45C11.26 6.46 12.09 6.56 12.86 6.77C14.6 5.58 15.44 5.85 15.44 5.85C16.06 7.49 15.71 8.51 15.6 8.79C16.22 9.49 16.6 10.39 16.6 11.47C16.6 15.88 13.71 16.89 10.97 17.19C11.43 17.58 11.85 18.33 11.85 19.5V22.78C11.85 23.12 12.05 23.5 12.65 23.39C17.4 21.8 20.8 17.3 20.8 12C20.8 5.37 15.43 0 12 0Z" fill="currentColor"/>
+                      </svg>
+                      GitHub
+                    </button>
+                  )}
+                  {!oauthConfig.google.configured && !oauthConfig.github.configured && !oauthConfig.google.loading && !oauthConfig.github.loading && (
+                    <div className={styles.oauthDisabled}>
+                      <p className="text--small text--secondary">
+                        Social login is currently unavailable. Please use email and password to sign up.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

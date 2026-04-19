@@ -13,6 +13,10 @@ const RAGChatWidget = () => {
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const messagesEndRef = useRef(null);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   // Safely get auth context - handle case where provider might not be available yet
   let user = null;
   let token = null;
@@ -189,7 +193,24 @@ const RAGChatWidget = () => {
         console.error('🔴 RAG Query - Error response:', { status: response.status, errorCode, errorDetail });
 
         let userFriendlyError = 'Failed to get response. ';
-        if (response.status === 401) {
+
+        if (response.status === 429) {
+          // Rate limit exceeded
+          const retryAfter = errorData.retry_after || response.headers.get('Retry-After') || 60;
+          const limit = errorData.limit || 'unknown';
+
+          if (user) {
+            userFriendlyError += `You've reached the rate limit (${limit} requests). Please wait ${retryAfter} seconds before trying again.`;
+          } else {
+            userFriendlyError += `Rate limit reached (${limit} requests). Sign in for higher limits or wait ${retryAfter} seconds.`;
+          }
+
+          // Set a timer to re-enable the input after retry period
+          setTimeout(() => {
+            setError(null);
+          }, retryAfter * 1000);
+
+        } else if (response.status === 401) {
           userFriendlyError += 'Please sign in to continue.';
         } else if (response.status === 500 && errorCode === 'rag_bot_init_failed') {
           userFriendlyError += 'The RAG system is not available. Please try again later.';

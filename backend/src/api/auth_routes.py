@@ -193,8 +193,12 @@ async def google_login(request: Request):
     google_client_id = os.getenv("GOOGLE_CLIENT_ID")
     google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
 
-    # Check if the dummy values are set (meaning OAuth is not configured)
-    if google_client_id and "dummy_for_now" in google_client_id:
+    # Check if the placeholder values are set (meaning OAuth is not configured)
+    if (not google_client_id or
+        "dummy_for_now" in google_client_id or
+        "your_actual_google_client_id_here" in google_client_id or
+        google_client_id.startswith("your_") or
+        len(google_client_id) < 20):  # Real Google client IDs are much longer
         google_client_id = None
 
     redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", f"{request.url.scheme}://{request.url.netloc}/api/auth/google/callback")
@@ -239,8 +243,12 @@ async def github_login(request: Request):
     github_client_id = os.getenv("GITHUB_CLIENT_ID")
     github_client_secret = os.getenv("GITHUB_CLIENT_SECRET")
 
-    # Check if the dummy values are set (meaning OAuth is not configured)
-    if github_client_id and "dummy_for_now" in github_client_id:
+    # Check if the placeholder values are set (meaning OAuth is not configured)
+    if (not github_client_id or
+        "dummy_for_now" in github_client_id or
+        "your_actual_github_client_id_here" in github_client_id or
+        github_client_id.startswith("your_") or
+        len(github_client_id) < 20):  # Real GitHub client IDs are much longer
         github_client_id = None
 
     redirect_uri = os.getenv("GITHUB_REDIRECT_URI", f"{request.url.scheme}://{request.url.netloc}/api/auth/github/callback")

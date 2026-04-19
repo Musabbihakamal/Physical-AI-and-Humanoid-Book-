@@ -12,7 +12,7 @@ class RAGSession(Base):
     __tablename__ = "rag_sessions"
 
     # Fields
-    id = Column(UUID_TYPE, primary_key=True, default=uuid.uuid4)
+    id = Column(UUID_TYPE, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(UUID_TYPE, ForeignKey("user_profiles.user_id"), nullable=True)
     session_token = Column(String, nullable=True)  # for anonymous users
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -28,6 +28,7 @@ class RAGSession(Base):
         if not user_id and not session_token:
             raise ValueError("Either user_id or session_token must be provided")
 
+        self.id = str(uuid.uuid4())  # Explicitly set as string for SQLite compatibility
         self.user_id = user_id
         self.session_token = session_token
         self.active_context = active_context
@@ -38,7 +39,7 @@ class RAGQuery(Base):
     __tablename__ = "rag_queries"
 
     # Fields
-    id = Column(UUID_TYPE, primary_key=True, default=uuid.uuid4)
+    id = Column(UUID_TYPE, primary_key=True, default=lambda: str(uuid.uuid4()))
     session_id = Column(UUID_TYPE, ForeignKey("rag_sessions.id"), nullable=False)
     query = Column(Text, nullable=False)
     response = Column(Text, nullable=False)
@@ -63,6 +64,7 @@ class RAGQuery(Base):
         if not query or not response:
             raise ValueError("query and response must not be empty")
 
+        self.id = str(uuid.uuid4())  # Explicitly set as string for SQLite compatibility
         self.session_id = session_id
         self.query = query
         self.response = response

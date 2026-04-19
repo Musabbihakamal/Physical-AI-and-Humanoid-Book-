@@ -41,7 +41,14 @@ if TESTING:
         DATABASE_URL,
         connect_args={"check_same_thread": False}  # Required for SQLite
     )
+elif 'sqlite' in DATABASE_URL.lower():
+    # SQLite configuration for development
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False}  # Required for SQLite with FastAPI
+    )
 else:
+    # PostgreSQL configuration for production
     engine = create_engine(
         DATABASE_URL,
         poolclass=QueuePool,

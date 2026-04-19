@@ -51,6 +51,7 @@ const authReducer = (state, action) => {
     case 'LOGOUT':
       return {
         ...state,
+        loading: false,
         isAuthenticated: false,
         user: null,
         accessToken: null,
@@ -65,13 +66,13 @@ const authReducer = (state, action) => {
   }
 };
 
-const AuthProvider = ({ children }) => {
+function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, {
     isAuthenticated: false,
     user: null,
     accessToken: null,
     refreshToken: null,
-    loading: false,
+    loading: true, // Start with loading=true during initial auth check
     error: null
   });
 
@@ -105,7 +106,13 @@ const AuthProvider = ({ children }) => {
         };
 
         verifyToken();
+      } else {
+        // No tokens found, set loading to false
+        dispatch({ type: 'LOGOUT' });
       }
+    } else {
+      // Not in browser environment, set loading to false
+      dispatch({ type: 'LOGOUT' });
     }
   }, []);
 
@@ -294,6 +301,7 @@ const AuthProvider = ({ children }) => {
 
   const value = {
     ...state,
+    token: state.accessToken, // Alias for compatibility
     login,
     register,
     logout,
@@ -303,14 +311,14 @@ const AuthProvider = ({ children }) => {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+}
 
-const useAuth = () => {
+function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
+}
 
 export { AuthProvider, useAuth };

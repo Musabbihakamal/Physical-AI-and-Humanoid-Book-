@@ -8,23 +8,15 @@
     "init:windows": "scripts\\initialize.bat",
     "setup": "npm install && cd frontend && npm install && cd ..",
     "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "backend": "cd backend && python -m src.main",
+    "backend": "cd backend && .venv\\Scripts\\activate && set PORT=8001 && python -m src.main",
     "frontend": "cd frontend && npm start",
     "test": "cd backend && python -m pytest tests/",
     "docs": "cd frontend && npm run build",
     "validate": "cd backend && python src/scripts/validate_subagents.py",
     "build": "npm run docs",
-    "deploy": "docker-compose up -d",
-    "deploy:prod": "docker-compose -f docker-compose.prod.yml up -d",
     "deploy:gh-pages": "cd frontend && npm run deploy",
-    "logs": "docker-compose logs -f",
-    "stop": "docker-compose down",
-    "restart": "docker-compose down && docker-compose up -d",
     "setup-dev": "npm run setup && npm run backend & npm run frontend",
-    "build-all": "npm run build && npm run backend-build",
-    "docker-build": "docker-compose build",
-    "docker-up": "docker-compose up -d",
-    "docker-down": "docker-compose down"
+    "ingest": "cd backend && .venv\\Scripts\\activate && python main.py --mode ingest --url http://localhost:3000"
   },
   "repository": {
     "type": "git",
@@ -49,8 +41,5 @@
     "concurrently": "^8.2.2",
     "gh-pages": "^6.3.0",
     "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "axios": "^1.6.0"
   }
 }

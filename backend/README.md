@@ -1,59 +1,132 @@
-# Book + RAG Bot + Multi-Agent System - Backend
+# Backend - Physical AI Book RAG System
 
-This is the backend service for the multi-agent book generation system, providing APIs for specialized AI agents including Research, Writer, Editor, RAG Engineer, Developer, Documentation, and Project Planner agents.
+FastAPI backend for the Physical AI & Humanoid Robotics book with RAG chatbot capabilities.
 
-## Features
+## Quick Start
 
-- Multi-agent architecture with specialized subagents
-- RAG-based chatbot for book content interaction
-- User profile management for personalized experiences
-- Content generation and management
-- API endpoints for all agent interactions
+### 1. Setup
+```bash
+setup.bat
+```
+This will:
+- Create virtual environment
+- Install all dependencies
+- Verify installation
 
-## Tech Stack
+### 2. Ingest Content
+```bash
+ingest.bat
+```
+Crawls and ingests content from the deployed Docusaurus site into Qdrant vector database.
 
-- Python 3.11+
-- FastAPI for web framework
-- SQLAlchemy for database ORM
-- PostgreSQL for relational data
-- Qdrant for vector storage (RAG)
-- OpenAI API for embeddings and agent capabilities
+### 3. Start Server
+```bash
+start.bat
+```
+Starts the FastAPI backend on port 8001.
 
-## Setup
+## Manual Commands
 
-1. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Activate Virtual Environment
+```bash
+.venv\Scripts\activate
+```
 
-2. Set up environment variables:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys and database URLs
-   ```
+### Run Ingestion Pipeline
+```bash
+python main.py --mode ingest --url https://physical-ai-and-humanoid-book.vercel.app/
+```
 
-3. Run the application:
-   ```bash
-   python -m src.main
-   ```
+### Start Backend Server
+```bash
+set PORT=8001
+python -m src.main
+```
 
-## API Endpoints
+### Interactive Chat Mode
+```bash
+python main.py --mode chat
+```
 
-- `/api/agents/` - Endpoints for all agent interactions
-- `/api/rag/` - Endpoints for RAG functionality
-- `/api/content/` - Endpoints for content management
-- `/docs` - Interactive API documentation
+### Single Query Mode
+```bash
+python main.py --mode ask --query "What is ROS 2?"
+```
+
+## Project Structure
+
+```
+backend/
+├── src/
+│   ├── api/           # FastAPI routes
+│   ├── config/        # Configuration management
+│   ├── database/      # Database connections
+│   ├── models/        # Data models
+│   ├── services/      # Business logic
+│   └── utils/         # Utility functions
+├── rag_bot/           # RAG bot implementation
+│   ├── chunker.py     # Text chunking
+│   ├── crawler.py     # Web crawling
+│   ├── embedder.py    # Embedding generation
+│   ├── extractor.py   # Content extraction
+│   └── storage.py     # Vector storage
+├── main.py            # Ingestion pipeline & RAG CLI
+├── requirements.txt   # Python dependencies
+├── setup.bat          # Setup script
+├── start.bat          # Start server script
+└── ingest.bat         # Content ingestion script
+```
 
 ## Environment Variables
 
-- `DATABASE_URL` - PostgreSQL database URL
-- `OPENAI_API_KEY` - OpenAI API key for embeddings and agent capabilities
-- `QDRANT_URL` - Qdrant vector database URL
-- `QDRANT_API_KEY` - Qdrant API key (if using cloud)
-- `SECRET_KEY` - Secret key for JWT tokens
+Create a `.env` file with:
 
-## Running Tests
+```env
+# Cohere API
+COHERE_API_KEY=your_cohere_api_key
 
-```bash
-pytest tests/
+# Qdrant Vector Database
+QDRANT_URL=your_qdrant_url
+QDRANT_API_KEY=your_qdrant_api_key
+
+# Database
+DATABASE_URL=postgresql://user:pass@host/db
+
+# Server
+PORT=8001
 ```
+
+## API Endpoints
+
+- `GET /health` - Health check
+- `GET /api/rag/health` - RAG system health
+- `POST /api/rag/query` - Query the RAG system
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+
+Full API documentation: http://localhost:8001/docs
+
+## Development
+
+### Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### Run Tests
+```bash
+pytest
+```
+
+### Code Style
+Follow PEP 8 guidelines. Use type hints where applicable.
+
+## Deployment
+
+See `docs/guides/DEPLOY_RAG_TO_PRODUCTION.md` for production deployment instructions.
+
+## Support
+
+- API Documentation: http://localhost:8001/docs
+- Issues: Check backend terminal for error messages
+- Logs: `logs/app.log`

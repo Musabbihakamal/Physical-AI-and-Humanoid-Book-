@@ -1,7 +1,7 @@
 """
-Enhanced RAG API routes with authentication and chat history persistence.
+Enhanced RAG API routes with authentication, chat history persistence, and rate limiting.
 """
-from fastapi import APIRouter, HTTPException, Depends, Header
+from fastapi import APIRouter, HTTPException, Depends, Header, Request
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from sqlalchemy.orm import Session
@@ -19,6 +19,7 @@ from ..database.database import get_db
 from ..models.rag_session import RAGSession, RAGQuery
 from ..models.user import User
 from .dependencies import get_current_user_optional
+from .rate_limiting import limiter, RateLimits, get_user_rate_limit
 import logging
 
 logger = logging.getLogger(__name__)
@@ -33,6 +34,7 @@ class RAGErrorCode(str, Enum):
     INVALID_SESSION = "invalid_session"
     UNAUTHORIZED = "unauthorized"
     NOT_FOUND = "not_found"
+    RATE_LIMIT_EXCEEDED = "rate_limit_exceeded"
 
 # Pydantic models
 class RAGQueryRequest(BaseModel):
@@ -98,23 +100,40 @@ def get_rag_bot():
             logger.error(f"Failed to initialize RAG bot: {str(e)}", exc_info=True)
             raise HTTPException(
                 status_code=500,
-                detail=f"RAG system initialization failed",
-                headers={"X-Error-Code": RAGErrorCode.RAG_BOT_INIT_FAILED}
+                detail={"message": "RAG system initialization failed", "error_code": RAGErrorCode.RAG_BOT_INIT_FAILED}
             )
     return _rag_bot
 
+# Test endpoint for rate limiting
+@router.get("/test-rate-limit")
+@limiter.limit("2/minute")
+async def test_rate_limit(request: Request):
+    """Simple test endpoint to verify rate limiting works"""
+    return {"message": "Rate limit test successful", "timestamp": datetime.now().isoformat()}
+
 @router.post("/query", response_model=RAGResponse)
+@limiter.limit("3/minute;15/hour")
 async def rag_query(
+    request: Request,
     query: RAGQueryRequest,
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_current_user_optional),
     authorization: Optional[str] = Header(None)
 ):
     """
-    Query the RAG system with authentication support.
+    Query the RAG system with authentication support and rate limiting.
+
+    Rate Limits:
+    - Anonymous users: 3 queries/minute, 15/hour
+    - Authenticated users: 10 queries/minute, 60/hour
+
     Saves chat history for authenticated users.
     """
     try:
+        # Log rate limiting info
+        user_type = "authenticated" if current_user else "anonymous"
+        logger.info(f"RAG query from {user_type} user: {query.question[:50]}...")
+
         # Get RAG bot instance
         rag_bot = get_rag_bot()
 
@@ -220,12 +239,13 @@ async def rag_query(
         logger.error(f"Error processing RAG query: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail="Failed to process query",
-            headers={"X-Error-Code": RAGErrorCode.QUERY_PROCESSING_FAILED}
+            detail={"message": "Failed to process query", "error_code": RAGErrorCode.QUERY_PROCESSING_FAILED}
         )
 
 @router.get("/history", response_model=ChatHistoryResponse)
+@limiter.limit(RateLimits.CHAT_HISTORY)
 async def get_chat_history(
+    request: Request,
     session_id: Optional[str] = None,
     limit: int = 50,
     db: Session = Depends(get_db),
@@ -233,14 +253,13 @@ async def get_chat_history(
 ):
     """
     Get chat history for the current user or session.
-    Requires authentication for user-scoped history.
+    Rate limited to 30 requests/minute, 200/hour.
     """
     try:
         if not current_user and not session_id:
             raise HTTPException(
                 status_code=401,
-                detail="Authentication required to view chat history",
-                headers={"X-Error-Code": RAGErrorCode.UNAUTHORIZED}
+                detail={"message": "Authentication required to view chat history", "error_code": RAGErrorCode.UNAUTHORIZED}
             )
 
         # Get session
@@ -253,8 +272,7 @@ async def get_chat_history(
             if current_user and session and session.user_id != current_user.id:
                 raise HTTPException(
                     status_code=403,
-                    detail="Access denied to this chat session",
-                    headers={"X-Error-Code": RAGErrorCode.UNAUTHORIZED}
+                    detail={"message": "Access denied to this chat session", "error_code": RAGErrorCode.UNAUTHORIZED}
                 )
         else:
             # Get most recent session for user
@@ -297,12 +315,13 @@ async def get_chat_history(
         logger.error(f"Error retrieving chat history: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail="Failed to retrieve chat history",
-            headers={"X-Error-Code": RAGErrorCode.QUERY_PROCESSING_FAILED}
+            detail={"message": "Failed to retrieve chat history", "error_code": RAGErrorCode.QUERY_PROCESSING_FAILED}
         )
 
 @router.delete("/history/{session_id}")
+@limiter.limit(RateLimits.CHAT_HISTORY)
 async def delete_chat_history(
+    request: Request,
     session_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user_optional)
@@ -310,13 +329,13 @@ async def delete_chat_history(
     """
     Delete a chat session and all its queries.
     Requires authentication and ownership.
+    Rate limited to 30 requests/minute, 200/hour.
     """
     try:
         if not current_user:
             raise HTTPException(
                 status_code=401,
-                detail="Authentication required",
-                headers={"X-Error-Code": RAGErrorCode.UNAUTHORIZED}
+                detail={"message": "Authentication required", "error_code": RAGErrorCode.UNAUTHORIZED}
             )
 
         # Get session and verify ownership
@@ -328,8 +347,7 @@ async def delete_chat_history(
         if not session:
             raise HTTPException(
                 status_code=404,
-                detail="Chat session not found",
-                headers={"X-Error-Code": RAGErrorCode.NOT_FOUND}
+                detail={"message": "Chat session not found", "error_code": RAGErrorCode.NOT_FOUND}
             )
 
         # Delete all queries in this session
@@ -350,21 +368,28 @@ async def delete_chat_history(
         logger.error(f"Error deleting chat history: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail="Failed to delete chat history",
-            headers={"X-Error-Code": RAGErrorCode.QUERY_PROCESSING_FAILED}
+            detail={"message": "Failed to delete chat history", "error_code": RAGErrorCode.QUERY_PROCESSING_FAILED}
         )
 
 @router.get("/health")
-async def rag_health():
+@limiter.limit(RateLimits.HEALTH_CHECK)
+async def rag_health(request: Request):
     """
     Check if the RAG system is healthy and ready to serve requests.
+    Rate limited to 60 requests/minute for service protection.
     """
     try:
         rag_bot = get_rag_bot()
         return {
             "status": "healthy",
             "collection": "docusaurus_embeddings",
-            "ready": True
+            "ready": True,
+            "rate_limits": {
+                "rag_query_anonymous": RateLimits.RAG_QUERY_ANONYMOUS,
+                "rag_query_authenticated": RateLimits.RAG_QUERY_AUTHENTICATED,
+                "chat_history": RateLimits.CHAT_HISTORY,
+                "health_check": RateLimits.HEALTH_CHECK
+            }
         }
     except Exception as e:
         return {

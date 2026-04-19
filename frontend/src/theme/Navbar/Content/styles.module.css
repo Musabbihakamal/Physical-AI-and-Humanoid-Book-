@@ -1,0 +1,74 @@
+/*
+Hide color mode toggle in small viewports
+ */
+@media (max-width: 996px) {
+  .colorModeToggle {
+    display: none;
+  }
+}
+
+/* User dropdown styling */
+.userDropdown {
+  position: relative;
+}
+
+.userDropdown .navbar__link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.userDropdown .navbar__link:hover {
+  background-color: var(--ifm-navbar-link-hover-color);
+  text-decoration: none;
+}
+
+.userDropdown .dropdown__menu {
+  min-width: 160px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 6px;
+  padding: 0.5rem 0;
+}
+
+.userDropdown .dropdown__link {
+  padding: 0.5rem 1rem;
+  color: var(--ifm-font-color-base);
+  transition: background-color 0.2s ease;
+}
+
+.userDropdown .dropdown__link:hover {
+  background-color: var(--ifm-color-emphasis-100);
+  text-decoration: none;
+}
+
+.userDropdown .dropdown__link:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: -2px;
+}
+
+/* Loading state */
+.loadingText {
+  opacity: 0.6;
+  font-size: 0.9rem;
+}
+
+/* User avatar/icon */
+.userIcon {
+  font-size: 1.1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .userDropdown .navbar__link {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .userDropdown .dropdown__menu {
+    min-width: 140px;
+  }
+}
