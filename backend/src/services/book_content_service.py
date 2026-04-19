@@ -11,7 +11,7 @@ from ..models.book_chapter import BookChapter
 from .content_service import ContentService
 try:
     # Try importing from the installed package structure
-    from utils.content_validation import (
+    from ..utils.content_validation import (
         validate_technical_accuracy,
         validate_docusaurus_formatting,
         validate_educational_structure,
