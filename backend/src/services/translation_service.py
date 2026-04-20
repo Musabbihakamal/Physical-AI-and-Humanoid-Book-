@@ -97,6 +97,88 @@ class HuggingFaceTranslationService(TranslationService):
             return f"[{target_language.upper()} - Free Translation] {text}"
 
 
+class AnthropicTranslationProvider(TranslationService):
+    """Anthropic Claude-based translation service"""
+
+    def __init__(self):
+        self.api_key = os.getenv("ANTHROPIC_API_KEY")
+        if not self.api_key:
+            logger.warning("ANTHROPIC_API_KEY not found, translation will fail")
+
+    def is_available(self) -> bool:
+        """Check if the service is available"""
+        return bool(self.api_key)
+
+    async def translate(self, text: str, target_language: str, source_language: Optional[str] = None) -> str:
+        """Translate using Anthropic Claude API"""
+        if not self.api_key:
+            logger.error("ANTHROPIC_API_KEY not available")
+            return f"[{target_language.upper()} - No API Key] {text}"
+
+        try:
+            import anthropic
+            import httpx
+
+            # Create client with explicit httpx client to avoid proxy issues
+            http_client = httpx.Client()
+            client = anthropic.Anthropic(
+                api_key=self.api_key,
+                http_client=http_client
+            )
+
+            # Language mapping for better prompts
+            language_names = {
+                "ur": "Urdu",
+                "es": "Spanish",
+                "fr": "French",
+                "de": "German",
+                "ar": "Arabic",
+                "hi": "Hindi",
+                "zh": "Chinese",
+                "ja": "Japanese",
+                "ko": "Korean"
+            }
+
+            target_lang_name = language_names.get(target_language, target_language)
+            source_lang_name = language_names.get(source_language or "en", "English")
+
+            prompt = f"""You are a professional translator. Translate the following {source_lang_name} text to {target_lang_name}.
+
+IMPORTANT: Provide ONLY the translation. Do not include any explanations, notes, or additional text.
+
+Text to translate: "{text}"
+
+{target_lang_name} translation:"""
+
+            response = client.messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=4000,
+                system="You are a translation API service. Your only job is to translate text between languages. Always respond with only the translated text, nothing else.",
+                messages=[{
+                    "role": "user",
+                    "content": prompt
+                }]
+            )
+
+            translated_text = response.content[0].text.strip()
+
+            # Ensure proper UTF-8 encoding
+            if isinstance(translated_text, str):
+                # Encode to bytes then decode to ensure proper UTF-8 handling
+                translated_text = translated_text.encode('utf-8', errors='ignore').decode('utf-8')
+
+            logger.info(f"Claude translation successful to {target_language}")
+            return translated_text
+
+        except Exception as e:
+            logger.error(f"Anthropic translation failed: {str(e)}")
+            logger.error(f"Error type: {type(e)}")
+            import traceback
+            logger.error(f"Full traceback: {traceback.format_exc()}")
+            # Return error fallback with language code
+            return f"[{target_language.upper()} - Translation Error] {text}"
+
+
 class OpenAITranslationService(TranslationService):
     """OpenAI-based translation service"""
 
@@ -132,8 +214,14 @@ class ClaudeTranslationService(TranslationService):
         try:
             import asyncio
             from anthropic import Anthropic
+            import httpx
 
-            client = Anthropic(api_key=self.api_key)
+            # Create client with explicit httpx client to avoid proxy issues
+            http_client = httpx.Client()
+            client = Anthropic(
+                api_key=self.api_key,
+                http_client=http_client
+            )
 
             language_names = {
                 "ur": "Urdu",
@@ -146,21 +234,13 @@ class ClaudeTranslationService(TranslationService):
 
             target_lang_name = language_names.get(target_language, target_language)
 
-            prompt = f"""You are helping with a software development project that includes a technical documentation system with translation features.
+            prompt = f"""You are helping with a software development project that includes internationalization (i18n) features.
 
-As part of this development project, translate the following HTML content from English to {target_lang_name} for the documentation system:
+As part of this development project, translate the following text from English to {target_lang_name} for the application's user interface:
 
-TECHNICAL REQUIREMENTS:
-- Preserve all HTML tags exactly as they are
-- Preserve all code blocks (```...```) exactly as they are
-- Preserve all inline code (`...`) exactly as they are
-- Preserve all placeholders like __PRESERVED_* exactly as they are
-- Only translate the actual text content, not the markup or code
-- This is for technical documentation translation in a software project
-- Return ONLY the translated HTML, no explanations
+Text: {text}
 
-Content to translate:
-{text}"""
+Provide only the {target_lang_name} translation:"""
 
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(
@@ -263,6 +343,19 @@ def get_translation_service():
 
 async def translate_text(text: str, target_language: str, source_language: Optional[str] = None) -> str:
     """Convenience function to translate text using the configured service"""
-    # Force fresh service instance to avoid caching issues
-    service = TranslationServiceFactory.get_translation_service()
-    return await service.translate(text, target_language, source_language)
+    try:
+        # Force fresh service instance to avoid caching issues
+        service = TranslationServiceFactory.get_translation_service()
+        logger.info(f"=== translate_text called with: text='{text}', target='{target_language}', source='{source_language}' ===")
+
+        result = await service.translate(text, target_language, source_language)
+        logger.info(f"=== translate_text result type: {type(result)}, length: {len(result)} ===")
+        logger.info(f"=== translate_text result preview: {repr(result[:50])} ===")
+
+        return result
+    except Exception as e:
+        logger.error(f"=== translate_text EXCEPTION: {type(e).__name__}: {str(e)} ===")
+        import traceback
+        logger.error(f"=== translate_text TRACEBACK: {traceback.format_exc()} ===")
+        # Return error fallback
+        return f"[{target_language.upper()} - Translation Error] {text}"

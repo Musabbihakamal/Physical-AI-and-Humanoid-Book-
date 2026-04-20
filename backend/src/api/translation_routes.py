@@ -43,6 +43,13 @@ async def translate_content(request: TranslationRequest):
             source_language=request.source_language or "en"
         )
 
+        # Ensure the translated text is properly encoded for JSON response
+        if isinstance(translated_text, str):
+            # Clean the text and ensure it's JSON-safe
+            translated_text = translated_text.strip()
+            # Remove any problematic characters that might cause JSON issues
+            translated_text = translated_text.encode('utf-8', errors='ignore').decode('utf-8')
+
         return TranslationResponse(
             translated_text=translated_text,
             source_language=request.source_language or "en",
@@ -52,6 +59,10 @@ async def translate_content(request: TranslationRequest):
     except HTTPException:
         raise
     except Exception as e:
+        # Log the actual error for debugging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Translation API error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Translation failed: {str(e)}")
 
 

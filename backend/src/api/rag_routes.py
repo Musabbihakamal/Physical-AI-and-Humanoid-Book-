@@ -74,21 +74,22 @@ class ChatHistoryResponse(BaseModel):
     total_queries: int
 
 # Initialize RAG bot (lazy loading)
-_rag_bot = None
+_rag_bot = None  # Force reset to pick up new code
 
 def get_rag_bot():
     """Get or initialize the RAG bot instance."""
     global _rag_bot
+    # Force reset to ensure fresh instance
+    _rag_bot = None
+
     if _rag_bot is None:
         try:
-            # Import from the main.py at backend root
-            import sys
-            import os
-            backend_root = os.path.join(os.path.dirname(__file__), '..', '..')
-            if backend_root not in sys.path:
-                sys.path.insert(0, backend_root)
+            # Ensure environment variables are loaded
+            from dotenv import load_dotenv
+            load_dotenv()
 
-            from main import RagBot, DEFAULT_CONFIG
+            # Import from the rag_bot directory
+            from rag_bot.main import RagBot, DEFAULT_CONFIG
 
             _rag_bot = RagBot(
                 qdrant_url=DEFAULT_CONFIG["qdrant_url"],
@@ -176,11 +177,14 @@ async def rag_query(
                 logger.info(f"Created new anonymous RAG session")
 
         # Retrieve relevant chunks
+        logger.info(f"Retrieving chunks for question: {query.question}")
+        logger.info(f"Max chunks: {query.max_chunks}, Threshold: {query.threshold}")
         context_chunks = rag_bot.retrieve_relevant_chunks(
             query.question,
             limit=query.max_chunks,
             threshold=query.threshold
         )
+        logger.info(f"Retrieved {len(context_chunks)} chunks")
 
         if not context_chunks:
             response_text = "I couldn't find any relevant information to answer your question. The documentation might not contain the information you're looking for."

@@ -21,7 +21,7 @@ export const getBackendUrl = () => {
 
     // For localhost development
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return `${protocol}//${hostname}:8001`; // Updated to port 8001
+      return `${protocol}//${hostname}:8002`; // Updated to port 8002
     }
 
     // For Vercel production - requires REACT_APP_BACKEND_URL env var
@@ -31,13 +31,13 @@ export const getBackendUrl = () => {
     }
 
     // Generic production fallback
-    return `${protocol}//${hostname}:8001`; // Updated to port 8001
+    return `${protocol}//${hostname}:8002`; // Updated to port 8002
   }
 
   // Fallback for server-side rendering (Node.js environment)
   return typeof process !== 'undefined' && process.env && process.env.REACT_APP_BACKEND_URL
     ? process.env.REACT_APP_BACKEND_URL
-    : 'http://localhost:8001'; // Updated to port 8001
+    : 'http://localhost:8002'; // Updated to port 8002
 };
 
 // API base URL
