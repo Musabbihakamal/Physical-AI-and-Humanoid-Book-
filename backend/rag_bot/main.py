@@ -107,9 +107,17 @@ class RagBot:
                 for chunk in chunks
             ])
 
-            message = self.anthropic_client.messages.create(
-                model="claude-opus-4-7",
-                max_tokens=1000,
+            # Create client with timeout for this request
+            import httpx
+            http_client = httpx.Client(timeout=30.0)  # 30 second timeout
+            client = anthropic.Anthropic(
+                api_key=self.anthropic_api_key,
+                http_client=http_client
+            )
+
+            message = client.messages.create(
+                model="claude-3-5-sonnet-20241022",  # More reliable model
+                max_tokens=2000,  # Increased for better responses
                 messages=[
                     {
                         "role": "user",

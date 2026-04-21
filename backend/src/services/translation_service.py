@@ -216,8 +216,8 @@ class ClaudeTranslationService(TranslationService):
             from anthropic import Anthropic
             import httpx
 
-            # Create client with explicit httpx client to avoid proxy issues
-            http_client = httpx.Client()
+            # Create client with explicit httpx client and timeout
+            http_client = httpx.Client(timeout=30.0)  # 30 second timeout
             client = Anthropic(
                 api_key=self.api_key,
                 http_client=http_client
@@ -246,7 +246,7 @@ Provide only the {target_lang_name} translation:"""
             response = await loop.run_in_executor(
                 None,
                 lambda: client.messages.create(
-                    model="claude-opus-4-7",  # Back to original model
+                    model="claude-3-5-sonnet-20241022",  # More reliable model
                     max_tokens=4096,
                     messages=[
                         {"role": "user", "content": prompt}
