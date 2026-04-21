@@ -37,7 +37,77 @@ class MockTranslationService(TranslationService):
         return f"[{target_language.upper()} MOCK] {text}"
 
 
-class SimpleTranslationService(TranslationService):
+class WorkingHuggingFaceTranslationService(TranslationService):
+    """Working Hugging Face translation service with correct API format"""
+
+    async def translate(self, text: str, target_language: str, source_language: Optional[str] = None) -> str:
+        """Translate using Hugging Face inference API with correct format"""
+        try:
+            import requests
+            import asyncio
+
+            # Use a different, more reliable model for Urdu translation
+            if target_language == "ur":
+                # Try a different approach - use a general multilingual model
+                model_name = "facebook/mbart-large-50-many-to-many-mmt"
+
+                # Hugging Face inference API endpoint
+                url = f"https://api-inference.huggingface.co/models/{model_name}"
+
+                # Prepare the request
+                headers = {"Content-Type": "application/json"}
+
+                # For mBART, we need to specify source and target languages
+                payload = {
+                    "inputs": text,
+                    "parameters": {
+                        "src_lang": "en_XX",  # English
+                        "tgt_lang": "ur_PK"   # Urdu
+                    }
+                }
+
+                logger.info(f"Attempting Hugging Face translation to Urdu using mBART model")
+                logger.info(f"API endpoint: {url}")
+
+                # Make async request
+                loop = asyncio.get_event_loop()
+                response = await loop.run_in_executor(
+                    None,
+                    lambda: requests.post(url, json=payload, headers=headers, timeout=30)
+                )
+
+                logger.info(f"Hugging Face API response status: {response.status_code}")
+
+                if response.status_code == 200:
+                    result = response.json()
+                    logger.info(f"Translation response: {result}")
+
+                    if isinstance(result, list) and len(result) > 0:
+                        translated_text = result[0].get("generated_text", text)
+                        logger.info(f"Translation successful: {translated_text[:100]}...")
+                        return translated_text
+                    elif isinstance(result, dict) and "generated_text" in result:
+                        translated_text = result["generated_text"]
+                        logger.info(f"Translation successful: {translated_text[:100]}...")
+                        return translated_text
+                    else:
+                        logger.warning(f"Unexpected response format: {result}")
+                        return f"[Translation in progress...] {text}"
+
+                elif response.status_code == 503:
+                    logger.info("Model is loading, this is normal for first request")
+                    return f"[Model loading, please try again in a moment] {text}"
+                else:
+                    logger.warning(f"API error {response.status_code}: {response.text}")
+                    return f"[Translation service temporarily unavailable] {text}"
+
+            else:
+                # For other languages, return a placeholder for now
+                return f"[{target_language.upper()} translation not yet supported] {text}"
+
+        except Exception as e:
+            logger.error(f"Translation error: {e}")
+            return f"[Translation error, please try again] {text}"
     """Simple translation service that provides basic translation functionality"""
 
     async def translate(self, text: str, target_language: str, source_language: Optional[str] = None) -> str:
@@ -330,9 +400,9 @@ class TranslationServiceFactory:
         """Get the best available translation service"""
         logger.info("=== TranslationServiceFactory.get_translation_service() called ===")
 
-        # Use simple reliable translation service
-        logger.info("✓ Using Simple translation service (reliable)")
-        return SimpleTranslationService()
+        # Use working Hugging Face translation service with mBART model
+        logger.info("✓ Using Working Hugging Face translation service (mBART)")
+        return WorkingHuggingFaceTranslationService()
 
         # Check for Claude API key (ANTHROPIC_API_KEY) - commented out due to credit issues
         # anthropic_key = os.getenv("ANTHROPIC_API_KEY")
