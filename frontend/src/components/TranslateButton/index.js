@@ -138,7 +138,7 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
       }
 
       // Call backend translation API
-      const response = await fetch(`${API_BASE_URL}/api/translate/translate`, {
+      const response = await fetch(`${API_BASE_URL}/api/translate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

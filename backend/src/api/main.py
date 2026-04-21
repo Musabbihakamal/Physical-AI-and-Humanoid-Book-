@@ -118,7 +118,7 @@ app.include_router(rag_routes.router, prefix="/api/rag", tags=["rag"])
 app.include_router(content_routes.router, prefix="/api/content", tags=["content"])
 app.include_router(book_content_routes.router, prefix="/api/book-content", tags=["book-content"])
 app.include_router(auth_routes.router, prefix="/api/auth", tags=["auth"])
-app.include_router(translation_routes.router, prefix="/api/translate", tags=["translation"])
+app.include_router(translation_routes.router, prefix="/api", tags=["translation"])
 
 # Health check endpoint
 @app.get("/health")

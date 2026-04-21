@@ -26,7 +26,6 @@ const RAGChatWidget = () => {
     token = auth.token;
   } catch (e) {
     // AuthProvider not available yet, continue without auth
-    console.log('Auth context not available, continuing without authentication');
   }
 
   // Check backend connection on component mount
@@ -35,7 +34,7 @@ const RAGChatWidget = () => {
       try {
         const response = await fetch(`${API_BASE_URL}/health`);
         if (response.ok) {
-          console.log('✅ Backend is accessible at:', API_BASE_URL);
+          // Backend is accessible
         } else {
           console.warn('⚠️ Backend returned status:', response.status);
         }
@@ -146,9 +145,6 @@ const RAGChatWidget = () => {
     setError(null);
 
     try {
-      console.log('🔵 RAG Query - Backend URL:', API_BASE_URL);
-      console.log('🔵 RAG Query - Endpoint:', `${API_BASE_URL}/api/rag/query`);
-
       const headers = {
         'Content-Type': 'application/json',
       };
@@ -169,8 +165,6 @@ const RAGChatWidget = () => {
         requestBody.session_id = sessionId;
       }
 
-      console.log('🔵 RAG Query - Request body:', requestBody);
-
       // Set up request timeout (30 seconds)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
@@ -183,7 +177,6 @@ const RAGChatWidget = () => {
       });
 
       clearTimeout(timeoutId);
-      console.log('🔵 RAG Query - Response status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -224,7 +217,6 @@ const RAGChatWidget = () => {
       }
 
       const data = await response.json();
-      console.log('🟢 RAG Query - Success:', data);
 
       // Save session ID for future queries
       if (data.session_id) {
@@ -273,7 +265,6 @@ const RAGChatWidget = () => {
   };
 
   const toggleWidget = () => {
-    console.log('Toggle widget clicked, current state:', isOpen);
     setIsOpen(!isOpen);
   };
 

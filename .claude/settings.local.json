@@ -45,7 +45,23 @@
       "WebSearch",
       "Bash(taskkill /F /IM python.exe)",
       "Bash(taskkill /F /IM uvicorn.exe)",
-      "Bash(kill -9 1657)"
+      "Bash(kill -9 1657)",
+      "Bash(python -m uvicorn src.api.main:app --host 0.0.0.0 --port 8002)",
+      "Bash(curl -X GET \"http://localhost:8002/health\")",
+      "Bash(pkill -f \"uvicorn src.api.main\")",
+      "Bash(pkill -f \"npm run dev\")",
+      "Bash(xargs grep *)",
+      "Bash(.venv\\\\Scripts\\\\python.exe -c \"from src.config import settings; print\\('Config loaded successfully'\\)\")",
+      "Bash(findstr :8000)",
+      "Bash(findstr :3000)",
+      "Bash(python -m src.main)",
+      "Bash(set PORT=8001)",
+      "Bash(findstr \":8000\\\\|:8001\")",
+      "Bash(findstr \":8001\\\\|:3000\")",
+      "Bash(npm start *)",
+      "Bash(grep -E \"\\\\.\\(md|txt|log\\)$\")",
+      "Bash(grep -E \"\\\\.\\(log|tmp|bak|old\\)$\")",
+      "Bash(grep \"\\\\.md$\")"
     ]
   }
 }

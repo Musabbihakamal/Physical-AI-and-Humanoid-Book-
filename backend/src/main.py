@@ -41,9 +41,9 @@ def main():
     # Run the application
     import os
     reload_option = os.getenv("RELOAD", "False").lower() == "true"
-    port = int(os.getenv("PORT", 8000))  # Use PORT from environment, default to 8000
+    port = int(os.getenv("PORT", 8001))  # Use PORT from environment, default to 8001
     uvicorn.run(
-        "backend.src.api.main:app",
+        "src.api.main:app",
         host="0.0.0.0",
         port=port,
         reload=reload_option,

@@ -37,7 +37,6 @@ function TranslateButtonPortal({ portalRoot }) {
 
   try {
     const TranslateButton = require('../components/TranslateButton').default;
-    console.log('🟢 TranslateButton component loaded successfully');
 
     return ReactDOM.createPortal(
       <div style={{
