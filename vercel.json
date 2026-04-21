@@ -1,14 +1,4 @@
 {
   "version": 2,
-  "root": "frontend",
-  "buildCommand": "npm run build",
-  "outputDirectory": "build",
-  "env": {
-    "REACT_APP_BACKEND_URL": "https://ragbot-production-dad1.up.railway.app",
-    "REACT_APP_RAG_ENABLED": "true"
-  },
-  "github": {
-    "enabled": true,
-    "autoJobCancelation": true
-  }
+  "root": "frontend"
 }
