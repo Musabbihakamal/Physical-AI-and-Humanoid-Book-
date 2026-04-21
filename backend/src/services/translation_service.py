@@ -51,7 +51,7 @@ class HuggingFaceTranslationService(TranslationService):
             import requests
             import asyncio
 
-            # Map language codes to free model names
+            # Map language codes to working free model names
             model_map = {
                 "ur": "Helsinki-NLP/opus-mt-en-ur",  # English to Urdu
                 "es": "Helsinki-NLP/opus-mt-en-es",  # English to Spanish
@@ -66,21 +66,28 @@ class HuggingFaceTranslationService(TranslationService):
                 logger.warning(f"Language {target_language} not supported by free service")
                 return f"[{target_language.upper()} - Language not supported] {text}"
 
-            url = f"{self.base_url}/{model_name}"
+            # Use the correct Hugging Face inference API endpoint
+            url = f"https://api-inference.huggingface.co/models/{model_name}"
             payload = {"inputs": text}
             headers = {"Content-Type": "application/json"}
 
             logger.info(f"Free Hugging Face translation to {target_language}: {text[:50]}...")
+            logger.info(f"Using model: {model_name}")
+            logger.info(f"API endpoint: {url}")
 
-            # Make async request
+            # Make async request with longer timeout
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(
                 None,
-                lambda: requests.post(url, json=payload, headers=headers, timeout=15)
+                lambda: requests.post(url, json=payload, headers=headers, timeout=30)
             )
+
+            logger.info(f"Hugging Face API response status: {response.status_code}")
 
             if response.status_code == 200:
                 result = response.json()
+                logger.info(f"Hugging Face API response: {result}")
+
                 if isinstance(result, list) and len(result) > 0:
                     translated_text = result[0].get("translation_text", text)
                     logger.info(f"Translation successful: {translated_text[:50]}...")
@@ -88,8 +95,12 @@ class HuggingFaceTranslationService(TranslationService):
                 else:
                     logger.warning("Empty result from Hugging Face API")
                     return f"[{target_language.upper()} - Free Translation] {text}"
+            elif response.status_code == 503:
+                # Model is loading, try again with a simple fallback
+                logger.warning("Hugging Face model is loading, using fallback")
+                return f"[{target_language.upper()} - Model Loading] {text}"
             else:
-                logger.warning(f"Hugging Face API error: {response.status_code}")
+                logger.warning(f"Hugging Face API error: {response.status_code} - {response.text}")
                 return f"[{target_language.upper()} - Free Translation] {text}"
 
         except Exception as e:
