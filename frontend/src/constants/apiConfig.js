@@ -24,10 +24,9 @@ export const getBackendUrl = () => {
       return `${protocol}//${hostname}:8001`; // Fixed to port 8001
     }
 
-    // For Vercel production - requires REACT_APP_BACKEND_URL env var
+    // For Vercel production - use Railway backend
     if (hostname.includes('vercel.app')) {
-      console.warn('⚠️ REACT_APP_BACKEND_URL not configured for Vercel deployment');
-      return 'https://api.example.com'; // Fallback - will fail
+      return 'https://ragbot-production-dad1.up.railway.app';
     }
 
     // Generic production fallback
