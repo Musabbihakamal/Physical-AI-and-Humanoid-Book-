@@ -99,44 +99,41 @@ class RagBot:
             return []
 
     def generate_response(self, query: str, chunks: List[Dict[str, Any]]) -> str:
-        """Generate response using Anthropic Claude API"""
+        """Generate response using simple text processing (no API required)"""
         try:
-            # Prepare context from chunks
-            context = "\n\n".join([
-                f"Source: {chunk['page_title']} - {chunk['section_title']}\n{chunk['content']}"
-                for chunk in chunks
-            ])
+            if not chunks:
+                return "I couldn't find relevant information about your question in the book content. Please try rephrasing your question or ask about topics covered in the Physical AI and Humanoid Robotics book."
 
-            # Create client with timeout for this request
-            import httpx
-            http_client = httpx.Client(timeout=30.0)  # 30 second timeout
-            client = anthropic.Anthropic(
-                api_key=self.anthropic_api_key,
-                http_client=http_client
-            )
+            # Simple but effective response generation without API calls
+            response_parts = []
 
-            message = client.messages.create(
-                model="claude-3-5-sonnet-20241022",  # More reliable model
-                max_tokens=2000,  # Increased for better responses
-                messages=[
-                    {
-                        "role": "user",
-                        "content": f"""Based on the following documentation context, answer the user's question about Physical AI and Humanoid Robotics.
+            # Add a brief introduction
+            response_parts.append(f"Based on the book content, here's what I found about '{query}':\n")
 
-Context:
-{context}
+            # Process and format the chunks
+            for i, chunk in enumerate(chunks[:3], 1):  # Limit to top 3 chunks
+                section_title = chunk.get('section_title', 'Unknown Section')
+                page_title = chunk.get('page_title', 'Unknown Page')
+                content = chunk.get('content', '')
 
-Question: {query}
+                # Clean and truncate content
+                clean_content = content.strip()
+                if len(clean_content) > 300:
+                    clean_content = clean_content[:300] + "..."
 
-Provide a helpful and accurate answer based on the context above. If the context doesn't contain enough information, say so."""
-                    }
-                ]
-            )
+                response_parts.append(f"**{i}. From {section_title} ({page_title}):**")
+                response_parts.append(f"{clean_content}\n")
 
-            answer = message.content[0].text.strip()
-            logger.info(f"Generated response for query: {query[:50]}...")
-            return answer
+            # Add helpful conclusion
+            if len(chunks) > 3:
+                response_parts.append(f"Found {len(chunks)} total relevant sections. The above shows the most relevant content.")
+
+            response_parts.append("\n💡 **Tip:** For more detailed information, check the full chapters in the book!")
+
+            final_response = "\n".join(response_parts)
+            logger.info(f"Generated free response for query: {query[:50]}...")
+            return final_response
 
         except Exception as e:
-            logger.error(f"Failed to generate response: {str(e)}", exc_info=True)
-            return "I'm sorry, I encountered an error while generating a response. Please try again."
+            logger.error(f"Failed to generate free response: {str(e)}", exc_info=True)
+            return "I encountered an error while processing your question. Please try asking again or rephrase your question."
