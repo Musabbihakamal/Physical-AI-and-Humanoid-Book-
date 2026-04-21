@@ -37,7 +37,96 @@ class MockTranslationService(TranslationService):
         return f"[{target_language.upper()} MOCK] {text}"
 
 
-class WorkingHuggingFaceTranslationService(TranslationService):
+class BasicUrduTranslationService(TranslationService):
+    """Basic dictionary-based Urdu translation service"""
+
+    def __init__(self):
+        # Basic English to Urdu dictionary for key terms
+        self.translation_dict = {
+            # Technical terms
+            "robot": "روبوٹ",
+            "robotics": "روبوٹکس",
+            "humanoid": "انسان نما",
+            "control": "کنٹرول",
+            "system": "نظام",
+            "systems": "نظامات",
+            "simulation": "نقل",
+            "environment": "ماحول",
+            "physics": "طبیعیات",
+            "engine": "انجن",
+            "model": "ماڈل",
+            "chapter": "باب",
+            "learning": "سیکھنا",
+            "objectives": "مقاصد",
+            "theory": "نظریہ",
+            "practical": "عملی",
+            "examples": "مثالیں",
+            "exercises": "مشقیں",
+            "references": "حوالہ جات",
+            "summary": "خلاصہ",
+
+            # Common words
+            "the": "",  # Urdu doesn't always need "the"
+            "and": "اور",
+            "or": "یا",
+            "of": "کا",
+            "in": "میں",
+            "for": "کے لیے",
+            "with": "کے ساتھ",
+            "by": "کے ذریعے",
+            "to": "کو",
+            "is": "ہے",
+            "are": "ہیں",
+            "will": "گا",
+            "can": "سکتا",
+            "this": "یہ",
+            "that": "وہ",
+            "you": "آپ",
+            "we": "ہم",
+            "it": "یہ",
+
+            # Action words
+            "understand": "سمجھنا",
+            "implement": "نافذ کرنا",
+            "apply": "لاگو کرنا",
+            "evaluate": "جانچنا",
+            "design": "ڈیزائن",
+            "create": "بنانا",
+            "build": "تعمیر کرنا",
+            "test": "ٹیسٹ",
+            "configure": "ترتیب دینا",
+            "install": "انسٹال کرنا",
+        }
+
+    async def translate(self, text: str, target_language: str, source_language: Optional[str] = None) -> str:
+        """Basic dictionary-based translation to Urdu"""
+        try:
+            if target_language != "ur":
+                return f"[{target_language.upper()} translation not supported] {text}"
+
+            logger.info(f"Basic Urdu translation starting for text length: {len(text)}")
+
+            # Simple word-by-word translation
+            translated_text = text
+
+            # Replace English words with Urdu equivalents
+            for english_word, urdu_word in self.translation_dict.items():
+                if urdu_word:  # Skip empty translations
+                    # Case-insensitive replacement
+                    import re
+                    pattern = r'\b' + re.escape(english_word) + r'\b'
+                    translated_text = re.sub(pattern, urdu_word, translated_text, flags=re.IGNORECASE)
+
+            # Add RTL direction for Urdu text
+            if translated_text != text:  # If any translation occurred
+                translated_text = f'<div dir="rtl" lang="ur">{translated_text}</div>'
+
+            logger.info(f"Basic Urdu translation completed")
+            return translated_text
+
+        except Exception as e:
+            logger.error(f"Basic translation error: {e}")
+            return text
     """Working Hugging Face translation service with correct API format"""
 
     async def translate(self, text: str, target_language: str, source_language: Optional[str] = None) -> str:
@@ -400,9 +489,9 @@ class TranslationServiceFactory:
         """Get the best available translation service"""
         logger.info("=== TranslationServiceFactory.get_translation_service() called ===")
 
-        # Use working Hugging Face translation service with mBART model
-        logger.info("✓ Using Working Hugging Face translation service (mBART)")
-        return WorkingHuggingFaceTranslationService()
+        # Use basic dictionary-based Urdu translation service
+        logger.info("✓ Using Basic Urdu translation service (dictionary-based)")
+        return BasicUrduTranslationService()
 
         # Check for Claude API key (ANTHROPIC_API_KEY) - commented out due to credit issues
         # anthropic_key = os.getenv("ANTHROPIC_API_KEY")
