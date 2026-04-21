@@ -303,13 +303,17 @@ class TranslationServiceFactory:
         """Get the best available translation service"""
         logger.info("=== TranslationServiceFactory.get_translation_service() called ===")
 
-        # Check for Claude API key first (ANTHROPIC_API_KEY)
-        anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-        logger.info(f"Checking ANTHROPIC_API_KEY: {anthropic_key[:20] if anthropic_key else 'NOT SET'}...")
+        # Use FREE Hugging Face service as primary choice
+        logger.info("✓ Using FREE Hugging Face translation service")
+        return HuggingFaceTranslationService()
 
-        if anthropic_key:
-            logger.info("✓ Using Claude translation service")
-            return ClaudeTranslationService()
+        # Check for Claude API key (ANTHROPIC_API_KEY) - commented out due to credit issues
+        # anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+        # logger.info(f"Checking ANTHROPIC_API_KEY: {anthropic_key[:20] if anthropic_key else 'NOT SET'}...")
+
+        # if anthropic_key:
+        #     logger.info("✓ Using Claude translation service")
+        #     return ClaudeTranslationService()
 
         # Check for OpenAI API key
         openai_key = os.getenv("OPENAI_API_KEY")
