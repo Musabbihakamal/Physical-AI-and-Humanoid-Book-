@@ -111,10 +111,6 @@ app.include_router(book_content_routes.router, prefix="/api/book-content", tags=
 app.include_router(auth_routes.router, prefix="/api/auth", tags=["auth"])
 app.include_router(translation_routes.router, prefix="/api/translate", tags=["translation"])
 
-# Add new translation routes to bypass caching issues
-from . import new_translation_routes
-app.include_router(new_translation_routes.router, prefix="/api/translate", tags=["translation-new"])
-
 # Health check endpoint
 @app.get("/health")
 async def health_check():
