@@ -27,6 +27,7 @@ alembic==1.14.0
 qdrant-client>=1.16.1
 cohere>=4.9.0
 openai==1.57.4
+anthropic>=0.40.0
 
 # Web Scraping & Content Processing
 requests>=2.31.0
