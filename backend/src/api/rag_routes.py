@@ -128,7 +128,7 @@ async def rag_query(
     - Anonymous users: 3 queries/minute, 15/hour
     - Authenticated users: 10 queries/minute, 60/hour
 
-    Saves chat history for authenticated users.
+    Saves chat history for authenticated users (if database is available).
     """
     try:
         # Log rate limiting info
@@ -137,44 +137,6 @@ async def rag_query(
 
         # Get RAG bot instance
         rag_bot = get_rag_bot()
-
-        # Get or create RAG session
-        session = None
-        if current_user:
-            # Authenticated user - get or create session
-            session = db.query(RAGSession).filter(
-                RAGSession.user_id == current_user.id
-            ).order_by(RAGSession.updated_at.desc()).first()
-
-            if not session or (query.session_id and str(session.id) != query.session_id):
-                # Create new session or get specific session
-                if query.session_id:
-                    session = db.query(RAGSession).filter(
-                        RAGSession.id == query.session_id,
-                        RAGSession.user_id == current_user.id
-                    ).first()
-
-                if not session:
-                    session = RAGSession(user_id=current_user.id)
-                    db.add(session)
-                    db.commit()
-                    db.refresh(session)
-                    logger.info(f"Created new RAG session for user {current_user.email}")
-        else:
-            # Anonymous user - create session with token
-            if query.session_id:
-                session = db.query(RAGSession).filter(
-                    RAGSession.id == query.session_id
-                ).first()
-
-            if not session:
-                import uuid
-                session_token = str(uuid.uuid4())
-                session = RAGSession(session_token=session_token)
-                db.add(session)
-                db.commit()
-                db.refresh(session)
-                logger.info(f"Created new anonymous RAG session")
 
         # Retrieve relevant chunks
         logger.info(f"Retrieving chunks for question: {query.question}")
@@ -206,34 +168,72 @@ async def rag_query(
             ]
             error_code = None
 
-        # Save query to database if session exists
-        if session:
-            rag_query_record = RAGQuery(
-                session_id=session.id,
-                query=query.question,
-                response=response_text,
-                sources=[{
-                    "url": s.url,
-                    "page_title": s.page_title,
-                    "section_title": s.section_title,
-                    "score": s.score
-                } for s in sources],
-                confidence_score=max([s.score for s in sources]) if sources else 0.0
-            )
-            db.add(rag_query_record)
+        # Try to save query to database if available
+        session_id = ""
+        try:
+            if db and current_user:
+                # Get or create RAG session
+                session = db.query(RAGSession).filter(
+                    RAGSession.user_id == current_user.id
+                ).order_by(RAGSession.updated_at.desc()).first()
 
-            # Update session timestamp
-            session.updated_at = datetime.utcnow()
-            db.add(session)
+                if not session or (query.session_id and str(session.id) != query.session_id):
+                    if query.session_id:
+                        session = db.query(RAGSession).filter(
+                            RAGSession.id == query.session_id,
+                            RAGSession.user_id == current_user.id
+                        ).first()
 
-            db.commit()
-            logger.info(f"Saved RAG query to session {session.id}")
+                    if not session:
+                        session = RAGSession(user_id=current_user.id)
+                        db.add(session)
+                        db.commit()
+                        db.refresh(session)
+                        logger.info(f"Created new RAG session for user {current_user.email}")
+
+                # Save query to database
+                rag_query_record = RAGQuery(
+                    session_id=session.id,
+                    query=query.question,
+                    response=response_text,
+                    sources=[{
+                        "url": s.url,
+                        "page_title": s.page_title,
+                        "section_title": s.section_title,
+                        "score": s.score
+                    } for s in sources],
+                    confidence_score=max([s.score for s in sources]) if sources else 0.0
+                )
+                db.add(rag_query_record)
+                session.updated_at = datetime.utcnow()
+                db.add(session)
+                db.commit()
+                session_id = str(session.id)
+                logger.info(f"Saved RAG query to session {session.id}")
+            elif db:
+                # Anonymous user session
+                if query.session_id:
+                    session = db.query(RAGSession).filter(
+                        RAGSession.id == query.session_id
+                    ).first()
+                if not session:
+                    import uuid
+                    session_token = str(uuid.uuid4())
+                    session = RAGSession(session_token=session_token)
+                    db.add(session)
+                    db.commit()
+                    db.refresh(session)
+                    logger.info(f"Created new anonymous RAG session")
+                session_id = str(session.id)
+        except Exception as db_error:
+            logger.warning(f"Database operation failed, continuing without session: {db_error}")
+            session_id = "no-database"
 
         return RAGResponse(
             answer=response_text,
             sources=sources,
             chunks_retrieved=len(context_chunks),
-            session_id=str(session.id) if session else "",
+            session_id=session_id,
             error_code=error_code
         )
 

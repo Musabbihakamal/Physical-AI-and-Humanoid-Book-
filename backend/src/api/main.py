@@ -62,9 +62,18 @@ logging.getLogger('src.services.translation_service').setLevel(logging.INFO)
 # Create database tables using lifespan
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Creating database tables...")
-    Base.metadata.create_all(bind=engine)
-    logger.info("Database tables created successfully")
+    logger.info("Starting application...")
+
+    # Try to create database tables, but don't fail if database is unavailable
+    try:
+        logger.info("Attempting to create database tables...")
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables created successfully")
+    except Exception as e:
+        logger.warning(f"Database connection failed: {e}")
+        logger.warning("Application will continue without database functionality")
+        logger.warning("Translation and RAG services will still work")
+
     yield
     logger.info("Application shutdown")
 
