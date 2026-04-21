@@ -1,21 +1,10 @@
 {
   "version": 2,
-  "framework": "docusaurus",
-  "builds": [
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ],
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/build",
+  "env": {
+    "REACT_APP_BACKEND_URL": "@react_app_backend_url"
+  },
   "github": {
     "enabled": true,
     "autoJobCancelation": true
