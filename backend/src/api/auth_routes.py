@@ -33,7 +33,7 @@ class RegisterRequest(BaseModel):
     language_preference: str = "en"
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "email": "user@example.com",
                 "password": "securepassword123",
@@ -53,7 +53,7 @@ class LoginRequest(BaseModel):
     password: str
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "email": "user@example.com",
                 "password": "securepassword123"
