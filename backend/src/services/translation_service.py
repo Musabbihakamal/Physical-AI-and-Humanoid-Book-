@@ -526,8 +526,8 @@ _translation_service = None
 def get_translation_service():
     """Get or create the translation service (lazy loading)"""
     global _translation_service
-    if _translation_service is None:
-        _translation_service = TranslationServiceFactory.get_translation_service()
+    # Always use BasicUrduTranslationService - no other options
+    _translation_service = BasicUrduTranslationService()
     return _translation_service
 
 
