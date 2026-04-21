@@ -66,13 +66,12 @@ async def lifespan(app: FastAPI):
 
     # Try to create database tables, but don't fail if database is unavailable
     try:
-        logger.info("Attempting to create database tables...")
+        logger.info("Checking database connection...")
         Base.metadata.create_all(bind=engine)
-        logger.info("Database tables created successfully")
+        logger.info("✅ Database connected and tables ready")
     except Exception as e:
-        logger.warning(f"Database connection failed: {e}")
-        logger.warning("Application will continue without database functionality")
-        logger.warning("Translation and RAG services will still work")
+        logger.info("ℹ️ Database not available - continuing without database features")
+        logger.debug(f"Database error details: {e}")  # Only show in debug mode
 
     yield
     logger.info("Application shutdown")
