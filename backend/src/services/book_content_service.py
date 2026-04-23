@@ -292,14 +292,6 @@ class BookContentService:
 
         logger.info(f"Successfully updated chapter {chapter_id} with new content")
         return chapter
-            technical_domain=technical_domain,
-            validation_results=validation_results,
-            created_at=datetime.utcnow(),
-            quality_score=validation_results["comprehensive_score"],
-            metadata={"updated": True}
-        )
-
-        return chapter
 
     async def get_recommended_exercises(
         self,
