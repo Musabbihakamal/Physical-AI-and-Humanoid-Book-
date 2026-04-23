@@ -431,15 +431,6 @@ Emerging trends and future developments in {extension_request}:
 - Commercial solutions and case studies
 """
 
-### Key Points:
-- Important point about {extension_request}
-- How it relates to {technical_domain}
-- Practical applications
-
-### Examples:
-- Example 1: Usage in {target_audience} context
-- Example 2: Implementation details
-"""
         return extension_content
 
     async def expand_chapter_topic(
