@@ -208,7 +208,8 @@ async def google_login(request: Request):
         return {
             "error": "Google OAuth is not configured",
             "detail": "Google OAuth is not configured. Please contact the administrator to set up Google OAuth integration.",
-            "configured": False
+            "configured": False,
+            "fallback_available": True
         }
 
     # Generate a state parameter for security
@@ -258,7 +259,8 @@ async def github_login(request: Request):
         return {
             "error": "GitHub OAuth is not configured",
             "detail": "GitHub OAuth is not configured. Please contact the administrator to set up GitHub OAuth integration.",
-            "configured": False
+            "configured": False,
+            "fallback_available": True
         }
 
     # Generate a state parameter for security
@@ -534,6 +536,13 @@ async def register(
         )
     except Exception as e:
         logger.error(f"Error during registration: {str(e)}", exc_info=True)
+        # Return a more helpful error message
+        error_detail = str(e)
+        if "already exists" in error_detail.lower():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already registered"
+            )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred during registration"
@@ -624,6 +633,100 @@ async def refresh_token(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred during token refresh"
         )
+
+
+@router.post("/demo-login", response_model=TokenResponse)
+async def demo_login(
+    db: Session = Depends(get_db)
+):
+    """
+    Demo/Guest login for when OAuth is not configured.
+    Creates or uses existing demo user account.
+    """
+    try:
+        demo_email = "demo@example.com"
+        demo_name = "Demo User"
+
+        # Check if demo user already exists
+        existing_user = db.query(User).filter(User.email == demo_email).first()
+
+        if existing_user:
+            # Demo user exists, generate tokens
+            access_token, refresh_token = AuthService.generate_tokens(existing_user, db)
+
+            logger.info(f"Demo login successful for existing user: {demo_email}")
+
+            return TokenResponse(
+                access_token=access_token,
+                refresh_token=refresh_token,
+                token_type="bearer",
+                user_id=str(existing_user.id),
+                email=existing_user.email,
+                full_name=existing_user.full_name
+            )
+        else:
+            # Create demo user
+            random_password = secrets.token_urlsafe(32)
+
+            user, access_token, refresh_token = AuthService.register_user(
+                db=db,
+                email=demo_email,
+                password=random_password,
+                full_name=demo_name,
+                experience_level="INTERMEDIATE",
+                technical_background="Demo user for testing the application",
+                preferred_difficulty="MEDIUM",
+                learning_goals=["Explore AI and Robotics", "Learn about humanoid robots"],
+                hardware_access=["Computer", "Internet"],
+                language_preference="en"
+            )
+
+            logger.info(f"Demo user created successfully: {user.email}")
+
+            return TokenResponse(
+                access_token=access_token,
+                refresh_token=refresh_token,
+                token_type="bearer",
+                user_id=str(user.id),
+                email=user.email,
+                full_name=user.full_name
+            )
+
+    except Exception as e:
+        logger.error(f"Error during demo login: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Demo login failed. Please try again."
+        )
+
+
+@router.get("/auth-status")
+async def get_auth_status():
+    """
+    Get authentication configuration status.
+    Returns which auth methods are available.
+    """
+    import os
+
+    google_configured = bool(
+        os.getenv("GOOGLE_CLIENT_ID") and
+        not os.getenv("GOOGLE_CLIENT_ID", "").startswith("your_") and
+        len(os.getenv("GOOGLE_CLIENT_ID", "")) > 20
+    )
+
+    github_configured = bool(
+        os.getenv("GITHUB_CLIENT_ID") and
+        not os.getenv("GITHUB_CLIENT_ID", "").startswith("your_") and
+        len(os.getenv("GITHUB_CLIENT_ID", "")) > 20
+    )
+
+    return {
+        "oauth_configured": google_configured or github_configured,
+        "google_oauth": google_configured,
+        "github_oauth": github_configured,
+        "demo_login_available": True,
+        "registration_available": True
+    }
 
 
 @router.post("/logout")

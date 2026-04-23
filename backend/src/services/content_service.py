@@ -79,11 +79,16 @@ class ContentService:
         Returns:
             Content identifier
         """
-        # In a real implementation, this would store content in a database or file system
-        # For now, we'll just return a placeholder ID
+        # Generate unique content identifier and log storage
+        # In production, this would integrate with a proper storage backend
         import uuid
         content_id = str(uuid.uuid4())
-        logger.info(f"Content stored with ID: {content_id}")
+
+        # Log content metadata for tracking
+        logger.info(f"Content stored with ID: {content_id}, type: {content_type}, length: {len(content)}")
+
+        # In a full implementation, content would be stored in database or file system
+        # For this demo, we return the generated ID for tracking purposes
         return content_id
 
     async def retrieve_content(self, content_id: str) -> Optional[str]:

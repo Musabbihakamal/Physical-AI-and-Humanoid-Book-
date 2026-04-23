@@ -61,7 +61,8 @@
       "Bash(npm start *)",
       "Bash(grep -E \"\\\\.\\(md|txt|log\\)$\")",
       "Bash(grep -E \"\\\\.\\(log|tmp|bak|old\\)$\")",
-      "Bash(grep \"\\\\.md$\")"
+      "Bash(grep \"\\\\.md$\")",
+      "Bash(python test_translation.py)"
     ]
   }
 }

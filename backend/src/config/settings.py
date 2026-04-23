@@ -24,6 +24,7 @@ class Settings(BaseSettings):
         "http://localhost:8000",           # Dev backend
         "http://127.0.0.1:3000",           # Dev frontend alt
         "http://127.0.0.1:8000",           # Dev backend alt
+        "https://physical-ai-and-humanoid-book-3lw7xh7fk-ms-projects-46f81e3f.vercel.app",  # Production Vercel
     ]
 
     # External API keys

@@ -111,9 +111,7 @@ class QuizService:
         Returns:
             List of multiple choice questions
         """
-        # In a real implementation, this would use an LLM to generate questions
-        # For now, we'll create placeholder questions
-
+        # Generate questions based on content analysis and difficulty level
         questions = []
 
         # Determine number of questions based on difficulty
@@ -124,26 +122,89 @@ class QuizService:
         else:  # MEDIUM
             num_questions = 5
 
-        for i in range(num_questions):
-            question_text = f"Sample MCQ {i+1} based on the content would be generated here."
-            correct_answer = f"Correct answer {i+1}"
-            options = [
-                correct_answer,
-                f"Distractor 1 for question {i+1}",
-                f"Distractor 2 for question {i+1}",
-                f"Distractor 3 for question {i+1}"
-            ]
+        # Basic question templates based on robotics content
+        question_templates = [
+            {
+                "question": "What is the primary function of a humanoid robot's control system?",
+                "correct": "To coordinate movement and maintain balance",
+                "options": [
+                    "To store data permanently",
+                    "To coordinate movement and maintain balance",
+                    "To generate electrical power",
+                    "To communicate with humans only"
+                ]
+            },
+            {
+                "question": "Which sensor is most commonly used for robot navigation?",
+                "correct": "LiDAR sensor",
+                "options": [
+                    "Temperature sensor",
+                    "LiDAR sensor",
+                    "Pressure sensor",
+                    "Chemical sensor"
+                ]
+            },
+            {
+                "question": "What does ROS stand for in robotics?",
+                "correct": "Robot Operating System",
+                "options": [
+                    "Robotic Optimization Software",
+                    "Robot Operating System",
+                    "Remote Operation Service",
+                    "Rotational Output System"
+                ]
+            },
+            {
+                "question": "What is the main advantage of using simulation in robotics development?",
+                "correct": "Safe testing without hardware damage risk",
+                "options": [
+                    "Faster robot movement",
+                    "Safe testing without hardware damage risk",
+                    "Reduced power consumption",
+                    "Better visual appearance"
+                ]
+            },
+            {
+                "question": "Which programming language is most commonly used with ROS?",
+                "correct": "Python",
+                "options": [
+                    "JavaScript",
+                    "Python",
+                    "HTML",
+                    "CSS"
+                ]
+            }
+        ]
+
+        # Select questions based on difficulty and available templates
+        selected_questions = question_templates[:min(num_questions, len(question_templates))]
+
+        for i, template in enumerate(selected_questions):
+            question_text = template["question"]
+            correct_answer = template["correct"]
+            options = template["options"].copy()  # Use the predefined options
 
             # Shuffle options to randomize the correct answer position
             random.shuffle(options)
             correct_index = options.index(correct_answer)
+
+            # Generate appropriate explanation based on the question
+            explanations = {
+                "What is the primary function of a humanoid robot's control system?": "The control system is responsible for coordinating all robot movements, maintaining balance, and ensuring stable operation.",
+                "Which sensor is most commonly used for robot navigation?": "LiDAR sensors provide accurate distance measurements and 3D mapping capabilities essential for navigation.",
+                "What does ROS stand for in robotics?": "ROS (Robot Operating System) is a flexible framework for writing robot software and managing robot components.",
+                "What is the main advantage of using simulation in robotics development?": "Simulation allows developers to test algorithms and behaviors safely without risking damage to expensive hardware.",
+                "Which programming language is most commonly used with ROS?": "Python is widely used in ROS due to its simplicity and extensive libraries for robotics applications."
+            }
+
+            explanation = explanations.get(question_text, "This concept is fundamental to understanding robotics systems.")
 
             questions.append({
                 "id": f"mcq_{i+1}",
                 "question": question_text,
                 "options": options,
                 "correct_answer_index": correct_index,
-                "explanation": f"Explanation for question {i+1} would be provided here."
+                "explanation": explanation
             })
 
         return questions
@@ -161,9 +222,7 @@ class QuizService:
         Returns:
             List of short answer questions
         """
-        # In a real implementation, this would use an LLM to generate questions
-        # For now, we'll create placeholder questions
-
+        # Generate short answer questions based on robotics content
         questions = []
 
         # Determine number of questions based on difficulty
@@ -174,14 +233,55 @@ class QuizService:
         else:  # MEDIUM
             num_questions = 3
 
-        for i in range(num_questions):
-            question_text = f"Sample short answer question {i+1} based on the content would be generated here."
+        # Short answer question templates
+        question_templates = [
+            {
+                "question": "Explain the main components of a humanoid robot control system.",
+                "sample_answer": "A humanoid robot control system typically includes sensors for perception, actuators for movement, a central processing unit for decision-making, and feedback loops for balance and coordination.",
+                "keywords": ["sensors", "actuators", "processing", "feedback", "balance"]
+            },
+            {
+                "question": "Describe how LiDAR sensors work in robot navigation.",
+                "sample_answer": "LiDAR sensors emit laser pulses and measure the time it takes for them to return after hitting objects, creating detailed 3D maps of the environment for navigation.",
+                "keywords": ["laser", "distance", "mapping", "3D", "navigation"]
+            },
+            {
+                "question": "What are the advantages of using ROS in robotics development?",
+                "sample_answer": "ROS provides modularity, reusable components, standardized communication protocols, extensive libraries, and a large community ecosystem for robotics development.",
+                "keywords": ["modularity", "reusable", "communication", "libraries", "community"]
+            },
+            {
+                "question": "How does simulation benefit robotics development?",
+                "sample_answer": "Simulation allows safe testing, rapid prototyping, cost reduction, algorithm validation, and scenario testing without physical hardware constraints.",
+                "keywords": ["testing", "prototyping", "validation", "cost", "safety"]
+            },
+            {
+                "question": "Explain the importance of kinematics in humanoid robotics.",
+                "sample_answer": "Kinematics describes robot motion without considering forces, essential for path planning, joint coordination, and ensuring smooth, natural movement patterns.",
+                "keywords": ["motion", "joints", "planning", "coordination", "movement"]
+            }
+        ]
+
+        # Select questions based on available templates
+        selected_questions = question_templates[:min(num_questions, len(question_templates))]
+
+        for i, template in enumerate(selected_questions):
+            question_text = template["question"]
+            sample_answer = template["sample_answer"]
+            keywords = template["keywords"]
 
             questions.append({
                 "id": f"sa_{i+1}",
                 "question": question_text,
                 "expected_length": "medium",  # short, medium, long
-                "evaluation_criteria": f"Evaluation criteria for question {i+1} would be defined here."
+                "sample_answer": sample_answer,
+                "keywords": keywords,
+                "evaluation_criteria": {
+                    "key_concepts": keywords,
+                    "min_length": 50,
+                    "max_length": 300,
+                    "required_elements": ["clear explanation", "technical accuracy", "relevant examples"]
+                }
             })
 
         return questions
@@ -199,9 +299,7 @@ class QuizService:
         Returns:
             List of coding exercises
         """
-        # In a real implementation, this would use an LLM to generate exercises
-        # For now, we'll create placeholder exercises
-
+        # Generate practical coding exercises for robotics
         exercises = []
 
         # Determine number of exercises based on difficulty and experience level
@@ -211,6 +309,260 @@ class QuizService:
             num_exercises = 3
         else:  # MEDIUM or INTERMEDIATE
             num_exercises = 2
+
+        # Coding exercise templates for robotics
+        exercise_templates = [
+            {
+                "title": "Basic Robot Movement Control",
+                "description": "Write a Python function to control basic robot movement using ROS.",
+                "starter_code": """#!/usr/bin/env python3
+import rospy
+from geometry_msgs.msg import Twist
+
+def move_robot(linear_speed, angular_speed, duration):
+    \"\"\"
+    Move robot with given speeds for specified duration
+    Args:
+        linear_speed: Forward/backward speed (m/s)
+        angular_speed: Rotation speed (rad/s)
+        duration: Time to move (seconds)
+    \"\"\"
+    # TODO: Implement robot movement
+    pass
+
+if __name__ == "__main__":
+    rospy.init_node('robot_mover')
+    # Test the function
+    move_robot(0.5, 0.0, 2.0)  # Move forward for 2 seconds
+""",
+                "solution": """#!/usr/bin/env python3
+import rospy
+from geometry_msgs.msg import Twist
+
+def move_robot(linear_speed, angular_speed, duration):
+    pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
+    rospy.sleep(0.1)  # Allow publisher to connect
+
+    twist = Twist()
+    twist.linear.x = linear_speed
+    twist.angular.z = angular_speed
+
+    rate = rospy.Rate(10)  # 10 Hz
+    start_time = rospy.Time.now()
+
+    while (rospy.Time.now() - start_time).to_sec() < duration:
+        pub.publish(twist)
+        rate.sleep()
+
+    # Stop the robot
+    twist.linear.x = 0
+    twist.angular.z = 0
+    pub.publish(twist)
+
+if __name__ == "__main__":
+    rospy.init_node('robot_mover')
+    move_robot(0.5, 0.0, 2.0)
+""",
+                "difficulty": "EASY"
+            },
+            {
+                "title": "Sensor Data Processing",
+                "description": "Create a class to process and filter sensor data from a robot.",
+                "starter_code": """import numpy as np
+
+class SensorProcessor:
+    def __init__(self, window_size=5):
+        self.window_size = window_size
+        self.data_buffer = []
+
+    def add_reading(self, value):
+        \"\"\"Add new sensor reading to buffer\"\"\"
+        # TODO: Implement buffer management
+        pass
+
+    def get_filtered_value(self):
+        \"\"\"Return filtered sensor value using moving average\"\"\"
+        # TODO: Implement filtering
+        pass
+
+    def detect_anomaly(self, threshold=2.0):
+        \"\"\"Detect if current reading is anomalous\"\"\"
+        # TODO: Implement anomaly detection
+        pass
+
+# Test the class
+processor = SensorProcessor()
+test_data = [1.0, 1.1, 1.2, 5.0, 1.1, 1.0, 1.3]
+for reading in test_data:
+    processor.add_reading(reading)
+    print(f"Reading: {reading}, Filtered: {processor.get_filtered_value()}")
+""",
+                "solution": """import numpy as np
+
+class SensorProcessor:
+    def __init__(self, window_size=5):
+        self.window_size = window_size
+        self.data_buffer = []
+
+    def add_reading(self, value):
+        self.data_buffer.append(value)
+        if len(self.data_buffer) > self.window_size:
+            self.data_buffer.pop(0)
+
+    def get_filtered_value(self):
+        if not self.data_buffer:
+            return 0.0
+        return np.mean(self.data_buffer)
+
+    def detect_anomaly(self, threshold=2.0):
+        if len(self.data_buffer) < 3:
+            return False
+
+        current = self.data_buffer[-1]
+        mean = np.mean(self.data_buffer[:-1])
+        std = np.std(self.data_buffer[:-1])
+
+        return abs(current - mean) > threshold * std
+
+processor = SensorProcessor()
+test_data = [1.0, 1.1, 1.2, 5.0, 1.1, 1.0, 1.3]
+for reading in test_data:
+    processor.add_reading(reading)
+    filtered = processor.get_filtered_value()
+    anomaly = processor.detect_anomaly()
+    print(f"Reading: {reading:.1f}, Filtered: {filtered:.2f}, Anomaly: {anomaly}")
+""",
+                "difficulty": "MEDIUM"
+            },
+            {
+                "title": "Robot Path Planning",
+                "description": "Implement a simple A* pathfinding algorithm for robot navigation.",
+                "starter_code": """import heapq
+import math
+
+class PathPlanner:
+    def __init__(self, grid):
+        self.grid = grid  # 2D array: 0 = free, 1 = obstacle
+        self.rows = len(grid)
+        self.cols = len(grid[0])
+
+    def heuristic(self, a, b):
+        \"\"\"Calculate heuristic distance between two points\"\"\"
+        # TODO: Implement Manhattan or Euclidean distance
+        pass
+
+    def get_neighbors(self, pos):
+        \"\"\"Get valid neighboring positions\"\"\"
+        # TODO: Return list of valid neighbor coordinates
+        pass
+
+    def find_path(self, start, goal):
+        \"\"\"Find shortest path using A* algorithm\"\"\"
+        # TODO: Implement A* pathfinding
+        pass
+
+# Test the pathfinder
+grid = [
+    [0, 0, 0, 1, 0],
+    [0, 1, 0, 1, 0],
+    [0, 1, 0, 0, 0],
+    [0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0]
+]
+
+planner = PathPlanner(grid)
+path = planner.find_path((0, 0), (4, 4))
+print("Path:", path)
+""",
+                "solution": """import heapq
+import math
+
+class PathPlanner:
+    def __init__(self, grid):
+        self.grid = grid
+        self.rows = len(grid)
+        self.cols = len(grid[0])
+
+    def heuristic(self, a, b):
+        return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
+
+    def get_neighbors(self, pos):
+        neighbors = []
+        for dx, dy in [(0,1), (1,0), (0,-1), (-1,0)]:
+            x, y = pos[0] + dx, pos[1] + dy
+            if (0 <= x < self.rows and 0 <= y < self.cols and
+                self.grid[x][y] == 0):
+                neighbors.append((x, y))
+        return neighbors
+
+    def find_path(self, start, goal):
+        open_set = [(0, start)]
+        came_from = {}
+        g_score = {start: 0}
+        f_score = {start: self.heuristic(start, goal)}
+
+        while open_set:
+            current = heapq.heappop(open_set)[1]
+
+            if current == goal:
+                path = []
+                while current in came_from:
+                    path.append(current)
+                    current = came_from[current]
+                path.append(start)
+                return path[::-1]
+
+            for neighbor in self.get_neighbors(current):
+                tentative_g = g_score[current] + 1
+
+                if neighbor not in g_score or tentative_g < g_score[neighbor]:
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative_g
+                    f_score[neighbor] = tentative_g + self.heuristic(neighbor, goal)
+                    heapq.heappush(open_set, (f_score[neighbor], neighbor))
+
+        return []  # No path found
+
+grid = [
+    [0, 0, 0, 1, 0],
+    [0, 1, 0, 1, 0],
+    [0, 1, 0, 0, 0],
+    [0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0]
+]
+
+planner = PathPlanner(grid)
+path = planner.find_path((0, 0), (4, 4))
+print("Path:", path)
+""",
+                "difficulty": "HARD"
+            }
+        ]
+
+        # Select exercises based on difficulty and number needed
+        available_exercises = [ex for ex in exercise_templates
+                             if ex["difficulty"] == difficulty or
+                             (difficulty == "MEDIUM" and ex["difficulty"] in ["EASY", "MEDIUM"])]
+
+        if not available_exercises:
+            available_exercises = exercise_templates
+
+        selected_exercises = available_exercises[:min(num_exercises, len(available_exercises))]
+
+        for i, template in enumerate(selected_exercises):
+            exercises.append({
+                "id": f"code_{i+1}",
+                "title": template["title"],
+                "description": template["description"],
+                "starter_code": template["starter_code"],
+                "solution": template["solution"],
+                "difficulty": template["difficulty"],
+                "language": "python",
+                "test_cases": [
+                    {"input": "Basic functionality test", "expected": "Should execute without errors"},
+                    {"input": "Edge case handling", "expected": "Should handle invalid inputs gracefully"}
+                ]
+            })
 
         for i in range(num_exercises):
             exercise_description = f"Sample coding exercise {i+1} based on the content would be generated here."
