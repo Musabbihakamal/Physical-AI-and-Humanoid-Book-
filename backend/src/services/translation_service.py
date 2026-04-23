@@ -12,7 +12,16 @@ import re
 logger = logging.getLogger(__name__)
 
 
-class ConstitutionalUrduTranslationService(ABC):
+class TranslationService(ABC):
+    """Abstract base class for translation services"""
+
+    @abstractmethod
+    async def translate(self, text: str, target_language: str, source_language: Optional[str] = None) -> str:
+        """Translate text from source language to target language"""
+        pass
+
+
+class ConstitutionalUrduTranslationService(TranslationService):
     """
     Constitutional Urdu Translation Agent following Physical AI Book Constitution v2.0
 
@@ -942,12 +951,3 @@ class TranslationProvider(Enum):
     CONSTITUTIONAL = "constitutional"
     HUGGINGFACE = "huggingface"
     BASIC_URDU = "basic_urdu"
-
-
-class TranslationService(ABC):
-    """Abstract base class for translation services"""
-
-    @abstractmethod
-    async def translate(self, text: str, target_language: str, source_language: Optional[str] = None) -> str:
-        """Translate text from source language to target language"""
-        pass
