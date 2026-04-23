@@ -228,6 +228,186 @@ class ConstitutionalUrduTranslationService(ABC):
             pattern = r'\b' + re.escape(english_phrase) + r'\b'
             result = re.sub(pattern, urdu_phrase, result, flags=re.IGNORECASE)
 
+        # For longer content, translate sentence by sentence
+        if len(text) > 200:
+            return self._translate_full_content_constitutional(result)
+
+        return result
+
+    def _translate_full_content_constitutional(self, text: str) -> str:
+        """Translate full chapter content sentence by sentence following constitutional requirements"""
+        # Split into sentences while preserving structure
+        sentences = re.split(r'(?<=[.!?])\s+', text)
+        translated_sentences = []
+
+        for sentence in sentences:
+            if sentence.strip():
+                # Translate each sentence
+                translated = self._translate_single_sentence_constitutional(sentence.strip())
+                translated_sentences.append(translated)
+
+        return ' '.join(translated_sentences)
+
+    def _translate_single_sentence_constitutional(self, text: str) -> str:
+        """Translate a single sentence following constitutional patterns"""
+        text_lower = text.lower().strip()
+
+        # Sentence pattern templates for robotics content
+        sentence_templates = {
+            # Chapter and section patterns
+            r"^chapter (\d+):?\s*(.+)": "باب {}: {}",
+            r"^# (.+)": "# {}",
+            r"^## (.+)": "## {}",
+            r"^### (.+)": "### {}",
+
+            # Introduction patterns
+            r"this chapter (covers|discusses|explores|examines|introduces) (.+)": "یہ باب {} کا احاطہ کرتا ہے",
+            r"in this chapter,?\s*(we will|you will|we'll|you'll) (.+)": "اس باب میں ہم {}",
+            r"this section (covers|discusses|explores|examines) (.+)": "یہ حصہ {} کا احاطہ کرتا ہے",
+
+            # Learning objectives
+            r"by the end of this chapter,?\s*you will (.+)": "اس باب کے اختتام تک آپ {}",
+            r"learning objectives?:?": "تعلیمی مقاصد:",
+            r"you will (be able to|learn to|understand how to) (.+)": "آپ {} سکیں گے",
+            r"students will (learn|understand|be able to) (.+)": "طلباء {} سکیں گے",
+
+            # Technical descriptions
+            r"(.+) is a (.+) that (.+)": "{} ایک {} ہے جو {}",
+            r"(.+) are (.+) used for (.+)": "{} {} ہیں جو {} کے لیے استعمال ہوتے ہیں",
+            r"the (.+) system (.+)": "{} سسٹم {}",
+            r"a (.+) is (.+)": "ایک {} {} ہے",
+
+            # Process and instruction patterns
+            r"to (.+),?\s*(first|you need to|we need to|you must|we must) (.+)": "{} کے لیے پہلے آپ کو {}",
+            r"step (\d+):?\s*(.+)": "قدم {}: {}",
+            r"follow these steps:?": "یہ قدم اٹھائیں:",
+            r"first,?\s*(.+)": "پہلے، {}",
+            r"next,?\s*(.+)": "اگلا، {}",
+            r"finally,?\s*(.+)": "آخر میں، {}",
+
+            # Explanation patterns
+            r"this means that (.+)": "اس کا مطلب یہ ہے کہ {}",
+            r"in other words,?\s*(.+)": "دوسرے الفاظ میں، {}",
+            r"for example,?\s*(.+)": "مثال کے طور پر، {}",
+            r"for instance,?\s*(.+)": "مثلاً، {}",
+
+            # Conclusion patterns
+            r"in conclusion,?\s*(.+)": "خلاصہ یہ ہے کہ {}",
+            r"to summarize,?\s*(.+)": "خلاصہ کرتے ہوئے، {}",
+            r"as we can see,?\s*(.+)": "جیسا کہ ہم دیکھ سکتے ہیں، {}",
+
+            # Importance and emphasis
+            r"it is important to (.+)": "{} کرنا اہم ہے",
+            r"it is essential to (.+)": "{} کرنا ضروری ہے",
+            r"make sure (to )?(.+)": "یقینی بنائیں کہ {}",
+            r"remember that (.+)": "یاد رکھیں کہ {}",
+            r"note that (.+)": "نوٹ کریں کہ {}",
+
+            # Conditional patterns
+            r"if (.+),?\s*then (.+)": "اگر {} تو {}",
+            r"when (.+),?\s*(.+)": "جب {} تو {}",
+            r"while (.+),?\s*(.+)": "جبکہ {}, {}",
+
+            # Comparison patterns
+            r"unlike (.+),?\s*(.+)": "{} کے برعکس، {}",
+            r"similar to (.+),?\s*(.+)": "{} کی طرح، {}",
+            r"compared to (.+),?\s*(.+)": "{} کے مقابلے میں، {}"
+        }
+
+        # Try to match sentence patterns
+        for pattern, urdu_template in sentence_templates.items():
+            match = re.search(pattern, text_lower)
+            if match:
+                groups = match.groups()
+                translated_groups = []
+
+                for group in groups:
+                    if group:
+                        translated_group = self._translate_key_terms(group)
+                        translated_groups.append(translated_group)
+
+                try:
+                    result = urdu_template.format(*translated_groups)
+                    logger.debug(f"Pattern matched: {pattern} -> {result}")
+                    return result
+                except:
+                    pass
+
+        # If no pattern matches, use phrase-level translation
+        return self._translate_phrases_constitutional(text)
+
+    def _translate_key_terms(self, text: str) -> str:
+        """Translate key technical terms while preserving context"""
+        key_terms = {
+            "robot": "روبوٹ",
+            "robotics": "روبوٹکس",
+            "humanoid": "انسان نما روبوٹ",
+            "control system": "کنٹرول سسٹم",
+            "simulation": "نقل",
+            "environment": "ماحول",
+            "sensor": "سینسر",
+            "actuator": "ایکچویٹر",
+            "artificial intelligence": "مصنوعی ذہانت",
+            "machine learning": "مشین لرننگ",
+            "programming": "پروگرامنگ",
+            "algorithm": "الگورتھم",
+            "software": "سافٹ ویئر",
+            "hardware": "ہارڈ ویئر",
+            "computer": "کمپیوٹر",
+            "technology": "ٹیکنالوجی",
+            "development": "ترقی",
+            "implementation": "نافذ کرنا",
+            "configuration": "ترتیب",
+            "installation": "انسٹالیشن"
+        }
+
+        result = text
+        for english, urdu in key_terms.items():
+            pattern = r'\b' + re.escape(english) + r'\b'
+            result = re.sub(pattern, urdu, result, flags=re.IGNORECASE)
+
+        return result
+
+    def _translate_phrases_constitutional(self, text: str) -> str:
+        """Translate common phrases and improve grammar"""
+
+        # Common phrase replacements
+        phrase_replacements = {
+            "this chapter": "یہ باب",
+            "in this chapter": "اس باب میں",
+            "the next chapter": "اگلا باب",
+            "as we can see": "جیسا کہ ہم دیکھ سکتے ہیں",
+            "for example": "مثال کے طور پر",
+            "in conclusion": "خلاصہ یہ ہے",
+            "it is important": "یہ اہم ہے",
+            "we will learn": "ہم سیکھیں گے",
+            "you will learn": "آپ سیکھیں گے",
+            "let us": "آئیے",
+            "we can": "ہم کر ستے ہیں",
+            "you can": "آپ کر سکتے ہیں",
+            "we need to": "ہمیں ضرورت ہے",
+            "you need to": "آپ کو ضرورت ہے",
+            "make sure": "یقینی بنائیں",
+            "keep in mind": "ذہن میں رکھیں",
+            "step by step": "قدم بہ قدم",
+            "first of all": "سب سے پہلے",
+            "at the end": "آخر میں",
+            "on the other hand": "دوسری طرف"
+        }
+
+        result = text
+
+        # Replace phrases first (longer matches first)
+        for english_phrase, urdu_phrase in sorted(phrase_replacements.items(), key=len, reverse=True):
+            pattern = r'\b' + re.escape(english_phrase) + r'\b'
+            result = re.sub(pattern, urdu_phrase, result, flags=re.IGNORECASE)
+
+        # Then translate remaining key terms
+        result = self._translate_key_terms(result)
+
+        # Clean up spacing
+        result = re.sub(r'\s+', ' ', result).strip()
+
         return result
 
     def _translate_phrase(self, phrase: str) -> str:
