@@ -12,7 +12,7 @@ import re
 logger = logging.getLogger(__name__)
 
 
-class ConstitutionalUrduTranslationService:
+class ConstitutionalUrduTranslationService(ABC):
     """
     Constitutional Urdu Translation Agent following Physical AI Book Constitution v2.0
 
@@ -322,12 +322,11 @@ class HuggingFaceTranslationService(TranslationService):
                 logger.warning(f"Language {target_language} not supported by free service")
                 return f"[{target_language.upper()} - Language not supported] {text}"
 
-            # For Urdu, use a different approach since the model might not exist
+            # For Urdu, use Constitutional service
             if target_language == "ur":
-                logger.info("Using basic Urdu translation fallback")
-                # Use the basic dictionary-based service as fallback
-                basic_service = BasicUrduTranslationService()
-                return await basic_service.translate(text, target_language, source_language)
+                logger.info("Using Constitutional Urdu Translation Service for Urdu")
+                constitutional_service = ConstitutionalUrduTranslationService()
+                return await constitutional_service.translate(text, target_language, source_language)
 
             # Use the correct Hugging Face inference API endpoint
             url = f"https://api-inference.huggingface.co/models/{model_name}"
@@ -723,6 +722,7 @@ def get_translation_service():
     """Get or create the Constitutional translation service (lazy loading)"""
     global _translation_service
     # Use Constitutional service as per Physical AI Book Constitution
+    logger.info("=== get_translation_service: Creating Constitutional service ===")
     _translation_service = ConstitutionalUrduTranslationService()
     return _translation_service
 
@@ -740,7 +740,7 @@ async def translate_text(text: str, target_language: str, source_language: Optio
     - Preserves code blocks and technical terms
     """
     try:
-        # Use Constitutional translation service
+        # Use Constitutional translation service DIRECTLY
         service = ConstitutionalUrduTranslationService()
         logger.info(f"=== Constitutional translate_text v2.0: text='{text[:50]}...', target='{target_language}' ===")
 
