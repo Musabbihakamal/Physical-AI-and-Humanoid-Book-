@@ -171,45 +171,159 @@ class BasicUrduTranslationService(TranslationService):
 
             logger.info(f"Basic Urdu translation starting for text length: {len(text)}")
 
-            # For now, return a user-friendly message instead of poor mixed translation
-            # This prevents the confusing English-Urdu mix that users can't understand
+            # Comprehensive English to Urdu translation dictionary
+            translation_dict = {
+                # Technical terms
+                "robot": "روبوٹ",
+                "robotics": "روبوٹکس",
+                "humanoid": "انسان نما",
+                "control": "کنٹرول",
+                "system": "نظام",
+                "systems": "نظامات",
+                "simulation": "نقل",
+                "environment": "ماحول",
+                "physics": "طبیعیات",
+                "engine": "انجن",
+                "model": "ماڈل",
+                "chapter": "باب",
+                "learning": "سیکھنا",
+                "objectives": "مقاصد",
+                "theory": "نظریہ",
+                "practical": "عملی",
+                "examples": "مثالیں",
+                "exercises": "مشقیں",
+                "references": "حوالہ جات",
+                "summary": "خلاصہ",
+                "introduction": "تعارف",
+                "conclusion": "نتیجہ",
+                "artificial intelligence": "مصنوعی ذہانت",
+                "machine learning": "مشین لرننگ",
+                "sensor": "سینسر",
+                "actuator": "ایکچویٹر",
+                "algorithm": "الگورتھم",
+                "programming": "پروگرامنگ",
+                "software": "سافٹ ویئر",
+                "hardware": "ہارڈ ویئر",
+                "computer": "کمپیوٹر",
+                "technology": "ٹیکنالوجی",
+                "development": "ترقی",
+                "application": "اطلاق",
+                "implementation": "نافذ کرنا",
+                "configuration": "ترتیب",
+                "installation": "انسٹالیشن",
 
-            # Check if text is very short (likely a word or phrase)
-            if len(text.strip()) < 100:
-                # For short text, try basic word replacement
-                translated_text = text
+                # Common words
+                "the": "",
+                "and": "اور",
+                "or": "یا",
+                "of": "کا",
+                "in": "میں",
+                "for": "کے لیے",
+                "with": "کے ساتھ",
+                "by": "کے ذریعے",
+                "to": "کو",
+                "is": "ہے",
+                "are": "ہیں",
+                "will": "گا",
+                "can": "سکتا",
+                "this": "یہ",
+                "that": "وہ",
+                "you": "آپ",
+                "we": "ہم",
+                "it": "یہ",
+                "a": "",
+                "an": "",
+                "as": "جیسا کہ",
+                "be": "ہونا",
+                "have": "ہے",
+                "has": "ہے",
+                "do": "کرنا",
+                "does": "کرتا ہے",
+                "will be": "ہوگا",
+                "would": "گا",
+                "should": "چاہیے",
+                "could": "سکتا",
+                "may": "ہو سکتا",
+                "might": "ہو سکتا",
+                "must": "ضروری ہے",
 
-                # Only translate very common, well-known terms
-                basic_replacements = {
-                    "robot": "روبوٹ",
-                    "robotics": "روبوٹکس",
-                    "chapter": "باب",
-                    "summary": "خلاصہ",
-                    "introduction": "تعارف",
-                    "conclusion": "نتیجہ"
-                }
+                # Action words
+                "understand": "سمجھنا",
+                "implement": "نافذ کرنا",
+                "apply": "لاگو کرنا",
+                "evaluate": "جانچنا",
+                "design": "ڈیزائن",
+                "create": "بنانا",
+                "build": "تعمیر کرنا",
+                "test": "ٹیسٹ",
+                "configure": "ترتیب دینا",
+                "install": "انسٹال کرنا",
+                "setup": "سیٹ اپ",
+                "use": "استعمال کرنا",
+                "work": "کام",
+                "make": "بنانا",
+                "get": "حاصل کرنا",
+                "take": "لینا",
+                "go": "جانا",
+                "come": "آنا",
+                "see": "دیکھنا",
+                "know": "جاننا",
+                "think": "سوچنا",
+                "look": "دیکھنا",
+                "want": "چاہنا",
+                "give": "دینا",
+                "find": "تلاش کرنا",
+                "tell": "بتانا",
+                "ask": "پوچھنا",
+                "try": "کوشش کرنا",
+                "call": "کال کرنا",
+                "need": "ضرورت",
 
-                for english_word, urdu_word in basic_replacements.items():
-                    import re
+                # Descriptive words
+                "good": "اچھا",
+                "bad": "برا",
+                "big": "بڑا",
+                "small": "چھوٹا",
+                "new": "نیا",
+                "old": "پرانا",
+                "first": "پہلا",
+                "last": "آخری",
+                "long": "لمبا",
+                "short": "چھوٹا",
+                "high": "اونچا",
+                "low": "نیچا",
+                "right": "صحیح",
+                "wrong": "غلط",
+                "important": "اہم",
+                "different": "مختلف",
+                "same": "ویسا ہی",
+                "easy": "آسان",
+                "hard": "مشکل",
+                "simple": "سادہ",
+                "complex": "پیچیدہ",
+                "basic": "بنیادی",
+                "advanced": "اعلیٰ درجے کا",
+                "complete": "مکمل",
+                "partial": "جزوی"
+            }
+
+            # Perform translation
+            translated_text = text
+
+            # Replace English words with Urdu equivalents
+            import re
+            for english_word, urdu_word in translation_dict.items():
+                if urdu_word:  # Skip empty translations
+                    # Case-insensitive replacement with word boundaries
                     pattern = r'\b' + re.escape(english_word) + r'\b'
                     translated_text = re.sub(pattern, urdu_word, translated_text, flags=re.IGNORECASE)
 
-                return translated_text
-            else:
-                # For longer text, show a helpful message instead of poor translation
-                return f"""
-<div dir="rtl" lang="ur" style="background: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #007acc;">
-    <h3>🔄 اردو ترجمہ</h3>
-    <p><strong>یہ مواد اردو میں دستیاب ہے۔</strong></p>
-    <p>فی الوقت، تکنیکی مواد کا بہتر ترجمہ تیار کیا جا رہا ہے۔ اہم تکنیکی اصطلاحات انگریزی میں رکھی گئی ہیں تاکہ وضاحت برقرار رہے۔</p>
-    <details>
-        <summary>انگریزی مواد دیکھیں</summary>
-        <div dir="ltr" lang="en" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px;">
-            {text}
-        </div>
-    </details>
-</div>
-"""
+            # Clean up extra spaces
+            translated_text = re.sub(r'\s+', ' ', translated_text)
+            translated_text = translated_text.strip()
+
+            logger.info(f"Basic Urdu translation completed")
+            return translated_text
 
         except Exception as e:
             logger.error(f"Basic translation error: {e}")
