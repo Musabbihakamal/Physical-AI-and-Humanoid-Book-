@@ -164,170 +164,179 @@ class BasicUrduTranslationService(TranslationService):
         }
 
     async def translate(self, text: str, target_language: str, source_language: Optional[str] = None) -> str:
-        """Basic dictionary-based translation to Urdu"""
+        """Sentence-level translation to Urdu with proper grammar and context"""
         try:
             if target_language != "ur":
                 return f"[{target_language.upper()} translation not supported] {text}"
 
-            logger.info(f"Basic Urdu translation starting for text length: {len(text)}")
+            logger.info(f"Sentence-level Urdu translation starting for text length: {len(text)}")
 
-            # Comprehensive English to Urdu translation dictionary
-            translation_dict = {
-                # Technical terms
-                "robot": "روبوٹ",
-                "robotics": "روبوٹکس",
-                "humanoid": "انسان نما",
-                "control": "کنٹرول",
-                "system": "نظام",
-                "systems": "نظامات",
-                "simulation": "نقل",
-                "environment": "ماحول",
-                "physics": "طبیعیات",
-                "engine": "انجن",
-                "model": "ماڈل",
-                "chapter": "باب",
-                "learning": "سیکھنا",
-                "objectives": "مقاصد",
-                "theory": "نظریہ",
-                "practical": "عملی",
-                "examples": "مثالیں",
-                "exercises": "مشقیں",
-                "references": "حوالہ جات",
-                "summary": "خلاصہ",
-                "introduction": "تعارف",
-                "conclusion": "نتیجہ",
-                "artificial intelligence": "مصنوعی ذہانت",
-                "machine learning": "مشین لرننگ",
-                "sensor": "سینسر",
-                "actuator": "ایکچویٹر",
-                "algorithm": "الگورتھم",
-                "programming": "پروگرامنگ",
-                "software": "سافٹ ویئر",
-                "hardware": "ہارڈ ویئر",
-                "computer": "کمپیوٹر",
-                "technology": "ٹیکنالوجی",
-                "development": "ترقی",
-                "application": "اطلاق",
-                "implementation": "نافذ کرنا",
-                "configuration": "ترتیب",
-                "installation": "انسٹالیشن",
+            # First try to use a proper translation service
+            try:
+                # Try Google Translate via free API
+                import requests
+                import asyncio
 
-                # Common words
-                "the": "",
-                "and": "اور",
-                "or": "یا",
-                "of": "کا",
-                "in": "میں",
-                "for": "کے لیے",
-                "with": "کے ساتھ",
-                "by": "کے ذریعے",
-                "to": "کو",
-                "is": "ہے",
-                "are": "ہیں",
-                "will": "گا",
-                "can": "سکتا",
-                "this": "یہ",
-                "that": "وہ",
-                "you": "آپ",
-                "we": "ہم",
-                "it": "یہ",
-                "a": "",
-                "an": "",
-                "as": "جیسا کہ",
-                "be": "ہونا",
-                "have": "ہے",
-                "has": "ہے",
-                "do": "کرنا",
-                "does": "کرتا ہے",
-                "will be": "ہوگا",
-                "would": "گا",
-                "should": "چاہیے",
-                "could": "سکتا",
-                "may": "ہو سکتا",
-                "might": "ہو سکتا",
-                "must": "ضروری ہے",
+                # Use MyMemory free translation API (no key required)
+                url = "https://api.mymemory.translated.net/get"
+                params = {
+                    'q': text[:500],  # Limit text length
+                    'langpair': 'en|ur'
+                }
 
-                # Action words
-                "understand": "سمجھنا",
-                "implement": "نافذ کرنا",
-                "apply": "لاگو کرنا",
-                "evaluate": "جانچنا",
-                "design": "ڈیزائن",
-                "create": "بنانا",
-                "build": "تعمیر کرنا",
-                "test": "ٹیسٹ",
-                "configure": "ترتیب دینا",
-                "install": "انسٹال کرنا",
-                "setup": "سیٹ اپ",
-                "use": "استعمال کرنا",
-                "work": "کام",
-                "make": "بنانا",
-                "get": "حاصل کرنا",
-                "take": "لینا",
-                "go": "جانا",
-                "come": "آنا",
-                "see": "دیکھنا",
-                "know": "جاننا",
-                "think": "سوچنا",
-                "look": "دیکھنا",
-                "want": "چاہنا",
-                "give": "دینا",
-                "find": "تلاش کرنا",
-                "tell": "بتانا",
-                "ask": "پوچھنا",
-                "try": "کوشش کرنا",
-                "call": "کال کرنا",
-                "need": "ضرورت",
+                loop = asyncio.get_event_loop()
+                response = await loop.run_in_executor(
+                    None,
+                    lambda: requests.get(url, params=params, timeout=10)
+                )
 
-                # Descriptive words
-                "good": "اچھا",
-                "bad": "برا",
-                "big": "بڑا",
-                "small": "چھوٹا",
-                "new": "نیا",
-                "old": "پرانا",
-                "first": "پہلا",
-                "last": "آخری",
-                "long": "لمبا",
-                "short": "چھوٹا",
-                "high": "اونچا",
-                "low": "نیچا",
-                "right": "صحیح",
-                "wrong": "غلط",
-                "important": "اہم",
-                "different": "مختلف",
-                "same": "ویسا ہی",
-                "easy": "آسان",
-                "hard": "مشکل",
-                "simple": "سادہ",
-                "complex": "پیچیدہ",
-                "basic": "بنیادی",
-                "advanced": "اعلیٰ درجے کا",
-                "complete": "مکمل",
-                "partial": "جزوی"
+                if response.status_code == 200:
+                    result = response.json()
+                    if result.get('responseStatus') == 200:
+                        translated = result['responseData']['translatedText']
+                        if translated and translated != text:
+                            logger.info("MyMemory translation successful")
+                            return translated
+
+            except Exception as e:
+                logger.warning(f"MyMemory API failed: {e}")
+
+            # Fallback: Sentence-level templates for robotics content
+            text_lower = text.lower().strip()
+
+            # Common sentence patterns in robotics content
+            sentence_templates = {
+                # Chapter introductions
+                r"this chapter (covers|discusses|explores|examines) (.+)": "یہ باب {} کا احاطہ کرتا ہے",
+                r"in this chapter,? (we will|you will) (.+)": "اس باب میں آپ {}",
+                r"chapter (\d+):? (.+)": "باب {}: {}",
+
+                # Learning objectives
+                r"by the end of this chapter,? you will (.+)": "اس باب کے اختتام تک آپ {}",
+                r"learning objectives?:?": "تعلیمی مقاصد:",
+                r"you will (be able to|learn to|understand) (.+)": "آپ {} سکیں گے",
+
+                # Technical descriptions
+                r"(.+) is a (.+) that (.+)": "{} ایک {} ہے جو {}",
+                r"(.+) are (.+) used for (.+)": "{} {} ہیں جو {} کے لیے استعمال ہوتے ہیں",
+                r"the (.+) system (.+)": "{} نظام {}",
+
+                # Instructions
+                r"to (.+),? (first|you need to|we need to) (.+)": "{} کے لیے پہلے {}",
+                r"step (\d+):? (.+)": "قدم {}: {}",
+                r"follow these steps:?": "یہ قدم اٹھائیں:",
+
+                # Common phrases
+                r"for example,?": "مثال کے طور پر",
+                r"in conclusion,?": "خلاصہ یہ ہے کہ",
+                r"as we can see,?": "جیسا کہ ہم دیکھ سکتے ہیں",
+                r"it is important to (.+)": "{} کرنا اہم ہے",
+                r"make sure (to )?(.+)": "یقینی بنائیں کہ {}",
             }
 
-            # Perform translation
-            translated_text = text
-
-            # Replace English words with Urdu equivalents
+            # Try to match sentence patterns
             import re
-            for english_word, urdu_word in translation_dict.items():
-                if urdu_word:  # Skip empty translations
-                    # Case-insensitive replacement with word boundaries
-                    pattern = r'\b' + re.escape(english_word) + r'\b'
-                    translated_text = re.sub(pattern, urdu_word, translated_text, flags=re.IGNORECASE)
+            for pattern, urdu_template in sentence_templates.items():
+                match = re.search(pattern, text_lower)
+                if match:
+                    # Extract matched groups and translate key terms
+                    groups = match.groups()
+                    translated_groups = []
 
-            # Clean up extra spaces
-            translated_text = re.sub(r'\s+', ' ', translated_text)
-            translated_text = translated_text.strip()
+                    for group in groups:
+                        if group:
+                            translated_group = self._translate_key_terms(group)
+                            translated_groups.append(translated_group)
 
-            logger.info(f"Basic Urdu translation completed")
-            return translated_text
+                    try:
+                        result = urdu_template.format(*translated_groups)
+                        logger.info("Sentence template translation successful")
+                        return result
+                    except:
+                        pass
+
+            # Fallback: Improved phrase-level translation
+            return self._translate_phrases(text)
 
         except Exception as e:
-            logger.error(f"Basic translation error: {e}")
+            logger.error(f"Sentence translation error: {e}")
             return text
+
+    def _translate_key_terms(self, text: str) -> str:
+        """Translate key technical terms while preserving context"""
+        key_terms = {
+            "robot": "روبوٹ",
+            "robotics": "روبوٹکس",
+            "humanoid": "انسان نما روبوٹ",
+            "control system": "کنٹرول سسٹم",
+            "simulation": "نقل",
+            "environment": "ماحول",
+            "sensor": "سینسر",
+            "actuator": "ایکچویٹر",
+            "artificial intelligence": "مصنوعی ذہانت",
+            "machine learning": "مشین لرننگ",
+            "programming": "پروگرامنگ",
+            "algorithm": "الگورتھم",
+            "software": "سافٹ ویئر",
+            "hardware": "ہارڈ ویئر",
+            "computer": "کمپیوٹر",
+            "technology": "ٹیکنالوجی",
+            "development": "ترقی",
+            "implementation": "نافذ کرنا",
+            "configuration": "ترتیب",
+            "installation": "انسٹالیشن"
+        }
+
+        result = text
+        import re
+        for english, urdu in key_terms.items():
+            pattern = r'\b' + re.escape(english) + r'\b'
+            result = re.sub(pattern, urdu, result, flags=re.IGNORECASE)
+
+        return result
+
+    def _translate_phrases(self, text: str) -> str:
+        """Translate common phrases and improve grammar"""
+
+        # Common phrase replacements
+        phrase_replacements = {
+            "this chapter": "یہ باب",
+            "in this chapter": "اس باب میں",
+            "the next chapter": "اگلا باب",
+            "as we can see": "جیسا کہ ہم دیکھ سکتے ہیں",
+            "for example": "مثال کے طور پر",
+            "in conclusion": "خلاصہ یہ ہے",
+            "it is important": "یہ اہم ہے",
+            "we will learn": "ہم سیکھیں گے",
+            "you will learn": "آپ سیکھیں گے",
+            "let us": "آئیے",
+            "we can": "ہم کر سکتے ہیں",
+            "you can": "آپ کر سکتے ہیں",
+            "we need to": "ہمیں ضرورت ہے",
+            "you need to": "آپ کو ضرورت ہے",
+            "make sure": "یقینی بنائیں",
+            "keep in mind": "ذہن میں رکھیں",
+            "step by step": "قدم بہ قدم",
+            "first of all": "سب سے پہلے",
+            "at the end": "آخر میں",
+            "on the other hand": "دوسری طرف"
+        }
+
+        result = text
+        import re
+
+        # Replace phrases first (longer matches first)
+        for english_phrase, urdu_phrase in sorted(phrase_replacements.items(), key=len, reverse=True):
+            pattern = r'\b' + re.escape(english_phrase) + r'\b'
+            result = re.sub(pattern, urdu_phrase, result, flags=re.IGNORECASE)
+
+        # Then translate remaining key terms
+        result = self._translate_key_terms(result)
+
+        # Clean up spacing
+        result = re.sub(r'\s+', ' ', result).strip()
+
+        return result
 
 
 class TranslationServiceFactory:
