@@ -130,17 +130,16 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
     setTranslationError(null);
 
     try {
-      // Simplified approach: only preserve essential code blocks
+      // Enhanced code preservation system
       let processedContent = text;
       const preservedElements = [];
-
-      // Only preserve code blocks and keep it simple
-      const codeBlockRegex = /```[\s\S]*?```/g;
-      let match;
       let index = 0;
 
-      while ((match = codeBlockRegex.exec(text)) !== null) {
-        const placeholder = `__CODE_BLOCK_${index}__`;
+      // 1. Preserve fenced code blocks (```...```)
+      const fencedCodeRegex = /```[\s\S]*?```/g;
+      let match;
+      while ((match = fencedCodeRegex.exec(text)) !== null) {
+        const placeholder = `__FENCED_CODE_${index}__`;
         preservedElements.push({
           placeholder,
           original: match[0]
@@ -149,8 +148,8 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
         index++;
       }
 
-      // Also preserve inline code
-      const inlineCodeRegex = /`[^`]+`/g;
+      // 2. Preserve inline code (`...`)
+      const inlineCodeRegex = /`[^`\n]+`/g;
       while ((match = inlineCodeRegex.exec(processedContent)) !== null) {
         const placeholder = `__INLINE_CODE_${index}__`;
         preservedElements.push({
@@ -161,9 +160,63 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
         index++;
       }
 
+      // 3. Preserve HTML code tags
+      const htmlCodeRegex = /<code[^>]*>[\s\S]*?<\/code>/gi;
+      while ((match = htmlCodeRegex.exec(processedContent)) !== null) {
+        const placeholder = `__HTML_CODE_${index}__`;
+        preservedElements.push({
+          placeholder,
+          original: match[0]
+        });
+        processedContent = processedContent.replace(match[0], placeholder);
+        index++;
+      }
+
+      // 4. Preserve pre tags
+      const preTagRegex = /<pre[^>]*>[\s\S]*?<\/pre>/gi;
+      while ((match = preTagRegex.exec(processedContent)) !== null) {
+        const placeholder = `__PRE_TAG_${index}__`;
+        preservedElements.push({
+          placeholder,
+          original: match[0]
+        });
+        processedContent = processedContent.replace(match[0], placeholder);
+        index++;
+      }
+
+      // 5. Preserve function definitions and code-like patterns
+      const functionRegex = /def\s+\w+\([^)]*\):|class\s+\w+:|import\s+\w+|from\s+\w+\s+import/g;
+      while ((match = functionRegex.exec(processedContent)) !== null) {
+        const placeholder = `__FUNCTION_${index}__`;
+        preservedElements.push({
+          placeholder,
+          original: match[0]
+        });
+        processedContent = processedContent.replace(match[0], placeholder);
+        index++;
+      }
+
+      // 6. Preserve technical acronyms that should stay in English
+      const technicalTerms = ['ZMP', 'LIMP', 'LIPM', 'FRI', 'CoM', 'CoP', 'API', 'HTTP', 'JSON', 'XML', 'HTML', 'CSS', 'JavaScript', 'Python', 'ROS', 'ROS2', 'URDF', 'SDF'];
+      for (const term of technicalTerms) {
+        const termRegex = new RegExp(`\\b${term}\\b`, 'g');
+        while ((match = termRegex.exec(processedContent)) !== null) {
+          const placeholder = `__TECH_${index}__`;
+          preservedElements.push({
+            placeholder,
+            original: match[0]
+          });
+          processedContent = processedContent.replace(match[0], placeholder);
+          index++;
+        }
+      }
+
       if (!processedContent || processedContent.trim().length === 0) {
         throw new Error('No translatable content found after processing.');
       }
+
+      console.log('Preserved elements:', preservedElements.length);
+      console.log('Processed content preview:', processedContent.substring(0, 200));
 
       // Call backend translation API
       const response = await fetch(`${API_BASE_URL}/api/translate`, {
@@ -189,15 +242,17 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
         throw new Error('Translation API returned empty result.');
       }
 
-      // Restore preserved elements
+      // Restore preserved elements in reverse order to handle nested elements
       let finalContent = result.translated_text;
-      for (const element of preservedElements) {
+      for (const element of preservedElements.reverse()) {
         finalContent = finalContent.replace(element.placeholder, element.original);
       }
 
       if (!finalContent || finalContent.trim().length === 0) {
         throw new Error('Translation result is empty after processing.');
       }
+
+      console.log('Final translated content preview:', finalContent.substring(0, 200));
 
       return {
         translatedText: finalContent,
