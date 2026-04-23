@@ -197,9 +197,9 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
       }
 
       // 6. Preserve technical acronyms that should stay in English
-      const technicalTerms = ['ZMP', 'LIMP', 'LIPM', 'FRI', 'CoM', 'CoP', 'API', 'HTTP', 'JSON', 'XML', 'HTML', 'CSS', 'JavaScript', 'Python', 'ROS', 'ROS2', 'URDF', 'SDF'];
+      const technicalTerms = ['ZMP', 'LIPM', 'FRI', 'CoM', 'CoP', 'API', 'HTTP', 'JSON', 'XML', 'HTML', 'CSS', 'JavaScript', 'Python', 'ROS', 'ROS2', 'URDF', 'SDF', 'Gazebo', 'Unity'];
       for (const term of technicalTerms) {
-        const termRegex = new RegExp(`\\b${term}\\b`, 'g');
+        const termRegex = new RegExp(`\\b${term}\\b`, 'gi');
         while ((match = termRegex.exec(processedContent)) !== null) {
           const placeholder = `__TECH_${index}__`;
           preservedElements.push({
@@ -209,10 +209,6 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
           processedContent = processedContent.replace(match[0], placeholder);
           index++;
         }
-      }
-
-      if (!processedContent || processedContent.trim().length === 0) {
-        throw new Error('No translatable content found after processing.');
       }
 
       console.log('Preserved elements:', preservedElements.length);
@@ -242,17 +238,27 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
         throw new Error('Translation API returned empty result.');
       }
 
-      // Restore preserved elements in reverse order to handle nested elements
+      // Restore preserved elements - fix the restoration order and logic
       let finalContent = result.translated_text;
-      for (const element of preservedElements.reverse()) {
-        finalContent = finalContent.replace(element.placeholder, element.original);
+
+      // Sort preserved elements by placeholder to ensure consistent restoration
+      preservedElements.sort((a, b) => a.placeholder.localeCompare(b.placeholder));
+
+      for (const element of preservedElements) {
+        // Use global replace to handle multiple occurrences
+        const regex = new RegExp(element.placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+        finalContent = finalContent.replace(regex, element.original);
       }
+
+      // Clean up any remaining malformed placeholders
+      finalContent = finalContent.replace(/__[A-Z_]+_\d+__/g, '');
 
       if (!finalContent || finalContent.trim().length === 0) {
         throw new Error('Translation result is empty after processing.');
       }
 
       console.log('Final translated content preview:', finalContent.substring(0, 200));
+      console.log('Remaining placeholders check:', finalContent.match(/__[A-Z_]+_\d+__/g) || 'None found');
 
       return {
         translatedText: finalContent,
