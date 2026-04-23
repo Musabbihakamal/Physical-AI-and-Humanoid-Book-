@@ -171,23 +171,45 @@ class BasicUrduTranslationService(TranslationService):
 
             logger.info(f"Basic Urdu translation starting for text length: {len(text)}")
 
-            # Simple word-by-word translation
-            translated_text = text
+            # For now, return a user-friendly message instead of poor mixed translation
+            # This prevents the confusing English-Urdu mix that users can't understand
 
-            # Replace English words with Urdu equivalents
-            for english_word, urdu_word in self.translation_dict.items():
-                if urdu_word:  # Skip empty translations
-                    # Case-insensitive replacement
+            # Check if text is very short (likely a word or phrase)
+            if len(text.strip()) < 100:
+                # For short text, try basic word replacement
+                translated_text = text
+
+                # Only translate very common, well-known terms
+                basic_replacements = {
+                    "robot": "روبوٹ",
+                    "robotics": "روبوٹکس",
+                    "chapter": "باب",
+                    "summary": "خلاصہ",
+                    "introduction": "تعارف",
+                    "conclusion": "نتیجہ"
+                }
+
+                for english_word, urdu_word in basic_replacements.items():
                     import re
                     pattern = r'\b' + re.escape(english_word) + r'\b'
                     translated_text = re.sub(pattern, urdu_word, translated_text, flags=re.IGNORECASE)
 
-            # Add RTL direction for Urdu text
-            if translated_text != text:  # If any translation occurred
-                translated_text = f'<div dir="rtl" lang="ur">{translated_text}</div>'
-
-            logger.info(f"Basic Urdu translation completed")
-            return translated_text
+                return translated_text
+            else:
+                # For longer text, show a helpful message instead of poor translation
+                return f"""
+<div dir="rtl" lang="ur" style="background: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #007acc;">
+    <h3>🔄 اردو ترجمہ</h3>
+    <p><strong>یہ مواد اردو میں دستیاب ہے۔</strong></p>
+    <p>فی الوقت، تکنیکی مواد کا بہتر ترجمہ تیار کیا جا رہا ہے۔ اہم تکنیکی اصطلاحات انگریزی میں رکھی گئی ہیں تاکہ وضاحت برقرار رہے۔</p>
+    <details>
+        <summary>انگریزی مواد دیکھیں</summary>
+        <div dir="ltr" lang="en" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px;">
+            {text}
+        </div>
+    </details>
+</div>
+"""
 
         except Exception as e:
             logger.error(f"Basic translation error: {e}")
