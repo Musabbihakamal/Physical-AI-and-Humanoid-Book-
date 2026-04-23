@@ -164,103 +164,200 @@ class BasicUrduTranslationService(TranslationService):
         }
 
     async def translate(self, text: str, target_language: str, source_language: Optional[str] = None) -> str:
-        """Sentence-level translation to Urdu with proper grammar and context"""
+        """Comprehensive sentence-level translation to Urdu with proper grammar and context"""
         try:
             if target_language != "ur":
                 return f"[{target_language.upper()} translation not supported] {text}"
 
-            logger.info(f"Sentence-level Urdu translation starting for text length: {len(text)}")
+            logger.info(f"Comprehensive Urdu translation starting for text length: {len(text)}")
 
-            # First try to use a proper translation service
+            # For longer content, break into sentences and translate each
+            if len(text) > 100:
+                return await self._translate_full_content(text)
+            else:
+                # For short content, use direct translation
+                return self._translate_single_sentence(text)
+
+        except Exception as e:
+            logger.error(f"Translation error: {e}")
+            return text
+
+    async def _translate_full_content(self, text: str) -> str:
+        """Translate full chapter content sentence by sentence"""
+        try:
+            # First try MyMemory API for natural translation
             try:
-                # Try Google Translate via free API
                 import requests
                 import asyncio
 
-                # Use MyMemory free translation API (no key required)
-                url = "https://api.mymemory.translated.net/get"
-                params = {
-                    'q': text[:500],  # Limit text length
-                    'langpair': 'en|ur'
-                }
+                # Split into chunks if text is very long
+                chunks = self._split_into_chunks(text, 400)
+                translated_chunks = []
 
-                loop = asyncio.get_event_loop()
-                response = await loop.run_in_executor(
-                    None,
-                    lambda: requests.get(url, params=params, timeout=10)
-                )
+                for chunk in chunks:
+                    url = "https://api.mymemory.translated.net/get"
+                    params = {
+                        'q': chunk,
+                        'langpair': 'en|ur'
+                    }
 
-                if response.status_code == 200:
-                    result = response.json()
-                    if result.get('responseStatus') == 200:
-                        translated = result['responseData']['translatedText']
-                        if translated and translated != text:
-                            logger.info("MyMemory translation successful")
-                            return translated
+                    loop = asyncio.get_event_loop()
+                    response = await loop.run_in_executor(
+                        None,
+                        lambda: requests.get(url, params=params, timeout=8)
+                    )
+
+                    if response.status_code == 200:
+                        result = response.json()
+                        if result.get('responseStatus') == 200:
+                            translated = result['responseData']['translatedText']
+                            if translated and translated != chunk and not translated.startswith('MYMEMORY WARNING'):
+                                translated_chunks.append(translated)
+                                continue
+
+                    # Fallback to sentence-level translation for this chunk
+                    translated_chunks.append(self._translate_sentences_in_chunk(chunk))
+
+                final_result = ' '.join(translated_chunks)
+                if final_result and final_result != text:
+                    logger.info("MyMemory API translation successful")
+                    return final_result
 
             except Exception as e:
                 logger.warning(f"MyMemory API failed: {e}")
 
-            # Fallback: Sentence-level templates for robotics content
-            text_lower = text.lower().strip()
-
-            # Common sentence patterns in robotics content
-            sentence_templates = {
-                # Chapter introductions
-                r"this chapter (covers|discusses|explores|examines) (.+)": "یہ باب {} کا احاطہ کرتا ہے",
-                r"in this chapter,? (we will|you will) (.+)": "اس باب میں آپ {}",
-                r"chapter (\d+):? (.+)": "باب {}: {}",
-
-                # Learning objectives
-                r"by the end of this chapter,? you will (.+)": "اس باب کے اختتام تک آپ {}",
-                r"learning objectives?:?": "تعلیمی مقاصد:",
-                r"you will (be able to|learn to|understand) (.+)": "آپ {} سکیں گے",
-
-                # Technical descriptions
-                r"(.+) is a (.+) that (.+)": "{} ایک {} ہے جو {}",
-                r"(.+) are (.+) used for (.+)": "{} {} ہیں جو {} کے لیے استعمال ہوتے ہیں",
-                r"the (.+) system (.+)": "{} نظام {}",
-
-                # Instructions
-                r"to (.+),? (first|you need to|we need to) (.+)": "{} کے لیے پہلے {}",
-                r"step (\d+):? (.+)": "قدم {}: {}",
-                r"follow these steps:?": "یہ قدم اٹھائیں:",
-
-                # Common phrases
-                r"for example,?": "مثال کے طور پر",
-                r"in conclusion,?": "خلاصہ یہ ہے کہ",
-                r"as we can see,?": "جیسا کہ ہم دیکھ سکتے ہیں",
-                r"it is important to (.+)": "{} کرنا اہم ہے",
-                r"make sure (to )?(.+)": "یقینی بنائیں کہ {}",
-            }
-
-            # Try to match sentence patterns
-            import re
-            for pattern, urdu_template in sentence_templates.items():
-                match = re.search(pattern, text_lower)
-                if match:
-                    # Extract matched groups and translate key terms
-                    groups = match.groups()
-                    translated_groups = []
-
-                    for group in groups:
-                        if group:
-                            translated_group = self._translate_key_terms(group)
-                            translated_groups.append(translated_group)
-
-                    try:
-                        result = urdu_template.format(*translated_groups)
-                        logger.info("Sentence template translation successful")
-                        return result
-                    except:
-                        pass
-
-            # Fallback: Improved phrase-level translation
-            return self._translate_phrases(text)
+            # Fallback: Sentence-by-sentence translation
+            return self._translate_sentences_in_chunk(text)
 
         except Exception as e:
-            logger.error(f"Sentence translation error: {e}")
+            logger.error(f"Full content translation error: {e}")
             return text
+
+    def _split_into_chunks(self, text: str, max_length: int) -> list:
+        """Split text into chunks while preserving sentence boundaries"""
+        import re
+
+        # Split by sentences first
+        sentences = re.split(r'(?<=[.!?])\s+', text)
+        chunks = []
+        current_chunk = ""
+
+        for sentence in sentences:
+            if len(current_chunk + sentence) <= max_length:
+                current_chunk += sentence + " "
+            else:
+                if current_chunk:
+                    chunks.append(current_chunk.strip())
+                current_chunk = sentence + " "
+
+        if current_chunk:
+            chunks.append(current_chunk.strip())
+
+        return chunks
+
+    def _translate_sentences_in_chunk(self, text: str) -> str:
+        """Translate text by breaking into sentences and translating each"""
+        import re
+
+        # Split into sentences
+        sentences = re.split(r'(?<=[.!?])\s+', text)
+        translated_sentences = []
+
+        for sentence in sentences:
+            if sentence.strip():
+                translated = self._translate_single_sentence(sentence.strip())
+                translated_sentences.append(translated)
+
+        return ' '.join(translated_sentences)
+
+    def _translate_single_sentence(self, text: str) -> str:
+        """Translate a single sentence with context awareness"""
+        text_lower = text.lower().strip()
+
+        # Sentence pattern templates for robotics content
+        sentence_templates = {
+            # Chapter and section patterns
+            r"^chapter (\d+):?\s*(.+)": "باب {}: {}",
+            r"^# (.+)": "# {}",
+            r"^## (.+)": "## {}",
+            r"^### (.+)": "### {}",
+
+            # Introduction patterns
+            r"this chapter (covers|discusses|explores|examines|introduces) (.+)": "یہ باب {} کا احاطہ کرتا ہے",
+            r"in this chapter,?\s*(we will|you will|we'll|you'll) (.+)": "اس باب میں ہم {}",
+            r"this section (covers|discusses|explores|examines) (.+)": "یہ حصہ {} کا احاطہ کرتا ہے",
+
+            # Learning objectives
+            r"by the end of this chapter,?\s*you will (.+)": "اس باب کے اختتام تک آپ {}",
+            r"learning objectives?:?": "تعلیمی مقاصد:",
+            r"you will (be able to|learn to|understand how to) (.+)": "آپ {} سکیں گے",
+            r"students will (learn|understand|be able to) (.+)": "طلباء {} سکیں گے",
+
+            # Technical descriptions
+            r"(.+) is a (.+) that (.+)": "{} ایک {} ہے جو {}",
+            r"(.+) are (.+) used for (.+)": "{} {} ہیں جو {} کے لیے استعمال ہوتے ہیں",
+            r"the (.+) system (.+)": "{} سسٹم {}",
+            r"a (.+) is (.+)": "ایک {} {} ہے",
+
+            # Process and instruction patterns
+            r"to (.+),?\s*(first|you need to|we need to|you must|we must) (.+)": "{} کے لیے پہلے آپ کو {}",
+            r"step (\d+):?\s*(.+)": "قدم {}: {}",
+            r"follow these steps:?": "یہ قدم اٹھائیں:",
+            r"first,?\s*(.+)": "پہلے، {}",
+            r"next,?\s*(.+)": "اگلا، {}",
+            r"finally,?\s*(.+)": "آخر میں، {}",
+
+            # Explanation patterns
+            r"this means that (.+)": "اس کا مطلب یہ ہے کہ {}",
+            r"in other words,?\s*(.+)": "دوسرے الفاظ میں، {}",
+            r"for example,?\s*(.+)": "مثال کے طور پر، {}",
+            r"for instance,?\s*(.+)": "مثلاً، {}",
+
+            # Conclusion patterns
+            r"in conclusion,?\s*(.+)": "خلاصہ یہ ہے کہ {}",
+            r"to summarize,?\s*(.+)": "خلاصہ کرتے ہوئے، {}",
+            r"as we can see,?\s*(.+)": "جیسا کہ ہم دیکھ سکتے ہیں، {}",
+
+            # Importance and emphasis
+            r"it is important to (.+)": "{} کرنا اہم ہے",
+            r"it is essential to (.+)": "{} کرنا ضروری ہے",
+            r"make sure (to )?(.+)": "یقینی بنائیں کہ {}",
+            r"remember that (.+)": "یاد رکھیں کہ {}",
+            r"note that (.+)": "نوٹ کریں کہ {}",
+
+            # Conditional patterns
+            r"if (.+),?\s*then (.+)": "اگر {} تو {}",
+            r"when (.+),?\s*(.+)": "جب {} تو {}",
+            r"while (.+),?\s*(.+)": "جبکہ {}, {}",
+
+            # Comparison patterns
+            r"unlike (.+),?\s*(.+)": "{} کے برعکس، {}",
+            r"similar to (.+),?\s*(.+)": "{} کی طرح، {}",
+            r"compared to (.+),?\s*(.+)": "{} کے مقابلے میں، {}"
+        }
+
+        # Try to match sentence patterns
+        import re
+        for pattern, urdu_template in sentence_templates.items():
+            match = re.search(pattern, text_lower)
+            if match:
+                groups = match.groups()
+                translated_groups = []
+
+                for group in groups:
+                    if group:
+                        translated_group = self._translate_key_terms(group)
+                        translated_groups.append(translated_group)
+
+                try:
+                    result = urdu_template.format(*translated_groups)
+                    logger.debug(f"Pattern matched: {pattern} -> {result}")
+                    return result
+                except:
+                    pass
+
+        # If no pattern matches, use phrase-level translation
+        return self._translate_phrases(text)
 
     def _translate_key_terms(self, text: str) -> str:
         """Translate key technical terms while preserving context"""
