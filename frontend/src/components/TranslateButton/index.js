@@ -130,8 +130,36 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
     setTranslationError(null);
 
     try {
-      // Extract and preserve code blocks and technical terms
-      const { processedContent, preservedElements } = extractAndPreserveElements(text);
+      // Simplified approach: only preserve essential code blocks
+      let processedContent = text;
+      const preservedElements = [];
+
+      // Only preserve code blocks and keep it simple
+      const codeBlockRegex = /```[\s\S]*?```/g;
+      let match;
+      let index = 0;
+
+      while ((match = codeBlockRegex.exec(text)) !== null) {
+        const placeholder = `__CODE_BLOCK_${index}__`;
+        preservedElements.push({
+          placeholder,
+          original: match[0]
+        });
+        processedContent = processedContent.replace(match[0], placeholder);
+        index++;
+      }
+
+      // Also preserve inline code
+      const inlineCodeRegex = /`[^`]+`/g;
+      while ((match = inlineCodeRegex.exec(processedContent)) !== null) {
+        const placeholder = `__INLINE_CODE_${index}__`;
+        preservedElements.push({
+          placeholder,
+          original: match[0]
+        });
+        processedContent = processedContent.replace(match[0], placeholder);
+        index++;
+      }
 
       if (!processedContent || processedContent.trim().length === 0) {
         throw new Error('No translatable content found after processing.');
@@ -161,8 +189,11 @@ const TranslateButton = ({ originalContentHTML, setTranslatedContent, setIsTrans
         throw new Error('Translation API returned empty result.');
       }
 
-      // Restore preserved elements back to the translated content
-      const finalContent = restorePreservedElements(result.translated_text, preservedElements);
+      // Restore preserved elements
+      let finalContent = result.translated_text;
+      for (const element of preservedElements) {
+        finalContent = finalContent.replace(element.placeholder, element.original);
+      }
 
       if (!finalContent || finalContent.trim().length === 0) {
         throw new Error('Translation result is empty after processing.');

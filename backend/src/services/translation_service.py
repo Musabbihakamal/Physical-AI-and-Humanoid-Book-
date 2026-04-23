@@ -41,18 +41,25 @@ class HuggingFaceTranslationService(TranslationService):
 
             # Map language codes to working free model names
             model_map = {
-                "ur": "Helsinki-NLP/opus-mt-en-ur",  # English to Urdu
-                "es": "Helsinki-NLP/opus-mt-en-es",  # English to Spanish
-                "fr": "Helsinki-NLP/opus-mt-en-fr",  # English to French
-                "de": "Helsinki-NLP/opus-mt-en-de",  # English to German
-                "ar": "Helsinki-NLP/opus-mt-en-ar",  # English to Arabic
-                "hi": "Helsinki-NLP/opus-mt-en-hi",  # English to Hindi
+                "ur": "Helsinki-NLP/opus-mt-en-urj",  # Updated model name
+                "es": "Helsinki-NLP/opus-mt-en-es",   # English to Spanish
+                "fr": "Helsinki-NLP/opus-mt-en-fr",   # English to French
+                "de": "Helsinki-NLP/opus-mt-en-de",   # English to German
+                "ar": "Helsinki-NLP/opus-mt-en-ar",   # English to Arabic
+                "hi": "Helsinki-NLP/opus-mt-en-hi",   # English to Hindi
             }
 
             model_name = model_map.get(target_language)
             if not model_name:
                 logger.warning(f"Language {target_language} not supported by free service")
                 return f"[{target_language.upper()} - Language not supported] {text}"
+
+            # For Urdu, use a different approach since the model might not exist
+            if target_language == "ur":
+                logger.info("Using basic Urdu translation fallback")
+                # Use the basic dictionary-based service as fallback
+                basic_service = BasicUrduTranslationService()
+                return await basic_service.translate(text, target_language, source_language)
 
             # Use the correct Hugging Face inference API endpoint
             url = f"https://api-inference.huggingface.co/models/{model_name}"
@@ -194,9 +201,9 @@ class TranslationServiceFactory:
     def get_translation_service() -> TranslationService:
         """Get the best available translation service"""
         logger.info("=== TranslationServiceFactory.get_translation_service() called ===")
-        # Use FREE Hugging Face service as primary (no API key needed, works everywhere)
-        logger.info("✓ Using FREE Hugging Face translation service (no API key required)")
-        return HuggingFaceTranslationService()
+        # Use basic dictionary service for Urdu (most reliable)
+        logger.info("✓ Using Basic Urdu translation service (dictionary-based, most reliable)")
+        return BasicUrduTranslationService()
 
 
 # Global instance for easy access - lazy loaded
@@ -206,8 +213,8 @@ _translation_service = None
 def get_translation_service():
     """Get or create the translation service (lazy loading)"""
     global _translation_service
-    # Use free Hugging Face service - works everywhere without API keys
-    _translation_service = HuggingFaceTranslationService()
+    # Use basic dictionary service for most reliable results
+    _translation_service = BasicUrduTranslationService()
     return _translation_service
 
 

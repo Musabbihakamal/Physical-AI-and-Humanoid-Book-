@@ -62,7 +62,10 @@
       "Bash(grep -E \"\\\\.\\(md|txt|log\\)$\")",
       "Bash(grep -E \"\\\\.\\(log|tmp|bak|old\\)$\")",
       "Bash(grep \"\\\\.md$\")",
-      "Bash(python test_translation.py)"
+      "Bash(python test_translation.py)",
+      "Bash(git commit -m 'Fix authentication and translation for production deployment *)",
+      "Bash(git commit *)",
+      "Bash(python -m py_compile backend/src/services/book_content_service.py)"
     ]
   }
 }
