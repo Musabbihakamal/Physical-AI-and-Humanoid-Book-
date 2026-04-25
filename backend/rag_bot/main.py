@@ -99,14 +99,77 @@ class RagBot:
             return []
 
     def generate_response(self, query: str, chunks: List[Dict[str, Any]]) -> str:
-        """Generate comprehensive, detailed response with robust fallback"""
+        """Generate comprehensive, detailed response using Claude AI with enhanced fallback"""
         try:
             if not chunks:
                 return "I couldn't find relevant information about your question in the Physical AI and Humanoid Robotics book. Please try rephrasing your question or ask about topics like ROS2, robot simulation, control systems, or humanoid locomotion."
 
-            # Always use enhanced fallback for now (more reliable than API calls)
-            logger.info(f"Generating comprehensive response for: {query[:50]}...")
-            return self._generate_comprehensive_explanation(query, chunks)
+            # Try Claude AI first (now that ANTHROPIC_API_KEY is available)
+            try:
+                logger.info(f"Using Claude AI for intelligent response generation: {query[:50]}...")
+
+                # Prepare context from chunks
+                context_parts = []
+                sources = []
+
+                for i, chunk in enumerate(chunks[:5], 1):  # Use top 5 chunks for better context
+                    section_title = chunk.get('section_title', 'Unknown Section')
+                    page_title = chunk.get('page_title', 'Unknown Page')
+                    content = chunk.get('content', '').strip()
+                    score = chunk.get('score', 0)
+
+                    if content and len(content) > 50:  # Only include substantial content
+                        context_parts.append(f"Source {i} - {section_title} ({page_title}) [Relevance: {score:.2f}]:\n{content}")
+                        sources.append(f"• {section_title} - {page_title}")
+
+                combined_context = "\n\n".join(context_parts)
+
+                # Create comprehensive prompt for Claude
+                prompt = f"""You are an expert Physical AI and Humanoid Robotics instructor. A student has asked: "{query}"
+
+Based on the following content from the Physical AI and Humanoid Robotics book, provide a comprehensive, detailed, and educational answer:
+
+{combined_context}
+
+Please provide a response that:
+1. **Directly answers the question** with technical accuracy
+2. **Explains concepts thoroughly** with clear definitions
+3. **Includes practical examples** and real-world applications
+4. **Provides step-by-step guidance** when applicable
+5. **Mentions related topics** the student should explore
+6. **Uses proper technical terminology** while remaining accessible
+7. **Includes safety considerations** when relevant
+8. **Suggests next learning steps** or related chapters
+
+Format your response with clear headings and bullet points for better readability. Make it comprehensive but well-structured."""
+
+                # Generate response using Claude
+                response = self.anthropic_client.messages.create(
+                    model="claude-3-5-sonnet-20241022",
+                    max_tokens=1500,
+                    temperature=0.3,
+                    messages=[{
+                        "role": "user",
+                        "content": prompt
+                    }]
+                )
+
+                ai_response = response.content[0].text
+
+                # Add sources section
+                if sources:
+                    sources_text = "\n\n📚 **Sources from the Book:**\n" + "\n".join(sources)
+                    ai_response += sources_text
+
+                # Add helpful footer
+                ai_response += "\n\n💡 **Need more details?** Ask follow-up questions about specific aspects or check the referenced chapters for complete information!"
+
+                logger.info(f"✅ Claude AI generated comprehensive response for: {query[:50]}...")
+                return ai_response
+
+            except Exception as api_error:
+                logger.warning(f"Claude AI failed, using enhanced fallback: {api_error}")
+                return self._generate_comprehensive_explanation(query, chunks)
 
         except Exception as e:
             logger.error(f"Failed to generate response: {str(e)}", exc_info=True)
