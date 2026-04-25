@@ -535,14 +535,19 @@ class FreeAPITranslationService(TranslationService):
 
                     if response.status_code == 200:
                         result = response.json()
-                        if result.get('responseStatus') == 200:
-                            translated = result['responseData']['translatedText']
+                        response_status = result.get('responseStatus', 0)
+
+                        if response_status == 200:
+                            translated = result.get('responseData', {}).get('translatedText', '')
                             if translated and not translated.startswith('MYMEMORY WARNING'):
                                 translated_chunks.append(translated)
                                 logger.info(f"Translation successful: {translated[:50]}...")
                                 continue
+                        else:
+                            logger.warning(f"MyMemory API returned status {response_status}")
+                    else:
+                        logger.warning(f"MyMemory HTTP error: {response.status_code}")
 
-                    logger.warning(f"MyMemory API returned status {result.get('responseStatus')}")
                     translated_chunks.append(chunk)
 
                 except Exception as e:
