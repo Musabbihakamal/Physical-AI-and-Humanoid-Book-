@@ -483,79 +483,100 @@ class ConstitutionalUrduTranslationService(TranslationService):
         return f"Source required — ambiguity detected: {message}"
 
 
-class HuggingFaceTranslationService(TranslationService):
-    """Free Hugging Face translation service - no API key needed"""
+class FreeAPITranslationService(TranslationService):
+    """Free translation service using MyMemory API - no API key needed"""
 
     def __init__(self):
-        self.base_url = "https://api-inference.huggingface.co/models"
-        logger.info("Using FREE Hugging Face translation service (no API key required)")
+        self.mymemory_url = "https://api.mymemory.translated.net/get"
+        logger.info("Using FREE MyMemory translation service (no API key required)")
 
     async def translate(self, text: str, target_language: str, source_language: Optional[str] = None) -> str:
-        """Translate using free Hugging Face models"""
+        """Translate using free MyMemory API"""
         try:
             import requests
             import asyncio
 
-            # Map language codes to working free model names
-            model_map = {
-                "ur": "Helsinki-NLP/opus-mt-en-urj",  # Updated model name
-                "es": "Helsinki-NLP/opus-mt-en-es",   # English to Spanish
-                "fr": "Helsinki-NLP/opus-mt-en-fr",   # English to French
-                "de": "Helsinki-NLP/opus-mt-en-de",   # English to German
-                "ar": "Helsinki-NLP/opus-mt-en-ar",   # English to Arabic
-                "hi": "Helsinki-NLP/opus-mt-en-hi",   # English to Hindi
+            if not source_language:
+                source_language = "en"
+
+            # Language code mapping
+            lang_map = {
+                "ur": "ur",
+                "es": "es",
+                "fr": "fr",
+                "de": "de",
+                "ar": "ar",
+                "hi": "hi",
+                "en": "en"
             }
 
-            model_name = model_map.get(target_language)
-            if not model_name:
-                logger.warning(f"Language {target_language} not supported by free service")
-                return f"[{target_language.upper()} - Language not supported] {text}"
+            target_lang = lang_map.get(target_language, target_language)
 
-            # For Urdu, use Constitutional service
-            if target_language == "ur":
-                logger.info("Using Constitutional Urdu Translation Service for Urdu")
-                constitutional_service = ConstitutionalUrduTranslationService()
-                return await constitutional_service.translate(text, target_language, source_language)
+            # Split long text into chunks to avoid API limits
+            chunks = self._split_text(text, 500)
+            translated_chunks = []
 
-            # Use the correct Hugging Face inference API endpoint
-            url = f"https://api-inference.huggingface.co/models/{model_name}"
-            payload = {"inputs": text}
-            headers = {"Content-Type": "application/json"}
+            for chunk in chunks:
+                try:
+                    params = {
+                        'q': chunk,
+                        'langpair': f'{source_language}|{target_lang}'
+                    }
 
-            logger.info(f"Free Hugging Face translation to {target_language}: {text[:50]}...")
-            logger.info(f"Using model: {model_name}")
+                    logger.info(f"Translating chunk to {target_lang}: {chunk[:50]}...")
 
-            # Make async request with longer timeout
-            loop = asyncio.get_event_loop()
-            response = await loop.run_in_executor(
-                None,
-                lambda: requests.post(url, json=payload, headers=headers, timeout=30)
-            )
+                    loop = asyncio.get_event_loop()
+                    response = await loop.run_in_executor(
+                        None,
+                        lambda p=params: requests.get(self.mymemory_url, params=p, timeout=10)
+                    )
 
-            logger.info(f"Hugging Face API response status: {response.status_code}")
+                    if response.status_code == 200:
+                        result = response.json()
+                        if result.get('responseStatus') == 200:
+                            translated = result['responseData']['translatedText']
+                            if translated and not translated.startswith('MYMEMORY WARNING'):
+                                translated_chunks.append(translated)
+                                logger.info(f"Translation successful: {translated[:50]}...")
+                                continue
 
-            if response.status_code == 200:
-                result = response.json()
-                logger.info(f"Hugging Face API response: {result}")
+                    logger.warning(f"MyMemory API returned status {result.get('responseStatus')}")
+                    translated_chunks.append(chunk)
 
-                if isinstance(result, list) and len(result) > 0:
-                    translated_text = result[0].get("translation_text", text)
-                    logger.info(f"Translation successful: {translated_text[:50]}...")
-                    return translated_text
-                else:
-                    logger.warning("Empty result from Hugging Face API")
-                    return f"[{target_language.upper()} - Free Translation] {text}"
-            elif response.status_code == 503:
-                # Model is loading, try again with a simple fallback
-                logger.warning("Hugging Face model is loading, using fallback")
-                return f"[{target_language.upper()} - Model Loading] {text}"
-            else:
-                logger.warning(f"Hugging Face API error: {response.status_code} - {response.text}")
-                return f"[{target_language.upper()} - Free Translation] {text}"
+                except Exception as e:
+                    logger.warning(f"MyMemory chunk translation failed: {e}, using original")
+                    translated_chunks.append(chunk)
+
+            final_result = ' '.join(translated_chunks)
+            return final_result if final_result else text
 
         except Exception as e:
-            logger.error(f"Hugging Face translation error: {e}")
-            return f"[{target_language.upper()} - Free Translation] {text}"
+            logger.error(f"Free API translation error: {e}")
+            return text
+
+    def _split_text(self, text: str, max_length: int) -> list:
+        """Split text into chunks while preserving sentence boundaries"""
+        import re
+
+        if len(text) <= max_length:
+            return [text]
+
+        sentences = re.split(r'(?<=[.!?])\s+', text)
+        chunks = []
+        current_chunk = ""
+
+        for sentence in sentences:
+            if len(current_chunk) + len(sentence) + 1 <= max_length:
+                current_chunk += sentence + " "
+            else:
+                if current_chunk:
+                    chunks.append(current_chunk.strip())
+                current_chunk = sentence + " "
+
+        if current_chunk:
+            chunks.append(current_chunk.strip())
+
+        return chunks if chunks else [text]
 
 
 class BasicUrduTranslationService(TranslationService):
@@ -893,14 +914,14 @@ class BasicUrduTranslationService(TranslationService):
 
 
 class TranslationServiceFactory:
-    """Factory for creating translation services following Constitutional requirements"""
+    """Factory for creating translation services"""
 
     @staticmethod
     def get_translation_service():
-        """Get Constitutional Urdu Translation Agent as per Physical AI Book Constitution v2.0"""
-        logger.info("=== Constitutional Translation Service Factory v2.0 ===")
-        logger.info("✓ Using Constitutional Urdu Translation Agent (Constitution compliant)")
-        return ConstitutionalUrduTranslationService()
+        """Get free API translation service (no API key required)"""
+        logger.info("=== Translation Service Factory ===")
+        logger.info("✓ Using FREE MyMemory Translation Service (no API key required)")
+        return FreeAPITranslationService()
 
 
 # Global instance for easy access - lazy loaded
@@ -918,31 +939,29 @@ def get_translation_service():
 
 async def translate_text(text: str, target_language: str, source_language: Optional[str] = None) -> str:
     """
-    Constitutional translation function following Physical AI Book Constitution v2.0
+    Translate text using free MyMemory API (no API key required)
 
-    This function implements the Constitutional Urdu Translation Agent requirements:
-    - Maintains technical accuracy and official documentation grounding
-    - Preserves Docusaurus-compatible Markdown formatting
-    - Follows consistent writing style across all chapters
-    - Never hallucinates - indicates ambiguity when unsure
-    - Maintains safety standards for minor users
-    - Preserves code blocks and technical terms
+    Args:
+        text: Content to translate
+        target_language: Target language code (ur, es, fr, de, ar, hi, etc.)
+        source_language: Source language code (default: en)
+
+    Returns:
+        Translated text
     """
     try:
-        # Use Constitutional translation service DIRECTLY
-        service = ConstitutionalUrduTranslationService()
-        logger.info(f"=== Constitutional translate_text v2.0: text='{text[:50]}...', target='{target_language}' ===")
+        service = FreeAPITranslationService()
+        logger.info(f"Translating text to {target_language}: {text[:50]}...")
 
-        result = await service.translate(text, target_language, source_language)
-        logger.info(f"=== Constitutional translation result type: {type(result)}, length: {len(result)} ===")
+        result = await service.translate(text, target_language, source_language or "en")
+        logger.info(f"Translation result length: {len(result)}")
 
         return result
     except Exception as e:
-        logger.error(f"=== Constitutional translation EXCEPTION: {type(e).__name__}: {str(e)} ===")
+        logger.error(f"Translation error: {type(e).__name__}: {str(e)}")
         import traceback
-        logger.error(f"=== Constitutional translation TRACEBACK: {traceback.format_exc()} ===")
-        # Return constitutional error as required
-        return f"Source required — ambiguity detected: Translation failed due to {str(e)}"
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        return text
 
 
 # Legacy services for backward compatibility
