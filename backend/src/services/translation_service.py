@@ -493,10 +493,11 @@ class FreeAPITranslationService(TranslationService):
         logger.info("Using FREE MyMemory translation service (no API key required)")
 
     async def translate(self, text: str, target_language: str, source_language: Optional[str] = None) -> str:
-        """Translate using free MyMemory API"""
+        """Translate using free MyMemory API - line by line for reliability"""
         try:
             import requests
             import asyncio
+            import time
 
             if not source_language:
                 source_language = "en"
@@ -514,18 +515,25 @@ class FreeAPITranslationService(TranslationService):
 
             target_lang = lang_map.get(target_language, target_language)
 
-            # Split long text into chunks to avoid API limits
-            chunks = self._split_text(text, 500)
-            translated_chunks = []
+            # Split into lines and translate each line
+            lines = text.split('\n')
+            translated_lines = []
 
-            for chunk in chunks:
+            for i, line in enumerate(lines):
+                if not line.strip():
+                    translated_lines.append(line)
+                    continue
+
                 try:
+                    # Add small delay to avoid rate limiting
+                    await asyncio.sleep(0.1)
+
                     params = {
-                        'q': chunk,
+                        'q': line,
                         'langpair': f'{source_language}|{target_lang}'
                     }
 
-                    logger.info(f"Translating chunk to {target_lang}: {chunk[:50]}...")
+                    logger.info(f"Translating line {i+1}/{len(lines)}: {line[:50]}...")
 
                     loop = asyncio.get_event_loop()
                     response = await loop.run_in_executor(
@@ -540,50 +548,28 @@ class FreeAPITranslationService(TranslationService):
                         if response_status == 200:
                             translated = result.get('responseData', {}).get('translatedText', '')
                             if translated and not translated.startswith('MYMEMORY WARNING'):
-                                translated_chunks.append(translated)
-                                logger.info(f"Translation successful: {translated[:50]}...")
+                                translated_lines.append(translated)
+                                logger.info(f"✓ Line {i+1} translated: {translated[:50]}...")
                                 continue
                         else:
-                            logger.warning(f"MyMemory API returned status {response_status}")
+                            logger.warning(f"Line {i+1} - MyMemory API returned status {response_status}")
                     else:
-                        logger.warning(f"MyMemory HTTP error: {response.status_code}")
+                        logger.warning(f"Line {i+1} - HTTP error: {response.status_code}")
 
-                    translated_chunks.append(chunk)
+                    # Fallback: keep original if translation fails
+                    translated_lines.append(line)
 
                 except Exception as e:
-                    logger.warning(f"MyMemory chunk translation failed: {e}, using original")
-                    translated_chunks.append(chunk)
+                    logger.warning(f"Line {i+1} translation failed: {e}, keeping original")
+                    translated_lines.append(line)
 
-            final_result = ' '.join(translated_chunks)
+            final_result = '\n'.join(translated_lines)
+            logger.info(f"Translation complete: {len(translated_lines)} lines processed")
             return final_result if final_result else text
 
         except Exception as e:
             logger.error(f"Free API translation error: {e}")
             return text
-
-    def _split_text(self, text: str, max_length: int) -> list:
-        """Split text into chunks while preserving sentence boundaries"""
-        import re
-
-        if len(text) <= max_length:
-            return [text]
-
-        sentences = re.split(r'(?<=[.!?])\s+', text)
-        chunks = []
-        current_chunk = ""
-
-        for sentence in sentences:
-            if len(current_chunk) + len(sentence) + 1 <= max_length:
-                current_chunk += sentence + " "
-            else:
-                if current_chunk:
-                    chunks.append(current_chunk.strip())
-                current_chunk = sentence + " "
-
-        if current_chunk:
-            chunks.append(current_chunk.strip())
-
-        return chunks if chunks else [text]
 
 
 class BasicUrduTranslationService(TranslationService):
