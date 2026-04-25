@@ -366,172 +366,183 @@ Popular platforms include Gazebo, Unity, and specialized robotics simulators."""
 
     def _create_main_explanation(self, query: str, content_list: List[str]) -> str:
         """Create the main explanation by intelligently combining content"""
-        # Combine all content
+        # Combine and clean content
         combined_content = " ".join(content_list)
+
+        # Remove duplicates and clean up
+        sentences = self._extract_unique_sentences(combined_content)
 
         # Create explanation based on query type
         query_lower = query.lower()
 
         if any(word in query_lower for word in ['what is', 'define', 'explain']):
-            return self._create_definition_explanation(query, combined_content)
+            return self._create_clean_definition_explanation(query, sentences)
         elif any(word in query_lower for word in ['how to', 'how do', 'steps', 'implement']):
-            return self._create_how_to_explanation(query, combined_content)
+            return self._create_clean_how_to_explanation(query, sentences)
         elif any(word in query_lower for word in ['why', 'purpose', 'benefit']):
-            return self._create_why_explanation(query, combined_content)
+            return self._create_clean_why_explanation(query, sentences)
         else:
-            return self._create_general_explanation(query, combined_content)
+            return self._create_clean_general_explanation(query, sentences)
 
-    def _create_definition_explanation(self, query: str, content: str) -> str:
-        """Create definition-focused explanation"""
-        # Extract key sentences that contain definitions
-        sentences = content.split('.')
+    def _extract_unique_sentences(self, content: str) -> List[str]:
+        """Extract unique, meaningful sentences from content"""
+        # Split into sentences and clean
+        sentences = []
+        for delimiter in ['. ', '.\n', '? ', '!\n']:
+            content = content.replace(delimiter, '.|SPLIT|')
+
+        raw_sentences = content.split('|SPLIT|')
+        seen_sentences = set()
+
+        for sentence in raw_sentences:
+            sentence = sentence.strip()
+            # Skip short, code-like, or repetitive sentences
+            if (len(sentence) > 20 and len(sentence) < 300 and
+                not sentence.startswith('def ') and
+                not sentence.startswith('class ') and
+                not sentence.startswith('import ') and
+                not sentence.startswith('```') and
+                sentence.count('_') < 5 and  # Skip variable-heavy lines
+                sentence not in seen_sentences):
+
+                sentences.append(sentence)
+                seen_sentences.add(sentence)
+
+        return sentences[:8]  # Limit to 8 unique sentences
+
+    def _create_clean_definition_explanation(self, query: str, sentences: List[str]) -> str:
+        """Create clean definition-focused explanation"""
         definition_sentences = []
 
         for sentence in sentences:
-            sentence = sentence.strip()
             if any(phrase in sentence.lower() for phrase in [' is ', ' are ', ' refers to', ' means', ' defines']):
-                if len(sentence) > 20 and len(sentence) < 200:
-                    definition_sentences.append(sentence + '.')
+                definition_sentences.append(sentence)
 
         if definition_sentences:
-            explanation = " ".join(definition_sentences[:3])  # Top 3 definition sentences
+            explanation = ". ".join(definition_sentences[:3]) + "."
         else:
-            # Fallback: use first substantial paragraph
-            paragraphs = content.split('\n\n')
-            explanation = next((p.strip() for p in paragraphs if len(p.strip()) > 100), content[:300])
+            # Use first few substantial sentences
+            explanation = ". ".join(sentences[:3]) + "."
 
-        return explanation + "\n\nThis concept is fundamental in robotics and plays a crucial role in system design and implementation."
+        return explanation + "\n\nThis concept is fundamental in robotics and essential for understanding advanced control systems."
 
-    def _create_how_to_explanation(self, query: str, content: str) -> str:
-        """Create process-focused explanation"""
-        # Look for step-by-step content
-        lines = content.split('\n')
-        process_lines = []
+    def _create_clean_how_to_explanation(self, query: str, sentences: List[str]) -> str:
+        """Create clean process-focused explanation"""
+        process_sentences = []
 
-        for line in lines:
-            line = line.strip()
-            if any(indicator in line.lower() for indicator in ['step', 'first', 'then', 'next', 'finally', '1.', '2.', '3.']):
-                if len(line) > 10:
-                    process_lines.append(line)
+        for sentence in sentences:
+            if any(word in sentence.lower() for word in ['implement', 'create', 'design', 'calculate', 'plan', 'control']):
+                process_sentences.append(sentence)
 
-        if process_lines:
-            explanation = "Here's the process:\n\n" + "\n".join(process_lines[:5])
+        if process_sentences:
+            explanation = ". ".join(process_sentences[:4]) + "."
         else:
-            # Extract procedural content
-            sentences = content.split('.')
-            procedural_sentences = []
+            explanation = ". ".join(sentences[:4]) + "."
 
-            for sentence in sentences:
-                sentence = sentence.strip()
-                if any(word in sentence.lower() for word in ['create', 'setup', 'configure', 'install', 'run', 'execute']):
-                    if len(sentence) > 20:
-                        procedural_sentences.append(sentence + '.')
+        return explanation + "\n\nFollowing these principles systematically will help ensure successful implementation."
 
-            explanation = " ".join(procedural_sentences[:4]) if procedural_sentences else content[:400]
-
-        return explanation + "\n\nFollowing these steps systematically will help ensure successful implementation."
-
-    def _create_why_explanation(self, query: str, content: str) -> str:
-        """Create purpose/benefit-focused explanation"""
-        sentences = content.split('.')
+    def _create_clean_why_explanation(self, query: str, sentences: List[str]) -> str:
+        """Create clean purpose/benefit-focused explanation"""
         purpose_sentences = []
 
         for sentence in sentences:
-            sentence = sentence.strip()
-            if any(phrase in sentence.lower() for phrase in ['because', 'since', 'purpose', 'benefit', 'advantage', 'important', 'essential']):
-                if len(sentence) > 20:
-                    purpose_sentences.append(sentence + '.')
+            if any(phrase in sentence.lower() for phrase in ['because', 'purpose', 'important', 'essential', 'crucial', 'enables']):
+                purpose_sentences.append(sentence)
 
         if purpose_sentences:
-            explanation = " ".join(purpose_sentences[:3])
+            explanation = ". ".join(purpose_sentences[:3]) + "."
         else:
-            explanation = content[:400]
+            explanation = ". ".join(sentences[:3]) + "."
 
-        return explanation + "\n\nUnderstanding these reasons helps in making informed design decisions."
+        return explanation + "\n\nUnderstanding these principles helps in making informed design decisions."
 
-    def _create_general_explanation(self, query: str, content: str) -> str:
-        """Create general comprehensive explanation"""
-        # Take the most substantial paragraphs
-        paragraphs = content.split('\n\n')
-        substantial_paragraphs = [p.strip() for p in paragraphs if len(p.strip()) > 50]
+    def _create_clean_general_explanation(self, query: str, sentences: List[str]) -> str:
+        """Create clean general comprehensive explanation"""
+        # Select the most informative sentences
+        informative_sentences = []
 
-        if substantial_paragraphs:
-            explanation = "\n\n".join(substantial_paragraphs[:2])
+        for sentence in sentences:
+            # Prioritize sentences with technical terms but avoid code
+            if (any(term in sentence.lower() for term in ['control', 'system', 'model', 'algorithm', 'robot', 'balance']) and
+                not sentence.startswith('def ') and '=' not in sentence):
+                informative_sentences.append(sentence)
+
+        if informative_sentences:
+            explanation = ". ".join(informative_sentences[:4]) + "."
         else:
-            explanation = content[:500]
+            explanation = ". ".join(sentences[:4]) + "."
 
-        return explanation + "\n\nThis information provides a solid foundation for understanding the topic."
+        return explanation + "\n\nThis provides a solid foundation for understanding the technical concepts involved."
 
     def _extract_key_points(self, content_list: List[str]) -> List[str]:
-        """Extract key points from content"""
+        """Extract clean key points from content"""
         key_points = []
+        seen_points = set()
 
         for content in content_list:
             lines = content.split('\n')
             for line in lines:
                 line = line.strip()
-                # Look for bullet points, important statements
-                if (line.startswith('•') or line.startswith('-') or
-                    'important' in line.lower() or 'key' in line.lower() or
-                    'essential' in line.lower() or 'critical' in line.lower()):
-                    if 20 < len(line) < 150:
-                        clean_line = line.replace('•', '').replace('-', '').strip()
+                # Look for bullet points and important statements
+                if ((line.startswith('•') or line.startswith('-') or
+                     'important' in line.lower() or 'key' in line.lower() or
+                     'essential' in line.lower() or 'must' in line.lower()) and
+                    30 < len(line) < 120 and  # Reasonable length
+                    line not in seen_points and
+                    not line.startswith('def ') and
+                    '=' not in line):  # Avoid code lines
+
+                    clean_line = line.replace('•', '').replace('-', '').strip()
+                    if clean_line and len(clean_line) > 20:
                         key_points.append(clean_line)
+                        seen_points.add(line)
 
-        return key_points[:5]  # Limit to 5 key points
+        return key_points[:4]  # Limit to 4 key points
 
-    def _extract_implementation_steps(self, content_list: List[str]) -> List[str]:
-        """Extract implementation steps"""
-        steps = []
+    def _extract_technical_details(self, content_list: List[str], query: str) -> str:
+        """Extract clean technical details relevant to the query"""
+        technical_lines = []
+        seen_lines = set()
 
         for content in content_list:
             lines = content.split('\n')
             for line in lines:
                 line = line.strip()
-                if (any(line.startswith(f"{i}.") for i in range(1, 10)) or
-                    any(word in line.lower() for word in ['step', 'first', 'then', 'next', 'finally'])):
-                    if 10 < len(line) < 200:
-                        steps.append(line)
+                # Look for formulas, equations, or technical specifications
+                if (('=' in line or ':' in line or 'ω' in line or 'ZMP' in line or 'CoM' in line) and
+                    20 < len(line) < 100 and  # Reasonable length
+                    line not in seen_lines and
+                    not line.startswith('def ') and
+                    not line.startswith('class ') and
+                    not line.startswith('import ')):
 
-        return steps[:6]  # Limit to 6 steps
+                    technical_lines.append(line)
+                    seen_lines.add(line)
+
+        if technical_lines:
+            return "\n".join(technical_lines[:4])  # Limit to 4 technical details
+
+        return ""
 
     def _extract_examples(self, content_list: List[str]) -> List[str]:
-        """Extract examples from content"""
+        """Extract clean examples from content"""
         examples = []
+        seen_examples = set()
 
         for content in content_list:
             sentences = content.split('.')
             for sentence in sentences:
                 sentence = sentence.strip()
-                if any(phrase in sentence.lower() for phrase in ['example', 'for instance', 'such as', 'like']):
-                    if 20 < len(sentence) < 180:
-                        examples.append(sentence + '.')
+                if (any(phrase in sentence.lower() for phrase in ['example', 'for instance', 'such as']) and
+                    30 < len(sentence) < 150 and
+                    sentence not in seen_examples and
+                    not sentence.startswith('def ') and
+                    '=' not in sentence):
 
-        return examples[:4]  # Limit to 4 examples
+                    examples.append(sentence + '.')
+                    seen_examples.add(sentence)
 
-    def _extract_technical_details(self, content_list: List[str], query: str) -> str:
-        """Extract technical details relevant to the query"""
-        technical_content = []
-
-        for content in content_list:
-            # Look for technical terms, code, specifications
-            lines = content.split('\n')
-            for line in lines:
-                line = line.strip()
-                if (any(term in line.lower() for term in ['parameter', 'config', 'setting', 'value', 'specification']) or
-                    '=' in line or ':' in line or line.startswith('```')):
-                    if len(line) > 10:
-                        technical_content.append(line)
-
-        if technical_content:
-            return "\n".join(technical_content[:5])
-        else:
-            # Return most technical-sounding paragraph
-            for content in content_list:
-                if any(term in content.lower() for term in ['algorithm', 'method', 'function', 'class', 'module']):
-                    return content[:300] + "..."
-
-        return ""
+        return examples[:3]  # Limit to 3 examples
 
     def _generate_simple_explanation(self, query: str, chunks: List[Dict[str, Any]]) -> str:
         """Simple fallback explanation"""
