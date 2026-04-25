@@ -11,6 +11,8 @@ import re
 
 logger = logging.getLogger(__name__)
 
+# Force rebuild - using free MyMemory API for translations
+
 
 class TranslationService(ABC):
     """Abstract base class for translation services"""
