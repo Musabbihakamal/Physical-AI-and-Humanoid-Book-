@@ -65,7 +65,10 @@
       "Bash(python test_translation.py)",
       "Bash(git commit -m 'Fix authentication and translation for production deployment *)",
       "Bash(git commit *)",
-      "Bash(python -m py_compile backend/src/services/book_content_service.py)"
+      "Bash(python -m py_compile backend/src/services/book_content_service.py)",
+      "Bash(tables admonitions *)",
+      "WebFetch(domain:physical-ai-and-humanoid-book-3lw7xh7fk-ms-projects-46f81e3f.vercel.app)",
+      "Bash(python -m py_compile backend/src/services/translation_service.py)"
     ]
   }
 }
