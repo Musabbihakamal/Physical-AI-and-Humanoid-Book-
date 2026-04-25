@@ -545,25 +545,174 @@ Popular platforms include Gazebo, Unity, and specialized robotics simulators."""
         return examples[:3]  # Limit to 3 examples
 
     def _generate_simple_explanation(self, query: str, chunks: List[Dict[str, Any]]) -> str:
-        """Simple fallback explanation"""
-        response_parts = [f"## About: {query}\n"]
+        """Generate clean, educational fallback explanation"""
+        try:
+            response_parts = []
 
-        for i, chunk in enumerate(chunks[:2], 1):
-            content = chunk.get('content', '').strip()
-            section = chunk.get('section_title', 'Unknown Section')
+            # Smart introduction based on query
+            intro = self._generate_smart_intro(query)
+            response_parts.append(intro)
 
-            if content:
-                # Take first substantial sentence
-                sentences = content.split('.')
-                first_sentence = next((s.strip() + '.' for s in sentences if len(s.strip()) > 30), content[:200])
+            # Extract clean educational content
+            educational_content = []
+            unique_sources = set()
 
-                response_parts.append(f"**{section}:**")
-                response_parts.append(first_sentence)
+            for chunk in chunks[:3]:  # Limit to top 3 chunks
+                content = chunk.get('content', '').strip()
+                section = chunk.get('section_title', 'Unknown Section')
+                page = chunk.get('page_title', 'Unknown Page')
+                score = chunk.get('score', 0)
+
+                # Add to unique sources
+                source_key = f"{section} - {page}"
+                if source_key not in unique_sources and section != 'Unknown Section':
+                    unique_sources.add(source_key)
+
+                if content:
+                    # Extract only educational sentences, no code
+                    clean_sentences = self._extract_educational_sentences(content)
+                    if clean_sentences:
+                        educational_content.extend(clean_sentences[:2])  # Max 2 sentences per chunk
+
+            # Generate explanation
+            if educational_content:
+                response_parts.append("## 📖 Explanation:")
+                explanation = ". ".join(educational_content[:4]) + "."  # Max 4 sentences total
+                response_parts.append(explanation)
                 response_parts.append("")
 
-        response_parts.append("💡 For more detailed information, please refer to the complete chapters in the book.")
+                # Add context based on query
+                context = self._get_topic_context(query)
+                if context:
+                    response_parts.append("## 🎯 Key Concepts:")
+                    response_parts.append(context)
+                    response_parts.append("")
+            else:
+                # Generate context-based response when no clean content available
+                response_parts.append("## 📖 About Your Question:")
+                context_response = self._generate_context_based_explanation(query)
+                response_parts.append(context_response)
+                response_parts.append("")
 
-        return "\n".join(response_parts)
+            # Add unique sources
+            if unique_sources:
+                response_parts.append("## 📚 Sources:")
+                for source in list(unique_sources)[:3]:  # Max 3 unique sources
+                    response_parts.append(f"• {source}")
+                response_parts.append("")
+
+            # Add helpful conclusion
+            response_parts.append("## 💡 Next Steps:")
+            response_parts.append("• Review the referenced chapters for detailed implementation")
+            response_parts.append("• Ask more specific questions about particular aspects")
+            response_parts.append("• Explore related topics for broader understanding")
+
+            return "\n".join(response_parts)
+
+        except Exception as e:
+            logger.error(f"Simple explanation failed: {e}")
+            return self._generate_basic_response(query)
+
+    def _extract_educational_sentences(self, content: str) -> List[str]:
+        """Extract only clean, educational sentences from content"""
+        sentences = []
+
+        # Split content into sentences
+        for delimiter in ['. ', '.\n', '? ', '!\n']:
+            content = content.replace(delimiter, '.|SPLIT|')
+
+        raw_sentences = content.split('|SPLIT|')
+
+        for sentence in raw_sentences:
+            sentence = sentence.strip()
+
+            # Very strict filtering - only educational content
+            if (self._is_educational_sentence(sentence)):
+                sentences.append(sentence)
+
+        return sentences[:3]  # Max 3 sentences
+
+    def _is_educational_sentence(self, sentence: str) -> bool:
+        """Check if sentence is educational and not code"""
+        if not sentence or len(sentence) < 25 or len(sentence) > 200:
+            return False
+
+        # Reject code-like content
+        code_indicators = [
+            'def ', 'class ', 'import ', 'from ', '=', '()', '[]', '{}',
+            'self.', '__', 'np.', 'dt', 'zmp_', 'com_', 'gravity=',
+            '**', '++', '--', '=>', 'function', 'var ', 'let ', 'const '
+        ]
+
+        if any(indicator in sentence for indicator in code_indicators):
+            return False
+
+        # Reject sentences with too many underscores or technical symbols
+        if sentence.count('_') > 2 or sentence.count('#') > 0:
+            return False
+
+        # Accept educational content
+        educational_indicators = [
+            'is a', 'are', 'refers to', 'means', 'defines', 'concept',
+            'system', 'control', 'robot', 'model', 'algorithm', 'method',
+            'important', 'essential', 'fundamental', 'used for', 'enables'
+        ]
+
+        if any(indicator in sentence.lower() for indicator in educational_indicators):
+            return True
+
+        # Accept sentences that explain concepts
+        if any(word in sentence.lower() for word in ['humanoid', 'balance', 'stability', 'locomotion', 'walking']):
+            return True
+
+        return False
+
+    def _get_topic_context(self, query: str) -> str:
+        """Get contextual information based on query topic"""
+        query_lower = query.lower()
+
+        if 'lipm' in query_lower or 'linear inverted pendulum' in query_lower:
+            return """• LIMP simplifies humanoid dynamics to a point mass on a massless rod
+• Assumes constant center of mass height for linearized motion equations
+• Widely used in bipedal robot gait planning and balance control
+• Forms the basis for Zero Moment Point (ZMP) control strategies"""
+
+        elif any(term in query_lower for term in ['zmp', 'zero moment point']):
+            return """• ZMP is the point where net ground reaction moment is zero
+• Must remain within support polygon for stable balance
+• Critical for humanoid robot stability analysis
+• Used in real-time balance control systems"""
+
+        elif any(term in query_lower for term in ['control', 'stability', 'balance']):
+            return """• Balance control ensures robot stability during motion
+• Combines sensor feedback with predictive algorithms
+• Requires real-time processing for dynamic environments
+• Essential for safe humanoid robot operation"""
+
+        elif any(term in query_lower for term in ['humanoid', 'bipedal', 'walking']):
+            return """• Humanoid robots mimic human form and movement
+• Bipedal locomotion presents unique stability challenges
+• Requires sophisticated control algorithms for balance
+• Applications include service robots and human interaction"""
+
+        return ""
+
+    def _generate_basic_response(self, query: str) -> str:
+        """Most basic fallback response"""
+        return f"""## 📖 About: {query}
+
+Based on the Physical AI and Humanoid Robotics book, your question relates to advanced robotics concepts.
+
+The referenced chapters contain detailed information about this topic, including theoretical foundations, practical implementations, and real-world applications.
+
+## 💡 Recommendation:
+For comprehensive understanding, please refer to the complete chapters in the book or ask more specific questions about particular aspects of the topic.
+
+## 🎯 Related Topics:
+• Robot control systems and stability
+• Humanoid locomotion and balance
+• Mathematical modeling in robotics
+• Real-time control algorithms"""
 
     def _generate_enhanced_fallback_response(self, query: str, chunks: List[Dict[str, Any]]) -> str:
         """Enhanced fallback response generation without API"""
