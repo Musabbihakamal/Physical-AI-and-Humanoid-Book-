@@ -68,7 +68,9 @@
       "Bash(python -m py_compile backend/src/services/book_content_service.py)",
       "Bash(tables admonitions *)",
       "WebFetch(domain:physical-ai-and-humanoid-book-3lw7xh7fk-ms-projects-46f81e3f.vercel.app)",
-      "Bash(python -m py_compile backend/src/services/translation_service.py)"
+      "Bash(python -m py_compile backend/src/services/translation_service.py)",
+      "Bash(grep -E \"\\\\.\\(py|ts|tsx|js\\)$\")",
+      "Bash(python -m py_compile backend/rag_bot/main.py)"
     ]
   }
 }
