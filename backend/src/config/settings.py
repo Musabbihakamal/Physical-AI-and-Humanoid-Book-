@@ -6,15 +6,15 @@ from typing import List, Optional
 
 
 class Settings(BaseSettings):
-    # Database settings
-    DATABASE_URL: str = "postgresql://user:password@localhost/book_agent_db"
+    # Database settings - defaults to SQLite for development
+    DATABASE_URL: str = "sqlite:///./book_agent_system.db"
 
     # API settings
     API_V1_STR: str = "/api/v1"
     PROJECT_NAME: str = "Book + RAG Bot + Multi-Agent System"
 
     # Security settings
-    SECRET_KEY: str = "your-secret-key-here"
+    SECRET_KEY: str = "change-this-secret-key-in-production-environment"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
@@ -24,7 +24,7 @@ class Settings(BaseSettings):
         "http://localhost:8000",           # Dev backend
         "http://127.0.0.1:3000",           # Dev frontend alt
         "http://127.0.0.1:8000",           # Dev backend alt
-        "https://physical-ai-and-humanoid-book-3lw7xh7fk-ms-projects-46f81e3f.vercel.app",  # Production Vercel
+        "https://*.vercel.app",            # All Vercel deployments
     ]
 
     # External API keys

@@ -172,7 +172,16 @@ async def oauth_login(
             detail={"message": e.message, "field": e.field}
         )
     except Exception as e:
+        error_msg = str(e).lower()
         logger.error(f"Error during OAuth login: {str(e)}", exc_info=True)
+
+        # Check for database connection errors
+        if "connection" in error_msg or "refused" in error_msg or "database" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Database service unavailable. Please check that DATABASE_URL environment variable is set correctly."
+            )
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred during OAuth login"
@@ -535,10 +544,18 @@ async def register(
             detail={"message": e.message, "field": e.field}
         )
     except Exception as e:
+        error_msg = str(e).lower()
         logger.error(f"Error during registration: {str(e)}", exc_info=True)
+
+        # Check for database connection errors
+        if "connection" in error_msg or "refused" in error_msg or "database" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Database service unavailable. Please check that DATABASE_URL environment variable is set correctly."
+            )
+
         # Return a more helpful error message
-        error_detail = str(e)
-        if "already exists" in error_detail.lower():
+        if "already exists" in error_msg:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Email already registered"
@@ -588,7 +605,16 @@ async def login(
         # Re-raise HTTP exceptions
         raise
     except Exception as e:
+        error_msg = str(e).lower()
         logger.error(f"Error during login: {str(e)}", exc_info=True)
+
+        # Check for database connection errors
+        if "connection" in error_msg or "refused" in error_msg or "database" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Database service unavailable. Please check that DATABASE_URL environment variable is set correctly."
+            )
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred during login"
@@ -628,7 +654,16 @@ async def refresh_token(
         # Re-raise HTTP exceptions
         raise
     except Exception as e:
+        error_msg = str(e).lower()
         logger.error(f"Error during token refresh: {str(e)}", exc_info=True)
+
+        # Check for database connection errors
+        if "connection" in error_msg or "refused" in error_msg or "database" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Database service unavailable. Please check that DATABASE_URL environment variable is set correctly."
+            )
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred during token refresh"
@@ -693,7 +728,16 @@ async def demo_login(
             )
 
     except Exception as e:
+        error_msg = str(e).lower()
         logger.error(f"Error during demo login: {str(e)}", exc_info=True)
+
+        # Check for database connection errors
+        if "connection" in error_msg or "refused" in error_msg or "database" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Database service unavailable. Please check that DATABASE_URL environment variable is set correctly."
+            )
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Demo login failed. Please try again."

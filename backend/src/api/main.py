@@ -63,6 +63,7 @@ logging.getLogger('src.services.translation_service').setLevel(logging.INFO)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting application...")
+    logger.info(f"Database URL: {settings.DATABASE_URL[:50]}..." if settings.DATABASE_URL else "No DATABASE_URL set")
 
     # Try to create database tables, but don't fail if database is unavailable
     try:
@@ -70,8 +71,10 @@ async def lifespan(app: FastAPI):
         Base.metadata.create_all(bind=engine)
         logger.info("✅ Database connected and tables ready")
     except Exception as e:
-        logger.info("ℹ️ Database not available - continuing without database features")
-        logger.debug(f"Database error details: {e}")  # Only show in debug mode
+        logger.error(f"❌ Database connection failed: {str(e)}")
+        logger.error("Make sure DATABASE_URL environment variable is set correctly")
+        logger.error("For Railway: Set DATABASE_URL=sqlite:///./book_agent_system.db or add PostgreSQL plugin")
+        # Don't fail startup - auth endpoints will handle gracefully
 
     yield
     logger.info("Application shutdown")
